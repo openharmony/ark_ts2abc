@@ -35,7 +35,6 @@ import {
     LetDecl,
     LocalScope,
     LoopScope,
-    ModDecl,
     ModuleScope,
     Scope,
     VarDecl,
@@ -292,7 +291,7 @@ export class Recorder {
             // import defaultExport from "a.js"
             if (importClause.name) {
                 let name = jshelpers.getTextOfIdentifierOrLiteral(importClause.name);
-                scope.setDecls(new ModDecl(name, importClause.name));
+                scope.setDecls(new ConstDecl(name, importClause.name));
                 importStmt.addLocalName(name, "default");
             }
 
@@ -313,7 +312,7 @@ export class Recorder {
                     namedBindings.elements.forEach((element) => {
                         let name: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
                         let exoticName: string = element.propertyName ? jshelpers.getTextOfIdentifierOrLiteral(element.propertyName) : name;
-                        scope.setDecls(new ModDecl(name, element));
+                        scope.setDecls(new ConstDecl(name, element));
                         importStmt.addLocalName(name, exoticName);
                     });
                 }

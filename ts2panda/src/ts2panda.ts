@@ -170,6 +170,7 @@ export class Ts2Panda {
         let funcSignature = Ts2Panda.getFuncSignature(pg);
         let funcInsnsAndRegsNum = Ts2Panda.getFuncInsnsAndRegsNum(pg);
         let sourceFile = pg.getSourceFileDebugInfo();
+        let callType = pg.getCallType();
 
         let variables, sourceCode;
         if (CmdOptions.isDebugMode()) {
@@ -189,6 +190,7 @@ export class Ts2Panda {
             variables,
             sourceFile,
             sourceCode,
+            callType
         );
         let catchTables = generateCatchTables(pg.getCatchMap());
         catchTables.forEach((catchTable) => {

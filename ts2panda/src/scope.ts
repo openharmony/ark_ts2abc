@@ -19,7 +19,6 @@ import { LOGD, LOGE } from "./log";
 import {
     GlobalVariable,
     LocalVariable,
-    ModuleVariable,
     VarDeclarationKind,
     Variable
 } from "./variable";
@@ -52,12 +51,6 @@ export class LetDecl extends Decl {
 export class ConstDecl extends Decl {
     constructor(constName: string, node: ts.Node) {
         super(constName, node);
-    }
-}
-
-export class ModDecl extends Decl {
-    constructor(localName: string, node: ts.Node) {
-        super(localName, node);
     }
 }
 
@@ -393,9 +386,6 @@ export class ModuleScope extends VariableScope {
         } else if (declKind == VarDeclarationKind.VAR || declKind == VarDeclarationKind.FUNCTION) {
             v = new LocalVariable(declKind, name);
             this.locals.push(v);
-        } else if (declKind == VarDeclarationKind.MODULE) {
-            v = new ModuleVariable(VarDeclarationKind.CONST, name, InitStatus.INITIALIZED);
-            this.locals.push(v);
         } else {
             v = new LocalVariable(declKind, name, status);
             this.locals.push(v);
@@ -408,6 +398,8 @@ export class ModuleScope extends VariableScope {
 export class FunctionScope extends VariableScope {
     private parameterLength: number = 0;
     private funcName: string = "";
+    private callOpt: Set<String> = new Set();
+    private isArgumentsOrRestargs: boolean = false;
     constructor(parent?: Scope, node?: ts.FunctionLikeDeclaration) {
         super();
         this.parent = parent ? parent : undefined;
@@ -428,6 +420,22 @@ export class FunctionScope extends VariableScope {
 
     getFuncName() {
         return this.funcName;
+    }
+
+    public getCallOpt() {
+        return this.callOpt;
+    }
+
+    public setCallOpt(key: String) {
+        this.callOpt.add(key);
+    }
+
+    public setArgumentsOrRestargs() {
+        this.isArgumentsOrRestargs = true;
+    }
+
+    public getArgumentsOrRestargs() {
+        return this.isArgumentsOrRestargs;
     }
 
     getParent(): Scope | undefined {
