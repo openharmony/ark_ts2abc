@@ -171,8 +171,28 @@ export class DebugInfo {
         let firstStmt = pandaGen.getFirstStmt();
         if (firstStmt) {
             let file = jshelpers.getSourceFileOfNode(firstStmt);
-            let loc = file.getLineAndCharacterOfPosition(firstStmt.getStart());
-            let wholeLineText = firstStmt.getText();
+            if (!file) {
+                return;
+            }
+
+            let pos : number = 0;
+            let tempWholeLineText : string = ""
+            if (firstStmt.pos === -1 || firstStmt.end === -1) {
+                let parent = firstStmt.parent;
+                while (parent) {
+                    if (parent.pos !== -1 && parent.end !== -1) {
+                        pos = parent.pos;
+                        tempWholeLineText = parent.getText();
+                        break;
+                    }
+                    parent = parent.parent;
+                }
+            } else {
+                pos = firstStmt.getStart();
+            }
+
+            let loc = file.getLineAndCharacterOfPosition(pos); 
+            let wholeLineText = tempWholeLineText || firstStmt.getText();
             posInfo.setSourecLineNum(loc.line);
             posInfo.setSourecColumnNum(loc.character);
             posInfo.setWholeLine(wholeLineText);
@@ -199,12 +219,29 @@ export class DebugInfo {
         let wholeLineText = "";
         if (DebugInfo.isNode(node)) {
             let tsNode = <ts.Node>(node);
-            let file = jshelpers.getSourceFileOfNode(node);
+            let file = jshelpers.getSourceFileOfNode(tsNode);
             if (!file) {
                 return;
             }
-            let loc = file.getLineAndCharacterOfPosition(tsNode.getStart());
-            wholeLineText = tsNode.getText();
+
+            let pos : number = 0;
+            let tempWholeLineText : string = ""
+            if (tsNode.pos === -1 || tsNode.end === -1) {
+                let parent = tsNode.parent;
+                while (parent) {
+                    if (parent.pos !== -1 && parent.end !== -1) {
+                        pos = parent.pos;
+                        tempWholeLineText = parent.getText();
+                        break;
+                    }
+                    parent = parent.parent;
+                }
+            } else {
+                pos = tsNode.getStart();
+            }
+
+            let loc = file.getLineAndCharacterOfPosition(pos);
+            wholeLineText = tempWholeLineText || tsNode.getText();
             lineNumber = loc.line;
             columnNumber = loc.character;
         }

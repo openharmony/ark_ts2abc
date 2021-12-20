@@ -43,6 +43,7 @@ import {
 import { getClassNameForConstructor } from "./statement/classStatement";
 import { checkDuplicateDeclaration, checkExportEntries } from "./syntaxChecker";
 import { Ts2Panda } from "./ts2panda";
+import { TypeRecorder } from "./typeRecorder";
 
 export class PendingCompilationUnit {
     constructor(
@@ -143,6 +144,12 @@ export class CompilerDriver {
         return spArray.reverse();
     }
 
+    compileForSyntaxCheck(node: ts.SourceFile): void {
+       let recorder = this.compilePrologue(node, false);
+       checkDuplicateDeclaration(recorder);
+       checkExportEntries(recorder);
+    }
+
     compile(node: ts.SourceFile): void {
         if (CmdOptions.showASTStatistics()) {
             let statics: number[] = new Array(ts.SyntaxKind.Count).fill(0);
@@ -155,7 +162,7 @@ export class CompilerDriver {
             });
         }
 
-        let recorder = this.compilePrologue(node);
+        let recorder = this.compilePrologue(node, true);
 
         // initiate ts2abc
         if (!CmdOptions.isAssemblyMode()) {
@@ -233,7 +240,7 @@ export class CompilerDriver {
     }
 
     compileUnitTest(node: ts.SourceFile): void {
-        let recorder = this.compilePrologue(node);
+        let recorder = this.compilePrologue(node, true);
 
         for (let i = 0; i < this.pendingCompilationUnits.length; i++) {
             let unit: PendingCompilationUnit = this.pendingCompilationUnits[i];
@@ -261,7 +268,7 @@ export class CompilerDriver {
         this.compilationUnits.push(pandaGen);
     }
 
-    private compilePrologue(node: ts.SourceFile) {
+    private compilePrologue(node: ts.SourceFile, recordType: boolean) {
         let topLevelScope: GlobalScope | ModuleScope;
         if (CmdOptions.isModules()) {
             topLevelScope = new ModuleScope(node);
@@ -269,12 +276,14 @@ export class CompilerDriver {
             topLevelScope = new GlobalScope(node);
         }
 
-        let recorder = new Recorder(node, topLevelScope, this);
+        let enableTypeRecord = recordType && CmdOptions.needRecordType();
+        if (enableTypeRecord) {
+            TypeRecorder.createInstance();
+        }
+        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord);
         recorder.record();
-
-        checkDuplicateDeclaration(recorder);
-        checkExportEntries(recorder);
-        addVariableToScope(recorder);
+  
+        addVariableToScope(recorder, enableTypeRecord);
         let postOrderVariableScopes = this.postOrderAnalysis(topLevelScope);
 
         for (let variableScope of postOrderVariableScopes) {

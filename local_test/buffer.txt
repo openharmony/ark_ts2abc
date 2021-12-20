@@ -1,0 +1,99 @@
+{ literalBuffer: [ { tag: 2, value: 4 }, { tag: 2, value: 10 } ] }
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },   { tag: 2, value: 0 },
+    { tag: 2, value: 3 },   { tag: 2, value: 52 },
+    { tag: 2, value: 54 },  { tag: 2, value: 56 },
+    { tag: 2, value: 2 },   { tag: 5, value: 'c' },
+    { tag: 2, value: 3 },   { tag: 2, value: 2 },
+    { tag: 2, value: 0 },   { tag: 5, value: 'd' },
+    { tag: 2, value: 54 },  { tag: 2, value: 1 },
+    { tag: 2, value: 0 },   { tag: 2, value: 2 },
+    { tag: 5, value: 'a' }, { tag: 2, value: 1 },
+    { tag: 2, value: 0 },   { tag: 2, value: 0 },
+    { tag: 5, value: 'b' }, { tag: 2, value: 3 },
+    { tag: 2, value: 1 },   { tag: 2, value: 1 },
+    { tag: 2, value: 2 },   { tag: 2, value: 57 },
+    { tag: 2, value: 58 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 53 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'constructor' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 55 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'constructor' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'constructor' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'getA' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 1 },
+    { tag: 5, value: 'calSqur' },
+    { tag: 2, value: 2 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 3 },
+    { tag: 2, value: 54 }
+  ]
+}
+{ literalBuffer: [ { tag: 2, value: 1 }, { tag: 2, value: 51 } ] }

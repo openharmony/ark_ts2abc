@@ -47,9 +47,6 @@ def parse_args():
     parser.add_argument('--platform',
                         default="linux",
                         help='platform, as: linux, mac, win')
-    parser.add_argument('--gn-build',
-                        action='store_true',
-                        help='Whether it is GN compilation')
     parser.add_argument('--js-file',
                         metavar='FILE',
                         help='The name of the test use case file to execute')
@@ -99,8 +96,6 @@ class Ts2abcTests():
             run_command(['npm', 'install'], dist_dir)
 
     def copy_tests(self):
-        if self.args.gn_build:
-            return
         if os.path.exists(f'{self.dist_dir}/tests'):
             run_command(['rm', '-rf', f'{self.dist_dir}/tests'])
         run_command(['cp', '-rf', f'{self.src_dir}/tests', self.dist_dir])
@@ -131,16 +126,16 @@ class Ts2abcTests():
         if self.args.js_file:
             tests_args = self.args.js_file
         else:
-            tests_args = "**/*.test.js"
+            tests_args = "tests/**/*.test.js"
 
         if plat_form == "linux":
-            cmd = [mocha, f'build/tests/{tests_args}']
+            cmd = [mocha, f'build/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         elif plat_form == "win":
-            cmd = [mocha, f'build-win/tests/{tests_args}']
+            cmd = [mocha, f'build-win/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         elif plat_form == 'mac':
-            cmd = [mocha, f'build-mac/tests/{tests_args}']
+            cmd = [mocha, f'build-mac/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         if ret:
             raise RuntimeError("Run [" + " ".join(cmd) + "] failed !")

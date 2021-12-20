@@ -25,6 +25,7 @@ export class ModuleStmt {
     private moduleRequest: string;
     private namespace: string = "";
     private bingdingNameMap: Map<string, string> = new Map<string, string>();
+    private bingdingNodeMap: Map<ts.Node, ts.Node> = new Map<ts.Node, ts.Node>();
     private isCopy: boolean = true;
 
     constructor(node: ts.Node, moduleRequest: string = "") {
@@ -49,6 +50,14 @@ export class ModuleStmt {
 
     getBindingNameMap() {
         return this.bingdingNameMap;
+    }
+
+    addNodeMap(name: ts.Node, propertyName: ts.Node) {
+        this.bingdingNodeMap.set(name, propertyName);
+    }
+
+    getBindingNodeMap() {
+        return this.bingdingNodeMap;
     }
 
     setNameSpace(namespace: string) {

@@ -1,0 +1,548 @@
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+undefined
+variable2Type: 
+undefined
+getTypeSet: 
+Set { 51, 52, 53 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+undefined
+variable2Type: 
+undefined
+getTypeSet: 
+Set { 51, 52, 53 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+undefined
+variable2Type: 
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+undefined
+variable2Type: 
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+class base3 {}: 56
+undefined
+variable2Type: 
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55, 56 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+class base3 {}: 56
+constructor() {
+            super();
+            this.b = "hello";
+        }: 57
+undefined
+variable2Type: 
+a: 1
+b: 3
+c: 3
+d: 54
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55, 56, 57 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+class base3 {}: 56
+constructor() {
+            super();
+            this.b = "hello";
+        }: 57
+public getA(): number {
+            return this.a;
+        }: 58
+undefined
+variable2Type: 
+a: 1
+b: 3
+c: 3
+d: 54
+getA: 58
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55, 56, 57, 58 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+class base3 {}: 56
+constructor() {
+            super();
+            this.b = "hello";
+        }: 57
+public getA(): number {
+            return this.a;
+        }: 58
+private static calSqur(num: number, str: string): base {
+            return num;
+        }: 59
+undefined
+variable2Type: 
+a: 1
+b: 3
+c: 3
+d: 54
+getA: 58
+num: 1
+str: 3
+calSqur: 59
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55, 56, 57, 58, 59 }
+==============================
+==============================
+type2Index: 
+class AA extends base2 implements base, base3 {
+        public a: number = 4;
+        private readonly b: string;
+        protected static c: string;
+        private static d: base;
+
+        constructor() {
+            super();
+            this.b = "hello";
+        }
+
+        public getA(): number {
+            return this.a;
+        }
+
+        private static calSqur(num: number, str: string): base {
+            return num;
+        }
+    }: 51
+class base2 {
+    constructor() {}
+}: 52
+constructor() {}: 53
+class base {
+    constructor() {}
+}: 54
+constructor() {}: 55
+class base3 {}: 56
+constructor() {
+            super();
+            this.b = "hello";
+        }: 57
+public getA(): number {
+            return this.a;
+        }: 58
+private static calSqur(num: number, str: string): base {
+            return num;
+        }: 59
+undefined
+variable2Type: 
+a: 1
+b: 3
+c: 3
+d: 54
+getA: 58
+num: 1
+str: 3
+calSqur: 59
+yigeClass: 60
+undefined
+getTypeSet: 
+Set { 51, 52, 53, 54, 55, 56, 57, 58, 59, 60 }
+==============================
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 3
+\\\\\\ vreg type \\\\\ 1
+\\\\\\ vreg num \\\\\ 4
+\\\\\\ vreg type \\\\\ 3
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 3
+\\\\\\ vreg type \\\\\ 51
+\\\\\\ vreg num \\\\\ 4
+\\\\\\ vreg type \\\\\ 60
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+-=-=-=- LiteralArrayBuffer =-=-=-=-=-=
+{ literalBuffer: [ { tag: 2, value: 5 }, { tag: 2, value: 10 } ] }
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },   { tag: 2, value: 0 },
+    { tag: 2, value: 3 },   { tag: 2, value: 52 },
+    { tag: 2, value: 54 },  { tag: 2, value: 56 },
+    { tag: 2, value: 2 },   { tag: 5, value: 'c' },
+    { tag: 2, value: 3 },   { tag: 2, value: 2 },
+    { tag: 2, value: 0 },   { tag: 5, value: 'd' },
+    { tag: 2, value: 54 },  { tag: 2, value: 1 },
+    { tag: 2, value: 0 },   { tag: 2, value: 1 },
+    { tag: 2, value: 59 },  { tag: 2, value: 2 },
+    { tag: 5, value: 'a' }, { tag: 2, value: 1 },
+    { tag: 2, value: 0 },   { tag: 2, value: 0 },
+    { tag: 5, value: 'b' }, { tag: 2, value: 3 },
+    { tag: 2, value: 1 },   { tag: 2, value: 1 },
+    { tag: 2, value: 2 },   { tag: 2, value: 57 },
+    { tag: 2, value: 58 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 53 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'constructor' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 55 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'constructor' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'constructor' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 5, value: 'getA' },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 }
+  ]
+}
+{
+  literalBuffer: [
+    { tag: 2, value: 2 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 1 },
+    { tag: 5, value: 'calSqur' },
+    { tag: 2, value: 2 },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 3 },
+    { tag: 2, value: 54 }
+  ]
+}
+{ literalBuffer: [ { tag: 2, value: 1 }, { tag: 2, value: 51 } ] }
+{
+  literalBuffer: [
+    { tag: 5, value: 'getA' },
+    { tag: 6, value: 'getA' },
+    { tag: 9, value: 0 },
+    { tag: 5, value: 'calSqur' },
+    { tag: 6, value: 'calSqur' },
+    { tag: 9, value: 2 },
+    { tag: 2, value: 1 }
+  ]
+}
+{ literalBuffer: [ { tag: 2, value: 0 } ] }
+{ literalBuffer: [ { tag: 2, value: 0 } ] }
+{ literalBuffer: [ { tag: 2, value: 0 } ] }

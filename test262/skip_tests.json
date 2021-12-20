@@ -12,7 +12,8 @@
         "files": [
             "language/statements/for/S12.6.3_A2.1.js",
             "language/statements/for/S12.6.3_A2.2.js",
-            "language/statements/for/S12.6.3_A2.js"
+            "language/statements/for/S12.6.3_A2.js",
+            "language/expressions/template-literal/tv-utf16-escape-sequence.js"
         ]
     },
     {

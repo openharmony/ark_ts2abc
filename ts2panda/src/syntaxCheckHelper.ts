@@ -256,6 +256,10 @@ export function isOptionalParameter(node: ts.ParameterDeclaration): boolean {
         return true;
     }
 
+    if (!node.parent || !node.parent.parent) {
+        return false;
+    }
+
     let iife = jshelpers.getImmediatelyInvokedFunctionExpression(node.parent);
     if (iife) {
         return !node.type && !node.dotDotDotToken && node.parent.parameters.indexOf(node) >= iife.arguments.length;

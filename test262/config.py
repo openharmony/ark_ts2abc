@@ -32,6 +32,7 @@ CODE_ROOT = os.path.abspath(os.path.join(CUR_FILE_DIR, "../../.."))
 ARK_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/ark/ark"
 ICUI_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/global/i18n_standard"
 LLVM_DIR = f"{CODE_ROOT}/prebuilts/clang/ohos/linux-x86_64/llvm/lib/"
+ARK_JS_RUNTIME_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/ark/ark_js_runtime"
 
 # " mode_type": {
 #     "1": "only default",
@@ -45,8 +46,8 @@ TEST_ES2015_DIR = os.path.join(DATA_DIR, "test_es2015")
 TEST_CI_DIR = os.path.join(DATA_DIR, "test_CI")
 
 DEFAULT_ARK_FRONTEND_TOOL = os.path.join(ARK_DIR, "build", "src", "index.js")
-DEFAULT_ARK_TOOL = os.path.join(ARK_DIR, "..", "ark_js_runtime", "ark_js_vm")
-DEFAULT_LIBS_DIR = f"{ARK_DIR}:{ICUI_DIR}:{LLVM_DIR}"
+DEFAULT_ARK_TOOL = os.path.join(ARK_JS_RUNTIME_DIR, "ark_js_vm")
+DEFAULT_LIBS_DIR = f"{ARK_DIR}:{ICUI_DIR}:{LLVM_DIR}:{ARK_JS_RUNTIME_DIR}"
 
 DEFAULT_HOST_TYPE = "panda"
 DEFAULT_HOST_PATH = "python3"
@@ -60,14 +61,14 @@ ES5_LIST_FILE = os.path.join("test262", "es5_tests.txt")
 ES2015_LIST_FILE = os.path.join("test262", "es2015_tests.txt")
 CI_LIST_FILE = os.path.join("test262", "CI_tests.txt")
 
-TEST262_GIT_HASH = "9ca13b12728b7e0089c7eb03fa2bd17f8abe297f"
-HARNESS_GIT_HASH = "9c499f028eb24e67781435c0bb442e00343eb39d"
-ESHOST_GIT_HASH = "fa2d4d27d9d6152002bdef36ee2d17e98b886268"
+TEST262_GIT_HASH = "7e60f78958c89cb14e36f4f28de8fe8e9768743d"
+HARNESS_GIT_HASH = "4092b799522ac20590c7b054632fe70494c32331"
+ESHOST_GIT_HASH = "a71a29820b132ffcb6bb58061cabdba96e457da6"
 ESNEXT_GIT_HASH = "281eb10b2844929a7c0ac04527f5b42ce56509fd"
 
-TEST262_GIT_URL = "https://gitee.com/Han00000000/test262.git"
-ESHOST_GIT_URL = "https://gitee.com/Han00000000/eshost.git"
-HARNESS_GIT_URL = "https://gitee.com/Han00000000/test262-harness.git"
+TEST262_GIT_URL = "http://mgit-tm.rnd.huawei.com/a/hmf/ark_test262"
+ESHOST_GIT_URL = "http://mgit-tm.rnd.huawei.com/a/hmf/ark_test262_eshost"
+HARNESS_GIT_URL = "http://mgit-tm.rnd.huawei.com/a/hmf/ark_test262_harness"
 
 SKIP_LIST_FILE = os.path.join("test262", "skip_tests.json")
 ALL_SKIP_TESTS = []
@@ -83,6 +84,7 @@ ARK_ARCH_LIST = [
     "aarch64",
     "arm"
 ]
+
 DEFAULT_ARK_ARCH = ARK_ARCH_LIST[0]
 
 MODULE_FILES_LIST = [

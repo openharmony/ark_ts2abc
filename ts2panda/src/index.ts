@@ -23,10 +23,15 @@ import { CacheExpander } from "./pass/cacheExpander";
 import { ICPass } from "./pass/ICPass";
 import { RegAlloc } from "./regAllocator";
 import { setGlobalStrict } from "./strictMode";
+import { TypeChecker } from "./typeChecker";
+import { TypeRecorder } from "./typeRecorder";
 import jshelpers = require("./jshelpers");
+import path = require("path");
 
 function main(fileNames: string[], options: ts.CompilerOptions) {
     let program = ts.createProgram(fileNames, options);
+    let typeChecker = TypeChecker.getInstance();
+    typeChecker.setTypeChecker(program.getTypeChecker());
     let emitResult = program.emit(
         undefined,
         undefined,
@@ -36,11 +41,24 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
             before: [
                 (ctx: ts.TransformationContext) => {
                     return (node: ts.SourceFile) => {
-                        let outputBinName = CmdOptions.getOutputBinName();
-                        let fileName = node.fileName.substring(0, node.fileName.lastIndexOf('.'));
-                        if (fileName != CmdOptions.getInputFileName()) {
-                            outputBinName = fileName + ".abc";
+                        let outputBinName = getOutputBinName(node);
+                        // console.log("<==============> " + outputBinName + " <================>");
+                        let compilerDriver = new CompilerDriver(outputBinName);
+                        compilerDriver.compileForSyntaxCheck(node);
+                        return node;
+                    }
+                }
+            ],
+            after: [
+                (ctx: ts.TransformationContext) => {
+                    return (node: ts.SourceFile) => {
+                        if (ts.getEmitHelpers(node)) {
+                            const printer: ts.Printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
+                            const text: string = printer.printNode(ts.EmitHint.Unspecified, node, node);
+                            let newNode = ts.createSourceFile(node.fileName, text, options.target!);
+                            node = newNode;
                         }
+                        let outputBinName = getOutputBinName(node);
                         let compilerDriver = new CompilerDriver(outputBinName);
                         setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
                         if (CmdOptions.isVariantBytecode()) {
@@ -70,6 +88,21 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
     });
 }
 
+function getOutputBinName(node: ts.SourceFile) {
+    let outputBinName = CmdOptions.getOutputBinName();
+    let fileName = node.fileName.substring(0, node.fileName.lastIndexOf('.'));
+    let inputFileName = CmdOptions.getInputFileName();
+    if (/^win/.test(require('os').platform())) {
+        var inputFileTmps = inputFileName.split(path.sep);
+        inputFileName = path.posix.join(...inputFileTmps);
+    }
+
+    if (fileName != inputFileName) {
+        outputBinName = fileName + ".abc";
+    }
+    return outputBinName;
+}
+
 namespace Compiler {
     export namespace Options {
         export let Default: ts.CompilerOptions = {
@@ -78,7 +111,7 @@ namespace Compiler {
             noEmitOnError: true,
             noImplicitAny: true,
             target: ts.ScriptTarget.ES2015,
-            module: ts.ModuleKind.CommonJS,
+            module: ts.ModuleKind.ES2015,
             strictNullChecks: true,
             skipLibCheck: true,
             alwaysStrict: true
@@ -98,7 +131,8 @@ function run(args: string[], options?: ts.CompilerOptions): void {
         }
     }
     try {
-        main(parsed.fileNames, parsed.options);
+        let files: string[] = parsed.fileNames;
+        main(files.concat(CmdOptions.getIncludedFiles()), parsed.options);
     } catch (err) {
         if (err instanceof diag.DiagnosticError) {
             let diagnostic = diag.getDiagnostic(err.code);

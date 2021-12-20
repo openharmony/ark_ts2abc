@@ -1,0 +1,425 @@
+-------- source file --------
+"use strict";
+class AA {
+    constructor() {
+        this.a = 4;
+    }
+}
+function newYigeClass() {
+    let bigC = new AA();
+}
+
+*>*>*>*>*>*>**>* js constru <*<*<*<*<*<*<*<*
+NodeObject {
+  pos: 0,
+  end: 92,
+  flags: 8,
+  modifierFlagsCache: 536870912,
+  transformFlags: 536870912,
+  parent: SourceFileObject {
+    pos: 0,
+    end: 92,
+    flags: 8,
+    modifierFlagsCache: 536870912,
+    transformFlags: 536871168,
+    parent: undefined,
+    kind: 290,
+    statements: [
+      [Circular],
+      [NodeObject],
+      [NodeObject],
+      pos: 0,
+      end: 91,
+      hasTrailingComma: undefined,
+      transformFlags: 537985280
+    ],
+    endOfFileToken: TokenObject {
+      pos: 91,
+      end: 92,
+      flags: 0,
+      modifierFlagsCache: 0,
+      transformFlags: 536870912,
+      parent: [SourceFileObject],
+      kind: 1
+    },
+    fileName: 'test.ts',
+    path: '/home/zhuoli/code/L2_up2date/ark/ts2abc/local_test/test.ts',
+    text: 'class AA {\n' +
+      '    public a:number = 4;\n' +
+      '}\n' +
+      '\n' +
+      'function newYigeClass() {\n' +
+      '    let bigC = new AA();\n' +
+      '}\n',
+    isDeclarationFile: false,
+    referencedFiles: [],
+    typeReferenceDirectives: [],
+    hasNoDefaultLib: false,
+    libReferenceDirectives: [],
+    amdDependencies: [],
+    languageVariant: 0,
+    languageVersion: 2,
+    scriptKind: 3,
+    identifiers: Map {
+      'AA' => 'AA',
+      'a' => 'a',
+      'newYigeClass' => 'newYigeClass',
+      'bigC' => 'bigC'
+    },
+    nodeCount: 18,
+    identifierCount: 5,
+    symbolCount: 5,
+    parseDiagnostics: [],
+    bindDiagnostics: [],
+    classifiableNames: Map { 'AA' => true },
+    imports: [],
+    moduleAugmentations: [],
+    pragmas: Map {},
+    original: SourceFileObject {
+      pos: 0,
+      end: 92,
+      flags: 8,
+      modifierFlagsCache: 536870912,
+      transformFlags: 541065472,
+      parent: undefined,
+      kind: 290,
+      statements: [Array],
+      endOfFileToken: [TokenObject],
+      fileName: 'test.ts',
+      path: '/home/zhuoli/code/L2_up2date/ark/ts2abc/local_test/test.ts',
+      text: 'class AA {\n' +
+        '    public a:number = 4;\n' +
+        '}\n' +
+        '\n' +
+        'function newYigeClass() {\n' +
+        '    let bigC = new AA();\n' +
+        '}\n',
+      isDeclarationFile: false,
+      referencedFiles: [],
+      typeReferenceDirectives: [],
+      hasNoDefaultLib: false,
+      libReferenceDirectives: [],
+      amdDependencies: [],
+      languageVariant: 0,
+      languageVersion: 2,
+      scriptKind: 3,
+      identifiers: [Map],
+      nodeCount: 18,
+      identifierCount: 5,
+      symbolCount: 5,
+      parseDiagnostics: [],
+      bindDiagnostics: [],
+      classifiableNames: [Map],
+      imports: [],
+      moduleAugmentations: [],
+      pragmas: Map {},
+      original: [SourceFileObject]
+    },
+    lineMap: [
+       0, 11, 36, 38,
+      39, 65, 90, 92
+    ]
+  },
+  kind: 226,
+  expression: TokenObject {
+    pos: -1,
+    end: -1,
+    flags: 8,
+    modifierFlagsCache: 0,
+    transformFlags: 536870912,
+    parent: undefined,
+    kind: 10,
+    text: 'use strict'
+  },
+  emitNode: { startsOnNewLine: true }
+}
+*>*>*>*>*>*>**>* js constru <*<*<*<*<*<*<*<*
+NodeObject {
+  pos: 0,
+  end: 92,
+  flags: 8,
+  modifierFlagsCache: 536870912,
+  transformFlags: 536875008,
+  parent: NodeObject {
+    pos: 0,
+    end: 92,
+    flags: 8,
+    modifierFlagsCache: 536870912,
+    transformFlags: 536875008,
+    parent: NodeObject {
+      pos: 0,
+      end: 92,
+      flags: 8,
+      modifierFlagsCache: 536870912,
+      transformFlags: 536875008,
+      parent: [NodeObject],
+      kind: 162,
+      decorators: undefined,
+      modifiers: undefined,
+      typeParameters: undefined,
+      parameters: [Array],
+      type: undefined,
+      body: [Circular],
+      original: undefined,
+      emitNode: [Object]
+    },
+    kind: 223,
+    statements: [
+      [Circular],
+      pos: 10,
+      end: 35,
+      hasTrailingComma: undefined,
+      transformFlags: 536875008
+    ],
+    multiLine: true
+  },
+  kind: 226,
+  expression: NodeObject {
+    pos: -1,
+    end: -1,
+    flags: 8,
+    modifierFlagsCache: 536870912,
+    transformFlags: 536875008,
+    parent: undefined,
+    kind: 209,
+    left: NodeObject {
+      pos: 21,
+      end: 23,
+      flags: 8,
+      modifierFlagsCache: 536870912,
+      transformFlags: 536875008,
+      parent: undefined,
+      kind: 194,
+      expression: [TokenObject],
+      name: [IdentifierObject],
+      emitNode: [Object]
+    },
+    operatorToken: TokenObject {
+      pos: -1,
+      end: -1,
+      flags: 8,
+      modifierFlagsCache: 0,
+      transformFlags: 0,
+      parent: undefined,
+      kind: 62
+    },
+    right: TokenObject {
+      pos: 32,
+      end: 34,
+      flags: 0,
+      modifierFlagsCache: 0,
+      transformFlags: 536870912,
+      parent: [NodeObject],
+      kind: 8,
+      text: '4',
+      numericLiteralFlags: 0,
+      id: 16
+    }
+  },
+  emitNode: {
+    sourceMapRange: NodeObject {
+      pos: 10,
+      end: 35,
+      flags: 0,
+      modifierFlagsCache: 536870916,
+      transformFlags: 541065217,
+      parent: [NodeObject],
+      kind: 159,
+      decorators: undefined,
+      modifiers: [Array],
+      name: [IdentifierObject],
+      questionToken: undefined,
+      type: [TokenObject],
+      initializer: [TokenObject],
+      symbol: [SymbolObject]
+    },
+    commentRange: NodeObject {
+      pos: 10,
+      end: 35,
+      flags: 0,
+      modifierFlagsCache: 536870916,
+      transformFlags: 541065217,
+      parent: [NodeObject],
+      kind: 159,
+      decorators: undefined,
+      modifiers: [Array],
+      name: [IdentifierObject],
+      questionToken: undefined,
+      type: [TokenObject],
+      initializer: [TokenObject],
+      symbol: [SymbolObject]
+    }
+  },
+  original: NodeObject {
+    pos: 10,
+    end: 35,
+    flags: 8,
+    modifierFlagsCache: 536870912,
+    transformFlags: 541065216,
+    parent: undefined,
+    kind: 159,
+    decorators: undefined,
+    modifiers: [
+      pos: 10,
+      end: 21,
+      hasTrailingComma: undefined,
+      transformFlags: 536870912
+    ],
+    name: IdentifierObject {
+      pos: 21,
+      end: 23,
+      flags: 0,
+      modifierFlagsCache: 0,
+      transformFlags: 536870912,
+      parent: [NodeObject],
+      kind: 75,
+      escapedText: 'a',
+      flowNode: [Object]
+    },
+    questionToken: undefined,
+    exclamationToken: undefined,
+    type: undefined,
+    initializer: TokenObject {
+      pos: 32,
+      end: 34,
+      flags: 0,
+      modifierFlagsCache: 0,
+      transformFlags: 536870912,
+      parent: [NodeObject],
+      kind: 8,
+      text: '4',
+      numericLiteralFlags: 0,
+      id: 16
+    },
+    original: NodeObject {
+      pos: 10,
+      end: 35,
+      flags: 0,
+      modifierFlagsCache: 536870916,
+      transformFlags: 541065217,
+      parent: [NodeObject],
+      kind: 159,
+      decorators: undefined,
+      modifiers: [Array],
+      name: [IdentifierObject],
+      questionToken: undefined,
+      type: [TokenObject],
+      initializer: [TokenObject],
+      symbol: [SymbolObject]
+    },
+    emitNode: { commentRange: [NodeObject], sourceMapRange: [NodeObject] }
+  }
+}
+=========== NodeKind ===========: 245
+class AA {
+    public a:number = 4;
+}
+=========== currIndex ===========:  0
+LiteralBuffer {
+  literalBuffer: [
+    Literal { tag: 2, value: 0 },
+    Literal { tag: 2, value: 0 },
+    Literal { tag: 2, value: 0 },
+    Literal { tag: 2, value: 1 },
+    Literal { tag: 5, value: 'a' },
+    Literal { tag: 2, value: 1 },
+    Literal { tag: 2, value: 0 },
+    Literal { tag: 2, value: 0 },
+    Literal { tag: 2, value: 0 },
+    Literal { tag: 2, value: 0 }
+  ]
+}
+==============================
+type2Index:  Map { 0 => 0 }
+variable2Type:  Map { 21 => 1, 72 => 0 }
+==============================
+bigC
+///////  hoist pos ////////// - 
+37
+--node.text-- function newYigeClass() {
+    let bigC = new AA();
+}
+--node.pos-- 37
+--node.type-- 77
+/////// decls pos ////////// - 
+0
+//// class decl ////
+--node.text-- class AA {
+    public a:number = 4;
+}
+
+function newYigeClass() {
+    let bigC = new AA();
+}
+
+--node.pos-- 0
+--node.type-- 50
+////////// methods //////////
+0
+////////// methods //////////
+37
+/////// decls pos ////////// - 
+72
+//// let decl ////
+--node.text-- bigC
+--node.pos-- 72
+--node.type-- 50
+==== bindVreg var  Name ====:  4funcObj
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  4newTarget
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  this
+==== bindVreg typeIndex ====:  77
+\\\-= funcNmae =-\\\ -  #1#AA
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+==== bindVreg var  Name ====:  4funcObj
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  4newTarget
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  this
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  bigC
+==== bindVreg typeIndex ====:  50
+\\\-= funcNmae =-\\\ -  newYigeClass
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 3
+\\\\\\ vreg type \\\\\ 50
+==== bindVreg var  Name ====:  4funcObj
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  4newTarget
+==== bindVreg typeIndex ====:  77
+==== bindVreg var  Name ====:  this
+==== bindVreg typeIndex ====:  77
+\\\-= funcNmae =-\\\ -  func_main_0
+\\\\\\ vreg num \\\\\ 0
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 1
+\\\\\\ vreg type \\\\\ 77
+\\\\\\ vreg num \\\\\ 2
+\\\\\\ vreg type \\\\\ 77
+-=-=-=-length=-=-=-=-=-=
+{
+  literalBuffer: [
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 1 },
+    { tag: 5, value: 'a' },
+    { tag: 2, value: 1 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 },
+    { tag: 2, value: 0 }
+  ]
+}
+{ literalBuffer: [ { tag: 2, value: 0 } ] }

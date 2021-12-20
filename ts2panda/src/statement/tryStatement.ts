@@ -28,9 +28,10 @@ import {
 import { IteratorType, IteratorRecord } from "./forOfStatement";
 import * as astutils from "../astutils";
 import { VarDeclarationKind } from "../variable";
+import jshelpers from "../jshelpers";
 
 // adjust the try...catch...finally into nested try(try...catch) finally
-export function transformTryCatchFinally(tryStmt: ts.TryStatement, recorder: Recorder) {
+export function transformTryCatchFinally(tryStmt: ts.TryStatement, recorder: Recorder): ts.TryStatement {
     // after create new try block node, mapped with new scope, and adjust parent node
     let tryStmtScope = <LocalScope>recorder.getScopeOfNode(tryStmt);
     let newTryBlockScope = new LocalScope(tryStmtScope);
@@ -38,18 +39,16 @@ export function transformTryCatchFinally(tryStmt: ts.TryStatement, recorder: Rec
     (<LocalScope>recorder.getScopeOfNode(tryStmt.tryBlock)).setParent(newTryStmtScope);
     (<LocalScope>recorder.getScopeOfNode(tryStmt.catchClause!)).setParent(newTryStmtScope);
 
-    const newTryStmt = ts.createTry(tryStmt.tryBlock, tryStmt.catchClause, undefined);
+    const newTryStmt = ts.factory.createTryStatement(tryStmt.tryBlock, tryStmt.catchClause, undefined);
     recorder.setScopeMap(newTryStmt, newTryStmtScope);
 
     const newTryBlock = [newTryStmt];
-    newTryBlock[0].pos = tryStmt.tryBlock.pos;
-    newTryBlock[0].end = tryStmt.tryBlock.end;
-    tryStmt.tryBlock = ts.updateBlock(tryStmt.tryBlock, newTryBlock);
-    newTryBlock[0].parent = tryStmt.tryBlock;
-
+    newTryBlock[0] = jshelpers.setParent(newTryBlock[0], tryStmt)!;
+    newTryBlock[0] = ts.setTextRange(newTryBlock[0], tryStmt.tryBlock)!;
+    let tryBlock = ts.factory.updateBlock(tryStmt.tryBlock, newTryBlock);
+    tryStmt = ts.factory.updateTryStatement(tryStmt, tryBlock, undefined, tryStmt.finallyBlock);
     recorder.setScopeMap(tryStmt.tryBlock, newTryBlockScope);
-    tryStmt.catchClause = undefined;
-    tryStmt = ts.updateTry(tryStmt, tryStmt.tryBlock, undefined, tryStmt.finallyBlock);
+    return tryStmt;
 }
 
 export class LabelPair {
@@ -359,7 +358,7 @@ function compileCatchClauseVariableDeclaration(compiler: Compiler, param: ts.Var
 }
 
 export function updateCatchTables(inlinedTry: TryStatement | undefined, targetTry: TryStatement, inlinedLabelPair: LabelPair) {
-    for (; inlinedTry != targetTry; inlinedTry = inlinedTry ?.getOuterTryStatement()) {
+    for (; inlinedTry != targetTry; inlinedTry = inlinedTry?.getOuterTryStatement()) {
         inlinedTry!.getCatchTable().splitLabelPair(inlinedLabelPair);
     }
     targetTry.getCatchTable().splitLabelPair(inlinedLabelPair);

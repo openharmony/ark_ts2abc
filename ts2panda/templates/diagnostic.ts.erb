@@ -17,10 +17,10 @@ import { LOGE } from "./log"
 export class DiagnosticError {
   irnode:ts.Node | undefined;
   code:number;
-  file: ts.Node | undefined;
+  file: ts.SourceFile | undefined;
   args: (string | number | undefined)[];
 
-  constructor(irnode:ts.Node | undefined, code:number,file?:ts.Node | undefined ,args?:(string | number | undefined)[]) {
+  constructor(irnode:ts.Node | undefined, code:number, file?:ts.SourceFile | undefined, args?:(string | number | undefined)[]) {
     this.code = code
     this.irnode = irnode
     this.file = file ? file : undefined
@@ -40,13 +40,13 @@ export function printDiagnostic(diagnostic: ts.Diagnostic) {
 
 }
 
-export function createDiagnosticOnFirstToken(file:ts.Node | undefined,node: ts.Node ,message: ts.DiagnosticMessage|ts.DiagnosticMessageChain,...args:(string | number | undefined)[]) {
+export function createDiagnosticOnFirstToken(file:ts.SourceFile, node: ts.Node ,message: ts.DiagnosticMessage,...args:(string | number | undefined)[]) {
    let span = jshelpers.getSpanOfTokenAtPosition(file, node.pos);
    let diagnostic = jshelpers.createFileDiagnostic(file,span.start,span.length,message,...args);
    return diagnostic;
 }
 
-export function createFileDiagnostic(file:ts.Node|undefined,node: ts.Node , message: ts.DiagnosticMessage|ts.DiagnosticMessageChain,...args:(string | number | undefined)[]) {
+export function createFileDiagnostic(file:ts.SourceFile, node: ts.Node, message: ts.DiagnosticMessage,...args:(string | number | undefined)[]) {
 
   let diagnostic;
   let span = jshelpers.getErrorSpanForNode(file, node);
@@ -68,7 +68,7 @@ export function createFileDiagnostic(file:ts.Node|undefined,node: ts.Node , mess
    return diagnostic;
 }
 
-export function createDiagnostic(file:ts.Node|undefined, location: ts.Node | undefined, message: ts.DiagnosticMessage|ts.DiagnosticMessageChain,...args:(string | number | undefined)[]) {
+export function createDiagnostic(file:ts.SourceFile | undefined, location: ts.Node | undefined, message: ts.DiagnosticMessage,...args:(string | number | undefined)[]) {
   var diagnostic;
 
   if (!location) {
@@ -76,7 +76,7 @@ export function createDiagnostic(file:ts.Node|undefined, location: ts.Node | und
    }
 
   if (file) {
-    diagnostic = createFileDiagnostic(file,location,message,...args);
+    diagnostic = createFileDiagnostic(file, location, message, ...args);
   } else {
     diagnostic = jshelpers.createDiagnosticForNode(location, message, ...args)
   }

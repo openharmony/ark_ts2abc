@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import ts from "typescript";
+
 export function getSymbol(node: ts.Node): ts.Symbol;
 export function tsStringToString(str: ts.__String): string;
 export function getTextOfIdentifierOrLiteral(node: ts.Node): string;
@@ -21,7 +23,6 @@ export function createEmptyNodeArray<T extends ts.Node>(): ts.NodeArray<T>;
 export function getFlowNode(stmt: ts.Statement): ts.Node;
 export function bindSourceFile(sourceFile: ts.SourceFile, options: ts.CompilerOptions);
 export function createDiagnosticForNode(node: ts.Node, message: ts.DiagnosticMessage, ...args: (string | number | undefined)[]): ts.DiagnosticWithLocation;
-export function createCompilerDiagnostic(message: ts.DiagnosticMessage, ...args: (string | number | undefined)[]): ts.Diagnostic;
 export function createCompilerDiagnostic(message: ts.DiagnosticMessage, ...args: (string | number | undefined)[]): ts.Diagnostic;
 export function createFileDiagnostic(file: ts.SourceFile, start: number, length: number, message: ts.DiagnosticMessage, ...args: (string | number | undefined)[]): ts.DiagnosticWithLocation;
 export function isEffectiveStrictModeSourceFile(node: ts.SourceFile, compilerOptions: ts.CompilerOptions): boolean;
@@ -70,5 +71,5 @@ export function skipOuterExpressions(node: ts.Node, kinds?: ts.OuterExpressionKi
 export function isSuperCall(n: ts.Node);
 export function isThisProperty(node: ts.Node): boolean;
 export function isThisIdentifier(node: ts.Node | undefined): boolean;
-export function getClassExtendsHeritageElement(node: ts.ClassLikeDeclaration | ts.InterfaceDeclaration);
 export function isSuperProperty(node: ts.Node);
+export function setParent<T extends ts.Node>(child: T | undefined, parent: T["parent"] | undefined): T | undefined;
