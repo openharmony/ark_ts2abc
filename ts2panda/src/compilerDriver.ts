@@ -268,6 +268,15 @@ export class CompilerDriver {
         this.compilationUnits.push(pandaGen);
     }
 
+    private isTypeScriptSourceFile(node: ts.SourceFile) {
+        let fileName = node.fileName;
+        if (fileName && fileName.endsWith(".ts")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private compilePrologue(node: ts.SourceFile, recordType: boolean) {
         let topLevelScope: GlobalScope | ModuleScope;
         if (CmdOptions.isModules()) {
@@ -276,11 +285,12 @@ export class CompilerDriver {
             topLevelScope = new GlobalScope(node);
         }
 
-        let enableTypeRecord = recordType && CmdOptions.needRecordType();
+        let isTsFile = this.isTypeScriptSourceFile(node);
+        let enableTypeRecord = recordType && CmdOptions.needRecordType() && isTsFile;
         if (enableTypeRecord) {
             TypeRecorder.createInstance();
         }
-        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord);
+        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, isTsFile);
         recorder.record();
   
         addVariableToScope(recorder, enableTypeRecord);

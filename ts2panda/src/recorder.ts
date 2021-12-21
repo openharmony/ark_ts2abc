@@ -63,14 +63,16 @@ export class Recorder {
     private importStmts: Array<ModuleStmt> = [];
     private exportStmts: Array<ModuleStmt> = [];
     private defaultUsed: boolean = false;
+    private isTsFile: boolean;
 
-    constructor(node: ts.Node, scope: Scope, compilerDriver: CompilerDriver, recordType: boolean) {
+    constructor(node: ts.Node, scope: Scope, compilerDriver: CompilerDriver, recordType: boolean, isTsFile: boolean) {
         this.node = node;
         this.scope = scope;
         this.compilerDriver = compilerDriver;
         this.recordType = recordType;
         this.funcNameMap = new Map<string, number>();
         this.funcNameMap.set("main", 1);
+        this.isTsFile = isTsFile;
     }
 
     record() {
@@ -92,9 +94,11 @@ export class Recorder {
 
     private setParent(node: ts.Node) {
         node.forEachChild(childNode => {
-            childNode = jshelpers.setParent(childNode, node)!;
-            let originNode = ts.getOriginalNode(childNode);
-            childNode = ts.setTextRange(childNode, originNode);
+            if (!this.isTsFile || childNode!.parent == undefined || childNode.parent.kind != node.kind) {
+                childNode = jshelpers.setParent(childNode, node)!;
+                let originNode = ts.getOriginalNode(childNode);
+                childNode = ts.setTextRange(childNode, originNode);
+            }
             this.setParent(childNode);
         });
     }
