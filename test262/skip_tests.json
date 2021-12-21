@@ -421,6 +421,7 @@
             "language/literals/regexp/S7.8.5_A2.1_T2.js",
             "language/literals/regexp/S7.8.5_A2.4_T2.js",
             "language/literals/string/legacy-non-octal-escape-sequence-strict.js",
+            "language/module-code/export-default-asyncgenerator-declaration-binding.js",
             "language/statements/break/S12.8_A7.js",
             "language/statements/const/cptn-value.js",
             "language/statements/continue/S12.7_A7.js",
@@ -970,6 +971,7 @@
             "language/expressions/unary-minus/S11.4.7_A3_T5.js",
             "language/expressions/unary-plus/S11.4.6_A3_T5.js",
             "language/expressions/unsigned-right-shift/S11.7.3_A3_T1.5.js",
+            "language/module-code/eval-gtbndng-indirect-update-dflt.js",
             "language/statements/switch/S12.11_A1_T4.js",
             "language/statements/switch/S12.11_A1_T4.js",
             "built-ins/ArrayBuffer/isView/arg-is-typedarray-subclass-instance.js",
@@ -1265,7 +1267,7 @@
         ]
     },
     {
-        "reason": "Not support TypedArrayConstructors ecma2021 features",
+        "reason": "Not support TypedArrayConstructors ecma2020 features",
         "files": [
             "built-ins/TypedArrayConstructors/internals/Set/key-is-minus-zero.js",
             "built-ins/TypedArrayConstructors/internals/Set/key-is-not-integer.js",
@@ -1322,6 +1324,64 @@
             "intl402/Intl/getCanonicalLocales/unicode-ext-canonicalize-subdivision.js",
             "intl402/Intl/getCanonicalLocales/canonicalized-tags.js",
             "intl402/Intl/getCanonicalLocales/transformed-ext-invalid.js"
+        ]
+    },
+    {
+        "reason": "Not support with Class's Privatename(#)",
+        "files": [
+            "language/module-code/invalid-private-names-member-expression-bad-reference.js",
+            "language/module-code/invalid-private-names-member-expression-this.js",
+            "language/module-code/invalid-private-names-call-expression-bad-reference.js",
+            "language/module-code/invalid-private-names-call-expression-this.js",
+            "language/module-code/privatename-valid-no-earlyerr.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-1.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-2.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-3.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-4.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-5.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-6.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-7.js",
+            "language/module-code/privatename-not-valid-earlyerr-module-8.js",
+            "language/module-code/private-identifiers-not-empty.js"
+        ]
+    },
+    {
+        "reason": "Special unicode character that tsc can not recognize",
+        "files" : [
+            "language/module-code/export-expname-binding-string.js",
+            "language/module-code/export-expname-from-binding-string.js",
+            "language/module-code/export-expname-from-star-string.js",
+            "language/module-code/export-expname-from-string-binding.js",
+            "language/module-code/export-expname-from-star.js",
+            "language/module-code/export-expname-from-string-string.js",
+            "language/module-code/export-expname-from-string.js",
+            "language/module-code/export-expname-import-string-binding.js"
+        ]
+    },
+    {
+        "reason": "Not support Dynamic Import",
+        "files": [
+            "language/module-code/verify-dfs.js"
+        ]
+    },
+    {
+        "reason": "Unused node will be eliminated when tsc emiting in [after], So module won't get correct entries",
+        "files": [
+            "language/module-code/instn-named-err-ambiguous.js",
+            "language/module-code/instn-named-err-ambiguous-as.js",
+            "language/module-code/instn-named-err-not-found.js",
+            "language/module-code/instn-named-err-not-found-as.js",
+            "language/module-code/instn-named-err-not-found-dflt.js",
+            "language/module-code/instn-named-err-dflt-thru-star-as.js",
+            "language/module-code/instn-named-err-dflt-thru-star-dflt.js",
+            "language/module-code/eval-rqstd-order.js"
+        ]
+    },
+    {
+        "reason": "Not support further ecma-2015's feature in module code",
+        "files": [
+            "language/module-code/namespace/internals/define-own-property.js",
+            "language/module-code/early-dup-export-as-star-as.js"
         ]
     }
 ]

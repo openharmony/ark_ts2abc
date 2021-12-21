@@ -26,7 +26,6 @@ export enum VarDeclarationKind {
     CONST,
     VAR,
     FUNCTION,
-    MODULE,
     CLASS
 }
 
@@ -112,8 +111,28 @@ export abstract class Variable {
 
 export class LocalVariable extends Variable {
     status: InitStatus | null;
-    isExport: boolean = false;
-    exportedName: string = "";
+
+    constructor(declKind: VarDeclarationKind, name: string, status?: InitStatus) {
+        super(declKind, name);
+        this.status = status ? status : null;
+    }
+
+    initialize() {
+        this.status = InitStatus.INITIALIZED;
+    }
+
+    isInitialized() {
+        if (this.status != null) {
+            return this.status == InitStatus.INITIALIZED;
+        }
+        return true;
+    }
+}
+
+export class ModuleVariable extends Variable {
+    private isExport: boolean = false;
+    private status: InitStatus | null;
+
 
     constructor(declKind: VarDeclarationKind, name: string, status?: InitStatus) {
         super(declKind, name);
@@ -137,17 +156,6 @@ export class LocalVariable extends Variable {
 
     isExportVar() {
         return this.isExport;
-    }
-
-    setExportedName(name: string) {
-        this.exportedName = name;
-    }
-
-    getExportedName() {
-        if (!this.exportedName) {
-            throw new Error("Exported Variable " + this.getName() + " doesn't have exported name");
-        }
-        return this.exportedName;
     }
 }
 

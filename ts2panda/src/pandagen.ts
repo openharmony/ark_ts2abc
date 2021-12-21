@@ -30,7 +30,6 @@ import {
     call,
     closeIterator,
     copyDataProperties,
-    copyModuleIntoCurrentModule,
     creatDebugger,
     createArrayWithBuffer,
     createEmptyArray,
@@ -51,7 +50,7 @@ import {
     getIteratorNext,
     getNextPropName,
     getPropIterator,
-    importModule,
+    getModuleNamespace,
     isFalse,
     isTrue,
     jumpTarget,
@@ -65,7 +64,7 @@ import {
     loadHomeObject,
     loadLexicalEnv,
     loadLexicalVar,
-    loadModuleVarByName,
+    loadModuleVariable,
     loadObjByIndex,
     loadObjByName,
     loadObjByValue,
@@ -93,6 +92,7 @@ import {
     stSuperByValue,
     superCall,
     superCallSpread,
+    throwConstAssignment,
     throwDeleteSuperProperty,
     throwException,
     throwIfNotObject,
@@ -855,6 +855,10 @@ export class PandaGen {
         this.add(node, throwDeleteSuperProperty());
     }
 
+    throwConstAssignment(node: ts.Node, nameReg: VReg) {
+        this.add(node, throwConstAssignment(nameReg));
+    }
+
     return(node: ts.Node | NodeKind) {
         this.add(node, new ReturnDyn());
     }
@@ -1061,20 +1065,16 @@ export class PandaGen {
         )
     }
 
-    importModule(node: ts.Node, moduleName: string) {
-        this.add(node, importModule(moduleName));
+    loadModuleVariable(node: ts.Node, moduleVarName: string, isLocal: boolean) {
+        this.add(node, loadModuleVariable(moduleVarName, isLocal ? 1 : 0));
     }
 
-    loadModuleVariable(node: ts.Node, module: VReg, varName: string) {
-        this.add(node, loadModuleVarByName(varName, module));
-    }
-
-    storeModuleVar(node: ts.Node, moduleVarName: string) {
+    storeModuleVariable(node: ts.Node | NodeKind, moduleVarName: string) {
         this.add(node, storeModuleVariable(moduleVarName));
     }
 
-    copyModule(node: ts.Node, module: VReg) {
-        this.add(node, copyModuleIntoCurrentModule(module));
+    getModuleNamespace(node: ts.Node, localName: string) {
+        this.add(node, getModuleNamespace(localName));
     }
 
     defineClassWithBuffer(node: ts.Node, name: string, idx: number, parameterLength: number, base: VReg) {
