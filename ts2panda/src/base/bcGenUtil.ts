@@ -22,7 +22,6 @@ import {
     EcmaCallithisrangedyn,
     EcmaCloseiterator,
     EcmaCopydataproperties,
-    EcmaCopymodule,
     EcmaCreatearraywithbuffer,
     EcmaCreateemptyarray,
     EcmaCreateemptyobject,
@@ -43,14 +42,14 @@ import {
     EcmaGetiteratornext,
     EcmaGetnextpropname,
     EcmaGetpropiterator,
-    EcmaImportmodule,
+    EcmaGetmodulenamespace,
     EcmaIsfalse,
     EcmaIstrue,
     EcmaLdglobalvar,
     EcmaLdhomeobject,
     EcmaLdlexenvdyn,
     EcmaLdlexvardyn,
-    EcmaLdmodvarbyname,
+    EcmaLdmodulevar,
     EcmaLdobjbyindex,
     EcmaLdobjbyname,
     EcmaLdobjbyvalue,
@@ -366,20 +365,16 @@ export function ldSuperByValue(obj: VReg, prop: VReg): IRNode {
     return new EcmaLdsuperbyvalue(obj, prop);
 }
 
-export function importModule(name: string) {
-    return new EcmaImportmodule(name);
-}
-
-export function loadModuleVarByName(name: string, module: VReg) {
-    return new EcmaLdmodvarbyname(name, module);
+export function loadModuleVariable(name: string, isLocal: number) {
+    return new EcmaLdmodulevar(name, new Imm(isLocal));
 }
 
 export function storeModuleVariable(name: string) {
     return new EcmaStmodulevar(name);
 }
 
-export function copyModuleIntoCurrentModule(mod: VReg) {
-    return new EcmaCopymodule(mod);
+export function getModuleNamespace(localName: string) {
+    return new EcmaGetmodulenamespace(localName);
 }
 
 export function loadHomeObject() {
@@ -418,14 +413,14 @@ export function createRegExpWithLiteral(pattern: string, flags: number) {
     return new EcmaCreateregexpwithliteral(pattern, new Imm(flags));
 }
 
-export function stLetToGlobalRecord (name: string) {
+export function stLetToGlobalRecord(name: string) {
     return new EcmaStlettoglobalrecord(name);
 }
 
-export function stConstToGlobalRecord (name: string) {
+export function stConstToGlobalRecord(name: string) {
     return new EcmaStconsttoglobalrecord(name);
 }
 
-export function stClassToGlobalRecord (name: string) {
+export function stClassToGlobalRecord(name: string) {
     return new EcmaStclasstoglobalrecord(name);
 }

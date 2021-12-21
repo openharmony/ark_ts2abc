@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { DebugPosInfo, VariableDebugInfo } from "./debuginfo";
 import { LiteralBuffer } from "./base/literal";
+import { DebugPosInfo, VariableDebugInfo } from "./debuginfo";
 
 export class Metadata {
     public attribute: string;
@@ -211,6 +211,60 @@ export class DeclaredSymbol2Type {
         this.symbol = symbol;
         this.type = type;
     }
+}
+
+export class RegularImportEntry {
+    public localName: string;
+    public importName: string;
+    public moduleRequest: number;
+
+    constructor(localName: string, importName: string, moduleRequest: number) {
+        this.localName = localName;
+        this.importName = importName;
+        this.moduleRequest = moduleRequest;
+    }
+}
+
+export class NamespaceImportEntry {
+    public localName: string;
+    public moduleRequest: number;
+
+    constructor(localName: string, moduleRequest: number) {
+        this.localName = localName;
+        this.moduleRequest = moduleRequest;
+    }
+}
+
+export class LocalExportEntry {
+    public localName: string;
+    public exportName: string;
+
+    constructor(localName: string, exportName: string) {
+        this.localName = localName;
+        this.exportName = exportName;
+    }
+}
+
+export class IndirectExportEntry {
+    public exportName: string;
+    public importName: string;
+    public moduleRequest: number;
+
+    constructor(exportName: string, importName: string, moduleRequest: number) {
+        this.exportName = exportName;
+        this.importName = importName;
+        this.moduleRequest = moduleRequest;
+    }
+}
+
+export class ModuleRecord {
+    public moduleName: string = "";
+    public moduleRequests: Array<string> = [];
+    public regularImportEntries: Array<RegularImportEntry> = [];
+    public namespaceImportEntries: Array<NamespaceImportEntry> = [];
+    public localExportEntries: Array<LocalExportEntry> = [];
+    public indirectExportEntries: Array<IndirectExportEntry> = [];
+    public starExportEntries: Array<number> = [];
 }
 
 export interface Emmiter {

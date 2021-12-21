@@ -20,7 +20,6 @@ import {
     loadLexicalVar,
     storeAccumulator,
     storeLexicalVar,
-    storeModuleVariable,
     throwConstAssignment,
     throwUndefinedIfHole
 } from "./base/bcGenUtil";
@@ -109,7 +108,7 @@ export class VariableAccessLoad extends VariableAccessBase {
         insns.push(loadLexicalVar(this.level, slot));
 
         // check TDZ
-        if (v.isLetOrConst()) {
+        if (v.isLetOrConst() || v.isClass()) {
             let tempReg = pandaGen.getTemp();
 
             insns.push(storeAccumulator(tempReg));
@@ -161,12 +160,7 @@ export class VariableAcessStore extends VariableAccessBase {
             // check const assignment
             checkConstAssignment(pandaGen, v, insns, this.node);
         }
-
         insns.push(storeAccumulator(bindVreg));
-
-        if (v.isExportVar()) {
-            insns.push(storeModuleVariable(v.getExportedName()));
-        }
 
         return insns;
     }
@@ -200,9 +194,7 @@ export class VariableAcessStore extends VariableAccessBase {
 
         insns.push(storeLexicalVar(this.level, slot, valueReg));
         insns.push(loadAccumulator(valueReg));
-        if (v.isExportVar()) {
-            insns.push(storeModuleVariable(v.getExportedName()));
-        }
+
         pandaGen.freeTemps(valueReg);
 
         return insns;
