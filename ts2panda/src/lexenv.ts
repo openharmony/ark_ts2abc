@@ -35,7 +35,6 @@ import { PandaGen } from "./pandagen";
 import { Scope } from "./scope";
 import {
     LocalVariable,
-    ModuleVariable,
     Variable
 } from "./variable";
 import jshelpers from "./jshelpers";
@@ -93,7 +92,11 @@ export class VariableAccessLoad extends VariableAccessBase {
             pandaGen.freeTemps(holeReg);
             return insns;
         }
-        insns.push(loadAccumulator(bindVreg));
+        if (v.getName() === "4funcObj") {
+            insns.push(loadAccumulator(getVregisterCache(pandaGen, CacheList.FUNC)));
+        } else {
+            insns.push(loadAccumulator(bindVreg));
+        }
 
         return insns;
     }
@@ -161,7 +164,7 @@ export class VariableAcessStore extends VariableAccessBase {
 
         insns.push(storeAccumulator(bindVreg));
 
-        if (v.isExportVar() && !(v instanceof ModuleVariable)) {
+        if (v.isExportVar()) {
             insns.push(storeModuleVariable(v.getExportedName()));
         }
 
@@ -197,7 +200,7 @@ export class VariableAcessStore extends VariableAccessBase {
 
         insns.push(storeLexicalVar(this.level, slot, valueReg));
         insns.push(loadAccumulator(valueReg));
-        if (v.isExportVar() && !(v instanceof ModuleVariable)) {
+        if (v.isExportVar()) {
             insns.push(storeModuleVariable(v.getExportedName()));
         }
         pandaGen.freeTemps(valueReg);

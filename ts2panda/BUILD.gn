@@ -305,12 +305,22 @@ ohos_copy("panda_ts2abc_ets") {
   module_install_name = ""
 }
 
+ohos_copy("ts2abc_js_file") {
+  sources = [ "${ts2abc_root}/scripts/ts2abc.js" ]
+  outputs = [ target_out_dir + "/{{source_file_part}}" ]
+}
+
 group("ark_ts2abc_build") {
   deps = []
   if (host_os != "mac") {
     deps += [
       "${ts2abc_root}:ts2abc_build(${buildtool_linux})",
       "${ts2abc_root}:ts2abc_build_ets(${buildtool_linux})",
+    ]
+  } else {
+    deps += [
+      "${ts2abc_root}:ts2abc_build_mac(${buildtool_mac})",
+      "${ts2abc_root}:ts2abc_build_mac_ets(${buildtool_mac})",
     ]
   }
 }

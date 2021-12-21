@@ -201,6 +201,7 @@ export class PandaGen {
     private sourceFileDebugInfo: string = "";
     private sourceCodeDebugInfo: string | undefined;
     private icSize: number = 0;
+    private callType: number = 0;
 
     private static literalArrayBuffer: Array<LiteralBuffer> = [];
 
@@ -209,6 +210,14 @@ export class PandaGen {
         this.parametersCount = parametersCount;
         this.scope = scope;
         this.vregisterCache = new VregisterCache();
+    }
+
+    public setCallType(callType: number) {
+        this.callType = callType;
+    }
+
+    public getCallType(): number {
+        return this.callType;
     }
 
     public getSourceCodeDebugInfo() {
@@ -348,8 +357,16 @@ export class PandaGen {
         return this.totalRegsNum;
     }
 
+    setParametersCount(count: number) {
+        this.parametersCount = count;
+    }
+
     getParametersCount(): number {
         return this.parametersCount;
+    }
+
+    setLocals(locals: VReg[]) {
+        this.locals = locals;
     }
 
     getLocals(): VReg[] {
@@ -367,6 +384,9 @@ export class PandaGen {
     loadAccFromArgs(node: ts.Node) {
         if ((<VariableScope>this.scope).getUseArgs()) {
             let v = this.scope!.findLocal("arguments");
+            if (this.scope instanceof FunctionScope) {
+                this.scope.setArgumentsOrRestargs();
+            }
             if (v) {
                 let paramVreg = this.getVregForVariable(v);
                 this.getUnmappedArgs(node);

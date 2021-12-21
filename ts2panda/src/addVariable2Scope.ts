@@ -25,8 +25,6 @@ import {
     FuncDecl,
     InitStatus,
     LetDecl,
-    ModDecl,
-    ModuleScope,
     Scope,
     VarDecl,
     VariableScope
@@ -109,11 +107,6 @@ export function addVariableToScope(recorder: Recorder) {
                 scope.add(decl.name, VarDeclarationKind.FUNCTION);
             } else if (decl instanceof CatchParameter) {
                 scope.add(decl.name, VarDeclarationKind.LET);
-            } else if (decl instanceof ModDecl) {
-                if (!(scope instanceof ModuleScope)) {
-                    throw new Error("ModuleVariable can't exist without ModuleScope");
-                }
-                scope.add(decl.name, VarDeclarationKind.MODULE);
             } else if (decl instanceof ClassDecl) {
                 let classNode = decl.node;
                 if (ts.isClassDeclaration(classNode)) {

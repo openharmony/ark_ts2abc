@@ -140,37 +140,6 @@ export class LocalVariable extends Variable {
     }
 }
 
-export class ModuleVariable extends LocalVariable {
-    private module: VReg | undefined;
-    private exoticName: string = "";
-
-    constructor(declKind: VarDeclarationKind, name: string, status: InitStatus) {
-        super(declKind, name, status);
-    }
-
-    bindModuleVreg(vreg: VReg) {
-        this.module = vreg;
-    }
-
-    setExoticName(exoticName: string) {
-        this.exoticName = exoticName;
-    }
-
-    getExoticName() {
-        if (this.exoticName == "") {
-            throw new Error("Variable doesn't have exotic name");
-        }
-        return this.exoticName;
-    }
-
-    getModule() {
-        if (!this.module) {
-            throw new Error("Variable's module has not been binded");
-        }
-        return this.module;
-    }
-}
-
 export class GlobalVariable extends Variable {
     constructor(declKind: VarDeclarationKind, name: string) {
         super(declKind, name);

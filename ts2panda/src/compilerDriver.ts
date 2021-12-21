@@ -206,7 +206,7 @@ export class CompilerDriver {
         let compiler = new Compiler(node, pandaGen, this, recorder);
 
         if (CmdOptions.isModules() && ts.isSourceFile(node) && scope instanceof ModuleScope) {
-            setImport(recorder.getImportStmts(), scope, pandaGen, compiler);
+            setImport(recorder.getImportStmts(), scope, pandaGen);
             setExportBinding(recorder.getExportStmts(), scope, pandaGen);
         }
 
@@ -249,7 +249,7 @@ export class CompilerDriver {
         let compiler = new Compiler(node, pandaGen, this, recorder);
 
         if (CmdOptions.isModules() && ts.isSourceFile(node) && scope instanceof ModuleScope) {
-            setImport(recorder.getImportStmts(), scope, pandaGen, compiler);
+            setImport(recorder.getImportStmts(), scope, pandaGen);
             setExportBinding(recorder.getExportStmts(), scope, pandaGen);
         }
 

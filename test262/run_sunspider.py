@@ -41,6 +41,15 @@ def parse_args():
     parser.add_argument('--ark-frontend',
                         nargs='?', choices=ARK_FRONTEND_LIST, type=str,
                         help="Choose one of them")
+    parser.add_argument('--ark-arch',
+                        default=DEFAULT_ARK_ARCH,
+                        required=False,
+                        nargs='?', choices=ARK_ARCH_LIST, type=str,
+                        help="Choose one of them")
+    parser.add_argument('--ark-arch-root',
+                        default=DEFAULT_ARK_ARCH,
+                        required=False,
+                        help="the root path for qemu-aarch64 or qemu-arm")
     arguments = parser.parse_args()
     return arguments
 
@@ -51,6 +60,7 @@ ARK_TOOL = DEFAULT_ARK_TOOL
 ARK_FRONTEND_TOOL = DEFAULT_ARK_FRONTEND_TOOL
 LIBS_DIR = DEFAULT_LIBS_DIR
 ARK_FRONTEND = DEFAULT_ARK_FRONTEND
+ARK_ARCH = DEFAULT_ARK_ARCH
 
 
 def output(retcode, msg):
@@ -58,6 +68,8 @@ def output(retcode, msg):
         if msg != '':
             print(str(msg))
     elif retcode == -6:
+        sys.stderr.write("Aborted (core dumped)")
+    elif retcode == -4:
         sys.stderr.write("Aborted (core dumped)")
     elif retcode == -11:
         sys.stderr.write("Segmentation fault (core dumped)")
@@ -115,6 +127,8 @@ class ArkProgram():
         self.libs_dir = LIBS_DIR
         self.ark_frontend = ARK_FRONTEND
         self.js_file = ""
+        self.arch = ARK_ARCH
+        self.arch_root = ""
 
     def proce_parameters(self):
         if self.args.ark_tool:
@@ -130,6 +144,10 @@ class ArkProgram():
             self.ark_frontend = self.args.ark_frontend
 
         self.js_file = self.args.js_file
+
+        self.arch = self.args.ark_arch
+
+        self.arch_root = self.args.ark_arch_root
 
     def gen_abc(self):
         js_file = self.js_file
@@ -158,9 +176,25 @@ class ArkProgram():
         
         os.environ["LD_LIBRARY_PATH"] = self.libs_dir
         file_name_pre = os.path.splitext(self.js_file)[0]
+        cmd_args = []
+        if self.arch == ARK_ARCH_LIST[1]:
+            qemu_tool = "qemu-aarch64"
+            qemu_arg1 = "-L"
+            qemu_arg2 = self.arch_root
+            cmd_args = [qemu_tool, qemu_arg1, qemu_arg2, self.ark_tool,
+                        ARK_ARGS, ICU_PATH,
+                        f'{file_name_pre}.abc']
+        elif self.arch == ARK_ARCH_LIST[2]:
+            qemu_tool = "qemu-arm"
+            qemu_arg1 = "-L"
+            qemu_arg2 =  self.arch_root
+            cmd_args = [qemu_tool, qemu_arg1, qemu_arg2, self.ark_tool,
+                        ARK_ARGS, ICU_PATH,
+                        f'{file_name_pre}.abc']
+        elif self.arch == ARK_ARCH_LIST[0]:
+            cmd_args = [self.ark_tool, ARK_ARGS, ICU_PATH,
+                        f'{file_name_pre}.abc']
 
-        cmd_args = [self.ark_tool, ARK_ARGS, ICU_PATH,
-                    f'{file_name_pre}.abc']
         retcode = exec_command(cmd_args)
         return retcode
 

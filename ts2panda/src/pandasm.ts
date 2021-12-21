@@ -72,6 +72,7 @@ export class Function {
     public variables: Array<VariableDebugInfo> | undefined;
     public sourceFile: string;
     public sourceCode: string | undefined;
+    public callType: number;
 
     constructor(
         name: string,
@@ -82,6 +83,7 @@ export class Function {
         variables: Array<VariableDebugInfo> | undefined = undefined,
         sourceFile: string = "",
         sourceCode: string | undefined = undefined,
+        callType: number = 0
     ) {
         this.name = name;
         this.signature = signature;
@@ -93,6 +95,7 @@ export class Function {
         this.variables = variables;
         this.sourceFile = sourceFile;
         this.sourceCode = sourceCode;
+        this.callType = callType;
     }
 }
 

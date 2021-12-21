@@ -78,6 +78,12 @@ ARK_FRONTEND_LIST = [
 ]
 DEFAULT_ARK_FRONTEND = ARK_FRONTEND_LIST[0]
 
+ARK_ARCH_LIST = [
+    "x64",
+    "aarch64",
+    "arm"
+]
+DEFAULT_ARK_ARCH = ARK_ARCH_LIST[0]
 
 MODULE_FILES_LIST = [
     "early-dup-export-decl.js",

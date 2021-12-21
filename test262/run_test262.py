@@ -72,6 +72,13 @@ def parse_args():
     parser.add_argument('--ark-frontend',
                         nargs='?', choices=ARK_FRONTEND_LIST, type=str,
                         help="Choose one of them")
+    parser.add_argument('--ark-arch',
+                        default=DEFAULT_ARK_ARCH,
+                        nargs='?', choices=ARK_ARCH_LIST, type=str,
+                        help="Choose one of them")
+    parser.add_argument('--ark-arch-root',
+                        default=DEFAULT_ARK_ARCH,
+                        help="the root path for qemu-aarch64 or qemu-arm")
     return parser.parse_args()
 
 
@@ -388,6 +395,7 @@ def get_host_args(args, host_type):
     ark_frontend_tool = DEFAULT_ARK_FRONTEND_TOOL
     libs_dir = DEFAULT_LIBS_DIR
     ark_frontend = DEFAULT_ARK_FRONTEND
+    ark_arch = DEFAULT_ARK_ARCH
 
     if args.hostArgs:
         host_args = args.hostArgs
@@ -410,6 +418,10 @@ def get_host_args(args, host_type):
         host_args += f"--ark-frontend-tool={ark_frontend_tool} "
         host_args += f"--libs-dir={libs_dir} "
         host_args += f"--ark-frontend={ark_frontend} "
+
+    if args.ark_arch != ark_arch:
+        host_args += f"--ark-arch={args.ark_arch} "
+        host_args += f"--ark-arch-root={args.ark_arch_root} "
 
     return host_args
 
