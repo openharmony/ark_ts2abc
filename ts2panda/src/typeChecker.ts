@@ -4,6 +4,18 @@ import { ModuleStmt } from "./modules";
 import { TypeRecorder } from "./typeRecorder";
 import * as jshelpers from "./jshelpers";
 import { LOGD } from "./log";
+import { PrimitiveType } from "./base/typeSystem";
+
+export enum PrimitiveFlags {
+    ANY = 1,
+    NUMBER = 8,
+    BOOLEAN = 1048592,
+    STRING = 4,
+    SYMBOL = 4096,
+    NULL = 65536,
+    UNDEFINED = 32768,
+    _LENGTH = 50
+}
 
 export class TypeChecker {
     private static instance: TypeChecker;
@@ -39,7 +51,12 @@ export class TypeChecker {
 
     public getTypeFlagsAtLocation(node: ts.Node): string {
         let typeFlag = this.compiledTypeChecker.getTypeAtLocation(node).getFlags();
-        return ts.TypeFlags[typeFlag].toUpperCase();
+        if (typeFlag) {
+            return PrimitiveFlags[typeFlag];
+        } else {
+            console.log("typeFlag not found: ", typeFlag);
+            return ""
+        }
     }
 
     public checkExportKeyword(node: ts.Node): boolean {
@@ -51,6 +68,15 @@ export class TypeChecker {
             }
         }
         return false;
+    }
+
+    public checkPotentialPrimitiveType(node: ts.Node): number | undefined {
+        let typeFlagName = this.getTypeFlagsAtLocation(node);
+        let typeIndex = undefined;
+        if (typeFlagName in PrimitiveType) {
+            typeIndex = PrimitiveType[typeFlagName as keyof typeof PrimitiveType];
+        }
+        return typeIndex;
     }
 
     private getTypeDeclForInitializer(initializer: ts.Node, exportNeeded:boolean) {
@@ -72,8 +98,7 @@ export class TypeChecker {
             case ts.SyntaxKind.PropertyAccessExpression:
                 return initializer;
             default:
-                break;
-            return null;
+                return null;
         }
     }
 
@@ -137,7 +162,11 @@ export class TypeChecker {
     public checkTypeForVariableDeclaration(node: ts.VariableDeclaration, exportNeeded: boolean) {
         let name = node.name;
         let initializer = node.initializer;
-        if (initializer) {
+        // first check if this is a primitive type declaration
+        let typeIndex = this.checkPotentialPrimitiveType(name);
+        if (typeIndex) {
+            TypeRecorder.getInstance().setVariable2Type(name, typeIndex, false);
+        } else if (initializer) {
             let typeDeclNode = this.getTypeDeclForInitializer(initializer, exportNeeded);
             let newExpressionFlag = initializer.kind == ts.SyntaxKind.NewExpression;
             if (typeDeclNode) {

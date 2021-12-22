@@ -32,7 +32,6 @@ export enum PrimitiveType {
     BOOLEAN,
     STRING,
     SYMBOL,
-    VOID,
     NULL,
     UNDEFINED,
     _LENGTH = 50
@@ -131,12 +130,9 @@ export abstract class BaseType {
             }
             // get typeFlag to check if its a primitive type
             let typeRef = node.type;
-            let typeFlagName = this.typeChecker.getTypeFlagsAtLocation(typeRef);
-            let typeIndex = -1;
+            let typeIndex = this.typeChecker.checkPotentialPrimitiveType(typeRef);
             let isUserDefinedType = false;
-            if (typeFlagName in PrimitiveType) {
-                typeIndex = PrimitiveType[typeFlagName as keyof typeof PrimitiveType];
-            } else {
+            if (!typeIndex) {
                 let identifier = <ts.Identifier>typeRef.getChildAt(0);
                 typeIndex = this.getOrCreateUserDefinedType(identifier, newExpressionFlag, variableNode);
                 isUserDefinedType = true;
@@ -145,8 +141,9 @@ export abstract class BaseType {
             if (variableNode) {
                 this.setVariable2Type(variableNode, typeIndex, isUserDefinedType);
             }
-            if (typeIndex == -1) {
+            if (!typeIndex) {
                 LOGD("ERROR: Type cannot be found for: " + jshelpers.getTextOfNode(node));
+                typeIndex = -1;
             }
             return typeIndex!;
         }
