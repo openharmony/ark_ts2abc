@@ -30,6 +30,7 @@ export enum PrimitiveType {
     ANY,
     NUMBER,
     BOOLEAN,
+    BIGINT,
     STRING,
     SYMBOL,
     NULL,
@@ -41,6 +42,7 @@ export enum L2Type {
     CLASS,
     CLASSINST,
     FUNCTION,
+    UNION,
     OBJECT, // object literal
     EXTERNAL,
     _COUNTER
@@ -130,7 +132,7 @@ export abstract class BaseType {
             }
             // get typeFlag to check if its a primitive type
             let typeRef = node.type;
-            let typeIndex = this.typeChecker.checkPotentialPrimitiveType(typeRef);
+            let typeIndex = this.typeChecker.checkDeclarationType(typeRef);
             let isUserDefinedType = false;
             if (!typeIndex) {
                 let identifier = <ts.Identifier>typeRef.getChildAt(0);
@@ -545,6 +547,54 @@ export class ExternalType extends BaseType {
         ImpTypeBuf.addLiterals(...ImpTypeLiterals);
         return ImpTypeBuf;
     }
+}
+
+export class UnionType extends BaseType {
+    unionedTypeArray: Array<number> = [];
+    typeIndex: number;
+    shiftedTypeIndex: number;
+
+    constructor(typeNode: ts.Node) {
+        super();
+        this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
+        // record type before its initialization, so its index can be recorded
+        // in case there's recursive reference of this type
+        this.addCurrentType(typeNode, this.shiftedTypeIndex);
+        this.fillInUnionArray(typeNode, this.unionedTypeArray);
+        this.setTypeArrayBuffer(this, this.typeIndex);
+    }
+
+    fillInUnionArray(typeNode: ts.Node, unionedTypeArray: Array<number>) {
+        for (let element of (<ts.UnionType><any>typeNode).types) {
+            let elementNode = <ts.TypeNode><any>element;
+            let typeIndex = this.typeChecker.checkDeclarationType(elementNode);
+            if (typeIndex) {
+                unionedTypeArray.push(typeIndex);
+            } else if (elementNode.kind == ts.SyntaxKind.TypeReference) {
+                let typeName = elementNode.getChildAt(0);
+                let typeDecl = this.typeChecker.getTypeDeclForInitializer(typeName, false);
+                if (typeDecl) {
+                    typeIndex = this.typeChecker.checkForTypeDecl(typeName, typeDecl, false, true);
+                } else {
+                    typeIndex = 0;
+                }
+                unionedTypeArray.push(typeIndex);
+            }
+        }
+    }
+
+    transfer2LiteralBuffer(): LiteralBuffer {
+        let UnionTypeBuf = new LiteralBuffer();
+        let UnionTypeLiterals: Array<Literal> = new Array<Literal>();
+        UnionTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.UNION));
+        UnionTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.unionedTypeArray.length));
+        for (let type of this.unionedTypeArray) {
+            UnionTypeLiterals.push(new Literal(LiteralTag.INTEGER, type));
+        }
+        UnionTypeBuf.addLiterals(...UnionTypeLiterals);
+        return UnionTypeBuf;
+    }    
 }
 
 export class ObjectLiteralType extends BaseType {
