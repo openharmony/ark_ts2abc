@@ -43,6 +43,7 @@ export enum L2Type {
     CLASSINST,
     FUNCTION,
     UNION,
+    ARRAY,
     OBJECT, // object literal
     EXTERNAL,
     _COUNTER
@@ -595,6 +596,61 @@ export class UnionType extends BaseType {
         UnionTypeBuf.addLiterals(...UnionTypeLiterals);
         return UnionTypeBuf;
     }    
+}
+
+export class ArrayType extends BaseType {
+    referedTypeIndex: number = 0;
+    typeIndex: number = 0;
+    shiftedTypeIndex: number;
+    constructor(typeNode: ts.Node) {
+        super();
+        this.referedTypeIndex = this.getReferencedType(typeNode);
+        if (this.typeRecorder.hasArrayTypeMapping(this.referedTypeIndex)) {
+            this.shiftedTypeIndex = this.getRecordedArrayIndex(this.referedTypeIndex)!;
+        } else {
+            this.typeIndex = this.getIndexFromTypeArrayBuffer(this);
+            this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
+            this.setTypeArrayBuffer(this, this.typeIndex);
+            this.setRecordedArrayIndex(this.referedTypeIndex, this.shiftedTypeIndex);
+        }
+    }
+
+    getReferencedType(typeNode: ts.Node) {
+        let elementNode = (<ts.ArrayTypeNode><any>typeNode).elementType;
+        let typeIndex = this.typeChecker.checkDeclarationType(elementNode);
+        if (typeIndex) {
+            return typeIndex;
+        } else if (elementNode.kind == ts.SyntaxKind.TypeReference) {
+            let typeName = elementNode.getChildAt(0);
+            let typeDecl = this.typeChecker.getTypeDeclForInitializer(typeName, false);
+            if (typeDecl) {
+                typeIndex = this.typeChecker.checkForTypeDecl(typeName, typeDecl, false, true);
+            } else {
+                typeIndex = 0;
+            }
+            return typeIndex;
+        }
+        return 0;
+    }
+
+    getRecordedArrayIndex(referedTypeIndex: number) {
+        return this.typeRecorder.getFromArrayTypeMap(referedTypeIndex);
+    }
+    
+    setRecordedArrayIndex(referedTypeIndex: number, shiftedTypeIndex: number) {
+        return this.typeRecorder.setArrayTypeMap(referedTypeIndex, shiftedTypeIndex);
+    }
+
+    transfer2LiteralBuffer(): LiteralBuffer {
+        let classInstBuf = new LiteralBuffer();
+        let classInstLiterals: Array<Literal> = new Array<Literal>();
+
+        classInstLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.ARRAY));
+        classInstLiterals.push(new Literal(LiteralTag.INTEGER, this.referedTypeIndex));
+        classInstBuf.addLiterals(...classInstLiterals);
+
+        return classInstBuf;
+    }
 }
 
 export class ObjectLiteralType extends BaseType {

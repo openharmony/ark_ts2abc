@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ts from "typescript";
+import ts, { IndexedAccessType } from "typescript";
 import {
     ClassType,
     ExternalType,
@@ -30,6 +30,7 @@ export class TypeRecorder {
     private variable2Type: Map<ts.Node, number> = new Map<ts.Node, number>();
     private userDefinedTypeSet: Set<number> = new Set<number>();;
     private typeSummary: TypeSummary = new TypeSummary();
+    private arrayTypeMap: Map<number, number> = new Map<number, number>();
     // ---> export/import
     // exportedType: exportedName -> typeIndex
     private exportedType: Map<string, number> = new Map<string, number>();
@@ -92,6 +93,18 @@ export class TypeRecorder {
         } else {
             return -1;
         }
+    }
+
+    public setArrayTypeMap(contentTypeIndex: number, arrayTypeIndex: number) {
+        this.arrayTypeMap.set(contentTypeIndex, arrayTypeIndex)
+    }
+
+    public hasArrayTypeMapping(contentTypeIndex: number) {
+        return this.arrayTypeMap.has(contentTypeIndex);
+    }
+
+    public getFromArrayTypeMap(contentTypeIndex: number) {
+        return this.arrayTypeMap.get(contentTypeIndex);
     }
 
     // ---> exported/imported

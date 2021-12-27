@@ -3,7 +3,8 @@ import {
     ClassType,
     ClassInstType,
     ExternalType,
-    UnionType
+    UnionType,
+    ArrayType
 } from "./base/typeSystem";
 import { ModuleStmt } from "./modules";
 import { TypeRecorder } from "./typeRecorder";
@@ -108,6 +109,9 @@ export class TypeChecker {
             case ts.SyntaxKind.UnionType:
                 let unionType = new UnionType(typeNode);
                 return unionType.shiftedTypeIndex;
+            case ts.SyntaxKind.ArrayType:
+                let arrayType = new ArrayType(typeNode);
+                return arrayType.shiftedTypeIndex;
             default:
                 return undefined;
         }
@@ -207,7 +211,8 @@ export class TypeChecker {
         // first check if this is a primitive or union declaration
         let typeIndex = this.checkDeclarationType(type);
         if (typeIndex) {
-            TypeRecorder.getInstance().setVariable2Type(name, typeIndex, false);
+            let isUserDefinedType = typeIndex <= PrimitiveType._LENGTH ? false : true;
+            TypeRecorder.getInstance().setVariable2Type(name, typeIndex, isUserDefinedType);
         } else if (initializer) {
             let typeDeclNode = this.getTypeDeclForInitializer(initializer, exportNeeded);
             let newExpressionFlag = initializer.kind == ts.SyntaxKind.NewExpression;
