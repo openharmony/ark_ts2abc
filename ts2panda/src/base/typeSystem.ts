@@ -27,7 +27,7 @@ import * as jshelpers from "../jshelpers";
 import { access } from "fs";
 
 export enum PrimitiveType {
-    ANY,
+    ANY = -1,
     NUMBER,
     BOOLEAN,
     BIGINT,
@@ -78,6 +78,8 @@ export abstract class BaseType {
     protected typeChecker = TypeChecker.getInstance();
     protected typeRecorder = TypeRecorder.getInstance();
 
+    // this is needed for type like class, since it's declaration is in a certain place
+    // other types like primitives don't need this
     protected addCurrentType(node: ts.Node, index: number) {
         this.typeRecorder.addType2Index(node, index);
     }
@@ -111,11 +113,11 @@ export abstract class BaseType {
     }
 
     protected getOrCreateUserDefinedType(node: ts.Identifier, newExpressionFlag: boolean, variableNode?: ts.Node) {
-        let typeIndex = -1;
+        let typeIndex = PrimitiveType.ANY;
         let declNode = this.typeChecker.getTypeDeclForIdentifier(node);
         if (declNode) {
             typeIndex = this.tryGetTypeIndex(declNode);
-            if (typeIndex == -1) {
+            if (typeIndex == PrimitiveType.ANY) {
                 this.createType(declNode, newExpressionFlag, variableNode);
                 typeIndex = this.tryGetTypeIndex(declNode);
             }
@@ -135,23 +137,23 @@ export abstract class BaseType {
             let typeRef = node.type;
             let typeIndex = this.typeChecker.checkDeclarationType(typeRef);
             let isUserDefinedType = false;
-            if (!typeIndex) {
+            if (typeIndex == PrimitiveType.ANY) {
                 let identifier = <ts.Identifier>typeRef.getChildAt(0);
                 typeIndex = this.getOrCreateUserDefinedType(identifier, newExpressionFlag, variableNode);
                 isUserDefinedType = true;
+            }
+            if (typeIndex == PrimitiveType.ANY) {
+                console.log("ERROR: Type cannot be found for: " + jshelpers.getTextOfNode(node));
+                typeIndex = PrimitiveType.ANY;
             }
             // set variable if variable node is given;
             if (variableNode) {
                 this.setVariable2Type(variableNode, typeIndex, isUserDefinedType);
             }
-            if (!typeIndex) {
-                LOGD("ERROR: Type cannot be found for: " + jshelpers.getTextOfNode(node));
-                typeIndex = -1;
-            }
             return typeIndex!;
         }
         LOGD("WARNING: node type not found for: " + jshelpers.getTextOfNode(node));
-        return -1;
+        return PrimitiveType.ANY;
     }
 
     protected getIndexFromTypeArrayBuffer(type: BaseType): number {
@@ -499,9 +501,7 @@ export class FunctionType extends BaseType {
 
     private fillInReturn(node: ts.FunctionLikeDeclaration) {
         let typeIndex = this.getTypeIndexForDeclWithType(node);
-        if (typeIndex != -1) {
-            this.returnType = typeIndex;
-        }
+        this.returnType = typeIndex;
     }
 
     getModifier() {
@@ -552,36 +552,44 @@ export class ExternalType extends BaseType {
 
 export class UnionType extends BaseType {
     unionedTypeArray: Array<number> = [];
-    typeIndex: number;
-    shiftedTypeIndex: number;
+    typeIndex: number = PrimitiveType.ANY;
+    shiftedTypeIndex: number = PrimitiveType.ANY;
 
     constructor(typeNode: ts.Node) {
         super();
-        this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
-        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
-        // record type before its initialization, so its index can be recorded
-        // in case there's recursive reference of this type
-        this.addCurrentType(typeNode, this.shiftedTypeIndex);
-        this.fillInUnionArray(typeNode, this.unionedTypeArray);
-        this.setTypeArrayBuffer(this, this.typeIndex);
+        this.setOrReadFromArrayRecord(typeNode);
+    }
+
+    setOrReadFromArrayRecord(typeNode: ts.Node) {
+        let unionStr = typeNode.getText();
+        if (this.hasUnionTypeMapping(unionStr)) {
+            this.shiftedTypeIndex = this.getFromUnionTypeMap(unionStr)!;
+        } else {
+            this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
+            this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
+            this.fillInUnionArray(typeNode, this.unionedTypeArray);
+            this.setUnionTypeMap(unionStr, this.shiftedTypeIndex);
+            this.setTypeArrayBuffer(this, this.typeIndex);
+        }
+    }
+
+    hasUnionTypeMapping(unionStr: string) {
+        return this.typeRecorder.hasUnionTypeMapping(unionStr);
+    }
+
+    getFromUnionTypeMap(unionStr: string) {
+        return this.typeRecorder.getFromUnionTypeMap(unionStr);
+    }
+
+    setUnionTypeMap(unionStr: string, shiftedTypeIndex: number) {
+        return this.typeRecorder.setUnionTypeMap(unionStr, shiftedTypeIndex);
     }
 
     fillInUnionArray(typeNode: ts.Node, unionedTypeArray: Array<number>) {
         for (let element of (<ts.UnionType><any>typeNode).types) {
             let elementNode = <ts.TypeNode><any>element;
-            let typeIndex = this.typeChecker.checkDeclarationType(elementNode);
-            if (typeIndex) {
-                unionedTypeArray.push(typeIndex);
-            } else if (elementNode.kind == ts.SyntaxKind.TypeReference) {
-                let typeName = elementNode.getChildAt(0);
-                let typeDecl = this.typeChecker.getTypeDeclForInitializer(typeName, false);
-                if (typeDecl) {
-                    typeIndex = this.typeChecker.checkForTypeDecl(typeName, typeDecl, false, true);
-                } else {
-                    typeIndex = 0;
-                }
-                unionedTypeArray.push(typeIndex);
-            }
+            let typeIndex = this.typeChecker.getOrCreateRecordForTypeNode(elementNode);
+            unionedTypeArray.push(typeIndex!);
         }
     }
 
@@ -599,19 +607,24 @@ export class UnionType extends BaseType {
 }
 
 export class ArrayType extends BaseType {
-    referedTypeIndex: number = 0;
-    typeIndex: number = 0;
-    shiftedTypeIndex: number;
+    referedTypeIndex: number = PrimitiveType.ANY;
+    typeIndex: number = PrimitiveType.ANY;
+    shiftedTypeIndex: number = PrimitiveType.ANY;
     constructor(typeNode: ts.Node) {
         super();
-        this.referedTypeIndex = this.getReferencedType(typeNode);
-        if (this.typeRecorder.hasArrayTypeMapping(this.referedTypeIndex)) {
-            this.shiftedTypeIndex = this.getRecordedArrayIndex(this.referedTypeIndex)!;
+        let elementNode = (<ts.ArrayTypeNode><any>typeNode).elementType;
+        this.referedTypeIndex = this.typeChecker.getOrCreateRecordForTypeNode(elementNode);
+        this.setOrReadFromArrayRecord();
+    }
+
+    setOrReadFromArrayRecord() {
+        if (this.hasArrayTypeMapping(this.referedTypeIndex)) {
+            this.shiftedTypeIndex = this.getFromArrayTypeMap(this.referedTypeIndex)!;
         } else {
             this.typeIndex = this.getIndexFromTypeArrayBuffer(this);
             this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
             this.setTypeArrayBuffer(this, this.typeIndex);
-            this.setRecordedArrayIndex(this.referedTypeIndex, this.shiftedTypeIndex);
+            this.setArrayTypeMap(this.referedTypeIndex, this.shiftedTypeIndex);
         }
     }
 
@@ -633,22 +646,24 @@ export class ArrayType extends BaseType {
         return 0;
     }
 
-    getRecordedArrayIndex(referedTypeIndex: number) {
+    hasArrayTypeMapping(referedTypeIndex: number) {
+        return this.typeRecorder.hasArrayTypeMapping(referedTypeIndex);
+    }
+
+    getFromArrayTypeMap(referedTypeIndex: number) {
         return this.typeRecorder.getFromArrayTypeMap(referedTypeIndex);
     }
     
-    setRecordedArrayIndex(referedTypeIndex: number, shiftedTypeIndex: number) {
+    setArrayTypeMap(referedTypeIndex: number, shiftedTypeIndex: number) {
         return this.typeRecorder.setArrayTypeMap(referedTypeIndex, shiftedTypeIndex);
     }
 
     transfer2LiteralBuffer(): LiteralBuffer {
         let classInstBuf = new LiteralBuffer();
         let classInstLiterals: Array<Literal> = new Array<Literal>();
-
         classInstLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.ARRAY));
         classInstLiterals.push(new Literal(LiteralTag.INTEGER, this.referedTypeIndex));
         classInstBuf.addLiterals(...classInstLiterals);
-
         return classInstBuf;
     }
 }

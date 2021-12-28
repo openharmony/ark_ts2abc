@@ -125,6 +125,9 @@ export class Recorder {
                     this.compilerDriver.getFuncId(<ts.FunctionDeclaration>childNode);
                     let functionScope = this.buildVariableScope(scope, <ts.FunctionLikeDeclaration>childNode);
                     this.recordFuncDecl(<ts.FunctionDeclaration>childNode, scope);
+                    if (this.recordType) {
+                        TypeChecker.getInstance().formatNodeType(childNode);
+                    }
                     this.recordInfo(childNode, functionScope);
                     break;
                 }

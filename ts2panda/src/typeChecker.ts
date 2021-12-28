@@ -4,7 +4,8 @@ import {
     ClassInstType,
     ExternalType,
     UnionType,
-    ArrayType
+    ArrayType,
+    FunctionType
 } from "./base/typeSystem";
 import { ModuleStmt } from "./modules";
 import { TypeRecorder } from "./typeRecorder";
@@ -88,9 +89,24 @@ export class TypeChecker {
         return typeIndex;
     }
 
+    public getOrCreateRecordForTypeNode(typeNode: ts.TypeNode) {
+        let typeIndex = PrimitiveType.ANY;
+        typeIndex = this.checkDeclarationType(typeNode);
+        if (typeIndex == PrimitiveType.ANY && typeNode.kind == ts.SyntaxKind.TypeReference) {
+            let typeName = typeNode.getChildAt(0);
+            let typeDecl = this.getTypeDeclForInitializer(typeName, false);
+            if (typeDecl) {
+                typeIndex = this.checkForTypeDecl(typeName, typeDecl, false, true);
+            } else {
+                typeIndex = PrimitiveType.ANY;
+            }
+        }
+        return typeIndex;
+    }
+
     public checkDeclarationType(typeNode: ts.TypeNode | undefined) {
         if (!typeNode) {
-            return undefined;
+            return PrimitiveType.ANY;
         }
         switch (typeNode.kind) {
             case ts.SyntaxKind.StringKeyword:
@@ -101,7 +117,7 @@ export class TypeChecker {
             case ts.SyntaxKind.BigIntKeyword:
             case ts.SyntaxKind.LiteralType:
                 let typeName = typeNode.getText().toUpperCase();
-                let typeIndex = undefined;
+                let typeIndex = PrimitiveType.ANY;
                 if (typeName && typeName in PrimitiveType) {
                     typeIndex = PrimitiveType[typeName as keyof typeof PrimitiveType];
                 }
@@ -112,8 +128,15 @@ export class TypeChecker {
             case ts.SyntaxKind.ArrayType:
                 let arrayType = new ArrayType(typeNode);
                 return arrayType.shiftedTypeIndex;
+            case ts.SyntaxKind.ParenthesizedType:
+                let subType = (<ts.ParenthesizedTypeNode>typeNode).type
+                if (subType.kind == ts.SyntaxKind.UnionType) {
+                    let unionType = new UnionType(subType);
+                    return unionType.shiftedTypeIndex;
+                }
+                return PrimitiveType.ANY;
             default:
-                return undefined;
+                return PrimitiveType.ANY;
         }
     }
 
@@ -143,13 +166,16 @@ export class TypeChecker {
     // If newExpressionFlag is ture, the type has to be created no matter the export is needed or not;
     // while newExpressionFlag if false, the export has to be needed.
     public checkForTypeDecl(originalName: ts.Node, typeDeclNode: ts.Node, exportNeeded: boolean, newExpressionFlag: boolean): number {
+        if (!typeDeclNode) {
+            return PrimitiveType.ANY;
+        }
         switch (typeDeclNode.kind) {
             // Type found to be defined a classDeclaration or classExpression
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
                 let origTypeDeclNode = <ts.ClassDeclaration>ts.getOriginalNode(typeDeclNode);
                 let classTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(origTypeDeclNode);
-                if (classTypeIndex == -1) {
+                if (classTypeIndex == PrimitiveType.ANY) {
                     new ClassType(<ts.ClassDeclaration>origTypeDeclNode, newExpressionFlag, originalName);
                     if (newExpressionFlag) {
                         classTypeIndex = TypeRecorder.getInstance().tryGetVariable2Type(originalName);
@@ -176,16 +202,16 @@ export class TypeChecker {
                         return this.checkForTypeDecl(originalName, nextTypeDeclNode, exportNeeded, newExpressionFlag);
                     }
                 }
-                return 0;
+                return PrimitiveType.ANY;
             case ts.SyntaxKind.ImportSpecifier:
             case ts.SyntaxKind.ImportClause:
                 let ImportTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(typeDeclNode);
-                if (ImportTypeIndex != -1) {
+                if (ImportTypeIndex != PrimitiveType.ANY) {
                     TypeRecorder.getInstance().setVariable2Type(originalName, ImportTypeIndex, true);
                     return ImportTypeIndex;
                 }
                 // console.log("-> ERROR: missing imported type for: ", jshelpers.getTextOfIdentifierOrLiteral(originalName));
-                return 0;
+                return PrimitiveType.ANY;
             case ts.SyntaxKind.PropertyAccessExpression:
                 let propertyAccessExpression = <ts.PropertyAccessExpression>typeDeclNode;
                 let localName = jshelpers.getTextOfIdentifierOrLiteral(propertyAccessExpression.expression);
@@ -199,9 +225,9 @@ export class TypeChecker {
                     return shiftedTypeIndex;
                 }
                 // console.log("-> ERROR: missing imported type for: ", jshelpers.getTextOfIdentifierOrLiteral(originalName));
-                return 0;
+                return PrimitiveType.ANY;
         }
-        return 0;
+        return PrimitiveType.ANY;
     }
 
     public checkTypeForVariableDeclaration(node: ts.VariableDeclaration, exportNeeded: boolean) {
@@ -210,7 +236,7 @@ export class TypeChecker {
         let type = (<ts.VariableDeclaration>ts.getOriginalNode(node)).type;
         // first check if this is a primitive or union declaration
         let typeIndex = this.checkDeclarationType(type);
-        if (typeIndex) {
+        if (typeIndex != PrimitiveType.ANY) {
             let isUserDefinedType = typeIndex <= PrimitiveType._LENGTH ? false : true;
             TypeRecorder.getInstance().setVariable2Type(name, typeIndex, isUserDefinedType);
         } else if (initializer) {
@@ -236,6 +262,11 @@ export class TypeChecker {
                 decList.declarations.forEach(declaration => {
                     this.checkTypeForVariableDeclaration(declaration, exportNeeded);
                 });
+                break;
+            case ts.SyntaxKind.FunctionDeclaration:
+                let functionDeclNode = <ts.FunctionDeclaration>ts.getOriginalNode(node);
+                let functionName = functionDeclNode.name? functionDeclNode.name : undefined;
+                new FunctionType(functionDeclNode, functionName);
                 break;
             case ts.SyntaxKind.ClassDeclaration:
                 // Only create the type if it is exported. 

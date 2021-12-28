@@ -31,6 +31,7 @@ export class TypeRecorder {
     private userDefinedTypeSet: Set<number> = new Set<number>();;
     private typeSummary: TypeSummary = new TypeSummary();
     private arrayTypeMap: Map<number, number> = new Map<number, number>();
+    private unionTypeMap: Map<string, number> = new Map<string, number>();
     // ---> export/import
     // exportedType: exportedName -> typeIndex
     private exportedType: Map<string, number> = new Map<string, number>();
@@ -83,7 +84,7 @@ export class TypeRecorder {
         if (this.type2Index.has(typeNode)) {
             return this.type2Index.get(typeNode)!;
         } else {
-            return -1;
+            return PrimitiveType.ANY;
         }
     }
 
@@ -91,7 +92,7 @@ export class TypeRecorder {
         if (this.variable2Type.has(variableNode)) {
             return this.variable2Type.get(variableNode)!;
         } else {
-            return -1;
+            return PrimitiveType.ANY;
         }
     }
 
@@ -105,6 +106,18 @@ export class TypeRecorder {
 
     public getFromArrayTypeMap(contentTypeIndex: number) {
         return this.arrayTypeMap.get(contentTypeIndex);
+    }
+
+    public setUnionTypeMap(unionStr: string, unionTypeIndex: number) {
+        this.unionTypeMap.set(unionStr, unionTypeIndex)
+    }
+
+    public hasUnionTypeMapping(unionStr: string) {
+        return this.unionTypeMap.has(unionStr);
+    }
+
+    public getFromUnionTypeMap(unionStr: string) {
+        return this.unionTypeMap.get(unionStr);
     }
 
     // ---> exported/imported
@@ -161,9 +174,9 @@ export class TypeRecorder {
         // Imported type should already be stored in typeRecord by design
         let typeIndexForType = this.tryGetTypeIndex(typeNode);
         let typeIndexForVariable = this.tryGetVariable2Type(typeNode);
-        if (typeIndexForType != -1) {
+        if (typeIndexForType != PrimitiveType.ANY) {
             this.setExportedType(exportedName, typeIndexForType, true);
-        } else if (typeIndexForVariable != -1) {
+        } else if (typeIndexForVariable != PrimitiveType.ANY) {
             this.setExportedType(exportedName, typeIndexForVariable, true);
         } else {
             // not found in typeRecord. Need to create the type and
