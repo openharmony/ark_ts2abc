@@ -206,9 +206,9 @@ export class ClassType extends BaseType {
     heritages: Array<number> = new Array<number>();
     // fileds Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
     staticFields: Map<string, Array<number>> = new Map<string, Array<number>>();
-    staticMethods: Array<number> = new Array<number>();
+    staticMethods: Map<string, number> = new Map<string, number>();
     fields: Map<string, Array<number>> = new Map<string, Array<number>>();
-    methods: Array<number> = new Array<number>();
+    methods: Map<string, number> = new Map<string, number>();
     typeIndex: number;
 
     constructor(classNode: ts.ClassDeclaration | ts.ClassExpression, newExpressionFlag: boolean, variableNode?: ts.Node) {
@@ -333,9 +333,9 @@ export class ClassType extends BaseType {
         let typeIndex = this.tryGetTypeIndex(member);
         let funcModifier = funcType.getModifier();
         if (funcModifier) {
-            this.staticMethods.push(typeIndex!);
+            this.staticMethods.set(funcType.getFunctionName(), typeIndex!);
         } else {
-            this.methods.push(typeIndex!);
+            this.methods.set(funcType.getFunctionName(), typeIndex!);
         }
     }
 
@@ -396,11 +396,12 @@ export class ClassType extends BaseType {
     }
 
     private transferMethods2Literal(classTypeLiterals: Array<Literal>, isStatic: boolean) {
-        let transferredTarget: Array<number> = isStatic ? this.staticMethods : this.methods;
+        let transferredTarget: Map<string, number> = isStatic ? this.staticMethods : this.methods;
 
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.length));
-        transferredTarget.forEach(method => {
-            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, method));
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.size));
+        transferredTarget.forEach((typeInfo, name) => {
+            classTypeLiterals.push(new Literal(LiteralTag.STRING, name));
+            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo));
         });
     }
 }
@@ -431,7 +432,7 @@ export class ClassInstType extends BaseType {
 }
 
 export class FunctionType extends BaseType {
-    name: string | undefined = '';
+    name: string = '';
     accessFlag: number = 0; // 0 -> public -> 0, private -> 1, protected -> 2
     modifierStatic: number = 0; // 0 -> unstatic, 1 -> static
     parameters: Array<number> = new Array<number>();
@@ -463,6 +464,10 @@ export class FunctionType extends BaseType {
 
         // check typeRecorder
         // this.typeRecorder.getLog(funcNode, this.typeIndex);
+    }
+
+    public getFunctionName() {
+        return this.name;
     }
 
     public getTypeIndex() {
