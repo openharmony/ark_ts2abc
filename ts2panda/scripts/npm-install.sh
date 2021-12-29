@@ -21,7 +21,7 @@ nodejs_dir=$1
 
 cd ${ts2panda_dir}
 export PATH=${nodejs_dir}:$PATH
-npm config set registry http://mirrors.tools.huawei.com/npm/
+npm config set registry http://repo.huaweicloud.com/repository/npm/
 if [ "X${SKIP_SSL}" == "XYES" ];then
     npm config set strict-ssl false
 fi
