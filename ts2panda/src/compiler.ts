@@ -88,7 +88,7 @@ import {
     compileDefaultConstructor,
     compileDefaultInitClassMembers,
     compileReturnThis4Ctor,
-    isContainConstruct
+    extractCtorOfClass
 } from "./statement/classStatement";
 import { compileForOfStatement } from "./statement/forOfStatement";
 import { LabelTarget } from "./statement/labelTarget";
@@ -402,7 +402,7 @@ export class Compiler {
 
         if (ts.isConstructorDeclaration(decl)) {
             let classNode = <ts.ClassLikeDeclaration>decl.parent;
-            if (jshelpers.getClassExtendsHeritageElement(classNode) && !isContainConstruct(classNode)) {
+            if (jshelpers.getClassExtendsHeritageElement(classNode) && !extractCtorOfClass(classNode)) {
                 compileDefaultConstructor(this, decl);
                 return;
             }

@@ -60,7 +60,7 @@ export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDe
     let classBuffer = new LiteralBuffer();
     let propertyIndex = 0;
     let staticItemsNum = 0;
-    let hasConstructor = isContainConstruct(stmt);
+    let hasConstructor = extractCtorOfClass(stmt) == undefined ? false : true;
 
     for (; propertyIndex < properties.length; propertyIndex++) {
         let prop = properties[propertyIndex];
@@ -150,7 +150,6 @@ export function AddCtor2Class(recorder: Recorder, classNode: ts.ClassLikeDeclara
     ctorNode = ts.setTextRange(ctorNode, classNode);
 
     let parentScope = <LocalScope>recorder.getScopeOfNode(classNode);
-    recorder.compilerDriver.getFuncId(classNode);
     let funcScope = recorder.buildVariableScope(scope, ctorNode);
     funcScope.setParent(parentScope);
 
@@ -162,6 +161,8 @@ export function AddCtor2Class(recorder: Recorder, classNode: ts.ClassLikeDeclara
 
     recorder.recordFuncName(ctorNode);
     recorder.recordFunctionParameters(ctorNode);
+
+    recorder.setCtorOfClass(classNode, ctorNode);
 }
 
 export function compileDefaultConstructor(compiler: Compiler, ctrNode: ts.ConstructorDeclaration) {
@@ -227,13 +228,15 @@ function compileUnCompiledVariable(compiler: Compiler, prop: Property, classReg:
 
 function createClassLiteralBuf(compiler: Compiler, classBuffer: LiteralBuffer,
     stmt: ts.ClassLikeDeclaration, vregs: VReg[]) {
-    let pandaGen = compiler.getPandaGen();
     let classLiteralBuf = PandaGen.getLiteralArrayBuffer();
-    let buffIdx = classLiteralBuf.length;
-    let internalName = compiler.getCompilerDriver().getInternalNameForCtor(stmt);
     classLiteralBuf.push(classBuffer);
 
+    let ctorNode = compiler.getRecorder().getCtorOfClass(stmt);
+    let internalName = compiler.getCompilerDriver().getInternalNameForCtor(stmt, <ts.ConstructorDeclaration>ctorNode);
+
+    let pandaGen = compiler.getPandaGen();
     let parameterLength = getParameterLength4Ctor(stmt);
+    let buffIdx = classLiteralBuf.length;
     pandaGen.defineClassWithBuffer(stmt, internalName, buffIdx, parameterLength, vregs[0]);
     pandaGen.storeAccumulator(stmt, vregs[1]);
 }
@@ -420,16 +423,16 @@ function loadCtorObj(node: ts.CallExpression, compiler: Compiler) {
 
 }
 
-export function isContainConstruct(stmt: ts.ClassLikeDeclaration) {
+export function extractCtorOfClass(stmt: ts.ClassLikeDeclaration) {
     let members = stmt.members;
     for (let index = 0; index < members.length; index++) {
         let member = members[index];
         if (ts.isConstructorDeclaration(member)) {
-            return true
+            return member;
         }
     }
 
-    return false;
+    return undefined;
 }
 
 export function defineClassMember(

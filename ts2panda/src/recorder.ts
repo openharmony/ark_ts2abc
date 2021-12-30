@@ -41,7 +41,9 @@ import {
     VariableScope
 } from "./scope";
 import {
-    AddCtor2Class, getClassNameForConstructor, isContainConstruct
+    AddCtor2Class,
+    getClassNameForConstructor,
+    extractCtorOfClass
 } from "./statement/classStatement";
 import { checkSyntaxError } from "./syntaxChecker";
 import { isGlobalIdentifier } from "./syntaxCheckHelper";
@@ -59,7 +61,7 @@ export class Recorder {
     private hoistMap: Map<Scope, Decl[]> = new Map<Scope, Decl[]>();
     private parametersMap: Map<ts.FunctionLikeDeclaration, FunctionParameter[]> = new Map<ts.FunctionLikeDeclaration, FunctionParameter[]>();
     private funcNameMap: Map<string, number>;
-    private ClassGroupOfNoCtor: Array<ts.ClassLikeDeclaration> = new Array<ts.ClassLikeDeclaration>();
+    private class2Ctor: Map<ts.ClassLikeDeclaration, ts.ConstructorDeclaration> = new Map<ts.ClassLikeDeclaration, ts.ConstructorDeclaration>();
     private importStmts: Array<ModuleStmt> = [];
     private exportStmts: Array<ModuleStmt> = [];
     private defaultUsed: boolean = false;
@@ -88,8 +90,14 @@ export class Recorder {
         return this.node;
     }
 
-    getClassGroupOfNoCtor() {
-        return this.ClassGroupOfNoCtor;
+    getCtorOfClass(node: ts.ClassLikeDeclaration) {
+        return this.class2Ctor.get(node);
+    }
+
+    setCtorOfClass(node: ts.ClassLikeDeclaration, ctor: ts.ConstructorDeclaration) {
+        if (!this.class2Ctor.has(node)) {
+            this.class2Ctor.set(node, ctor);
+        }
     }
 
     private setParent(node: ts.Node) {
@@ -115,14 +123,12 @@ export class Recorder {
                 case ts.SyntaxKind.GetAccessor:
                 case ts.SyntaxKind.SetAccessor:
                 case ts.SyntaxKind.ArrowFunction: {
-                    this.compilerDriver.getFuncId(<ts.FunctionLikeDeclaration>childNode);
                     let functionScope = this.buildVariableScope(scope, <ts.FunctionLikeDeclaration>childNode);
                     this.recordFuncInfo(<ts.FunctionLikeDeclaration>childNode);
                     this.recordInfo(childNode, functionScope);
                     break;
                 }
                 case ts.SyntaxKind.FunctionDeclaration: {
-                    this.compilerDriver.getFuncId(<ts.FunctionDeclaration>childNode);
                     let functionScope = this.buildVariableScope(scope, <ts.FunctionLikeDeclaration>childNode);
                     this.recordFuncDecl(<ts.FunctionDeclaration>childNode, scope);
                     if (this.recordType) {
@@ -218,12 +224,15 @@ export class Recorder {
     private recordClassInfo(childNode: ts.ClassLikeDeclaration, scope: Scope) {
         let localScope = new LocalScope(scope);
         this.setScopeMap(childNode, localScope);
-        if (!isContainConstruct(childNode)) {
+        let ctor = extractCtorOfClass(childNode);
+        if (!ctor) {
             AddCtor2Class(this, childNode, localScope);
+        } else {
+            this.setCtorOfClass(childNode, ctor);
         }
         if (childNode.name) {
             let name = jshelpers.getTextOfIdentifierOrLiteral(childNode.name);
-            let calssDecl = new ClassDecl(name, childNode, this.compilerDriver.getFuncId(childNode));
+            let calssDecl = new ClassDecl(name, childNode);
             scope.setDecls(calssDecl);
         }
         this.recordInfo(childNode, localScope);
@@ -421,7 +430,7 @@ export class Recorder {
             return;
         }
         let funcName = jshelpers.getTextOfIdentifierOrLiteral(funcId);
-        let funcDecl = new FuncDecl(funcName, node, this.compilerDriver.getFuncId(node));
+        let funcDecl = new FuncDecl(funcName, node);
         scope.setDecls(funcDecl);
         let hoistScope = scope;
         if (scope instanceof GlobalScope || scope instanceof ModuleScope) {

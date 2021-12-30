@@ -55,18 +55,14 @@ export class ConstDecl extends Decl {
 }
 
 export class FuncDecl extends Decl {
-    readonly index: number;
-    constructor(funcName: string, node: ts.Node, index: number) {
+    constructor(funcName: string, node: ts.Node) {
         super(funcName, node);
-        this.index = index;
     }
 }
 
 export class ClassDecl extends Decl {
-    readonly index: number;
-    constructor(className: string, node: ts.Node, index: number) {
+    constructor(className: string, node: ts.Node) {
         super(className, node);
-        this.index = index;
     }
 }
 

@@ -339,7 +339,7 @@ export class CompilerDriver {
             name = "func_main_0";
         } else if (ts.isConstructorDeclaration(node)) {
             let classNode = node.parent;
-            name = this.getInternalNameForCtor(classNode);
+            name = this.getInternalNameForCtor(classNode, node);
         } else {
             let funcNode = <ts.FunctionLikeDeclaration>node;
             name = (<FunctionScope>recorder.getScopeOfNode(funcNode)).getFuncName();
@@ -368,11 +368,11 @@ export class CompilerDriver {
         return name;
     }
 
-    getInternalNameForCtor(node: ts.ClassLikeDeclaration) {
+    getInternalNameForCtor(node: ts.ClassLikeDeclaration, ctor: ts.ConstructorDeclaration) {
         let name = getClassNameForConstructor(node);
-        name = `#${this.getFuncId(node)}#${name}`
+        name = `#${this.getFuncId(ctor)}#${name}`
         if (name.lastIndexOf(".") != -1) {
-            name = `#${this.getFuncId(node)}#`
+            name = `#${this.getFuncId(ctor)}#`
         }
         return name;
     }
