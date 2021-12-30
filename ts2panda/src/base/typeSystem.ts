@@ -126,7 +126,7 @@ export abstract class BaseType {
     }
 
     protected getTypeIndexForDeclWithType(
-        node: ts.FunctionLikeDeclaration | ts.ParameterDeclaration | ts.PropertyDeclaration, variableNode?: ts.Node): number {
+        node: ts.FunctionLikeDeclaration | ts.ParameterDeclaration | ts.PropertyDeclaration | ts.PropertySignature | ts.MethodSignature, variableNode?: ts.Node): number {
         if (node.type) {
             // check for newExpression 
             let newExpressionFlag = false;
@@ -439,7 +439,7 @@ export class FunctionType extends BaseType {
     returnType: number = 0;
     typeIndex: number;
 
-    constructor(funcNode: ts.FunctionLikeDeclaration, variableNode?: ts.Node) {
+    constructor(funcNode: ts.FunctionLikeDeclaration | ts.MethodSignature, variableNode?: ts.Node) {
         super();
         this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
         let shiftedIndex = this.typeIndex + PrimitiveType._LENGTH;
@@ -474,7 +474,7 @@ export class FunctionType extends BaseType {
         return this.typeIndex;
     }
 
-    private fillInModifiers(node: ts.FunctionLikeDeclaration) {
+    private fillInModifiers(node: ts.FunctionLikeDeclaration | ts.MethodSignature) {
         if (node.modifiers) {
             for (let modifier of node.modifiers) {
                 switch (modifier.kind) {
@@ -494,7 +494,7 @@ export class FunctionType extends BaseType {
         }
     }
 
-    private fillInParameters(node: ts.FunctionLikeDeclaration) {
+    private fillInParameters(node: ts.FunctionLikeDeclaration | ts.MethodSignature) {
         if (node.parameters) {
             for (let parameter of node.parameters) {
                 let variableNode = parameter.name;
@@ -504,7 +504,7 @@ export class FunctionType extends BaseType {
         }
     }
 
-    private fillInReturn(node: ts.FunctionLikeDeclaration) {
+    private fillInReturn(node: ts.FunctionLikeDeclaration | ts.MethodSignature) {
         let typeIndex = this.getTypeIndexForDeclWithType(node);
         this.returnType = typeIndex;
     }
@@ -687,5 +687,161 @@ export class ObjectLiteralType extends BaseType {
         let objTypeBuf = new LiteralBuffer();
 
         return objTypeBuf;
+    }
+}
+
+export class InterfaceType extends BaseType {
+    heritages: Array<number> = new Array<number>();
+    // fileds Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
+    fields: Map<string, Array<number>> = new Map<string, Array<number>>();
+    methods: Array<number> = new Array<number>();
+    typeIndex: number;
+
+    constructor(interfaceNode: ts.InterfaceDeclaration, variableNode?: ts.Node) {
+        super();
+        this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
+        let shiftedIndex = this.typeIndex + PrimitiveType._LENGTH;
+        // record type before its initialization, so its index can be recorded
+        // in case there's recursive reference of this type
+        this.addCurrentType(interfaceNode, shiftedIndex);
+
+        this.fillInHeritages(interfaceNode);
+        this.fillInFieldsAndMethods(interfaceNode);
+
+        // initialization finished, add variable to type if variable is given
+        if (variableNode) {
+            // if the variable is a instance, create another classInstType instead of current classType itself
+            this.setVariable2Type(variableNode, shiftedIndex, true);
+        }
+        this.setTypeArrayBuffer(this, this.typeIndex);
+    }
+
+    public getTypeIndex() {
+        return this.typeIndex;
+    }
+
+    private fillInHeritages(node: ts.InterfaceDeclaration) {
+        if (node.heritageClauses) {
+            for (let heritage of node.heritageClauses) {
+                for (let heritageType of heritage.types) {
+                    let heritageIdentifier = <ts.Identifier>heritageType.expression;
+                    let heritageTypeIndex = this.getOrCreateUserDefinedType(heritageIdentifier, false);
+                    this.heritages.push(heritageTypeIndex);
+                }
+            }
+        }
+    }
+
+    private fillInFields(member: ts.PropertySignature) {
+        // collect modifier info
+        let fieldName: string = "";
+        switch (member.name.kind) {
+            case ts.SyntaxKind.Identifier:
+            case ts.SyntaxKind.StringLiteral:
+            case ts.SyntaxKind.NumericLiteral:
+                fieldName = jshelpers.getTextOfIdentifierOrLiteral(member.name);
+                break;
+            case ts.SyntaxKind.ComputedPropertyName:
+                fieldName = "#computed";
+                break;
+            default:
+                throw new Error("Invalid proerty name");
+        }
+
+        // Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
+        let fieldInfo = Array<number>(PrimitiveType.ANY, AccessFlag.PUBLIC, ModifierReadonly.NONREADONLY);
+        if (member.modifiers) {
+            for (let modifier of member.modifiers) {
+                switch (modifier.kind) {
+                    case ts.SyntaxKind.PrivateKeyword: {
+                        fieldInfo[1] = AccessFlag.PRIVATE;
+                        break;
+                    }
+                    case ts.SyntaxKind.ProtectedKeyword: {
+                        fieldInfo[1] = AccessFlag.PROTECTED;
+                        break;
+                    }
+                    case ts.SyntaxKind.ReadonlyKeyword: {
+                        fieldInfo[2] = ModifierReadonly.READONLY;
+                        break;
+                    }
+                }
+            }
+        }
+        // collect type info
+        let variableNode = member.name ? member.name : undefined;
+        fieldInfo[0] = this.getTypeIndexForDeclWithType(member, variableNode);
+
+        this.fields.set(fieldName, fieldInfo);
+    }
+
+    private fillInMethods(member: ts.MethodSignature) {
+        /**
+         * a method like declaration in a new class must be a new type,
+         * create this type and add it into typeRecorder
+         */
+        let variableNode = member.name ? member.name : undefined;
+        let funcType = new FunctionType(<ts.MethodSignature>member, variableNode);
+
+        // Then, get the typeIndex and fill in the methods array
+        let typeIndex = this.tryGetTypeIndex(member);
+        this.methods.push(typeIndex!);
+    }
+
+    private fillInFieldsAndMethods(node: ts.InterfaceDeclaration) {
+        if (node.members) {
+            for (let member of node.members) {
+                switch (member.kind) {
+                    case ts.SyntaxKind.MethodSignature:{
+                        this.fillInMethods(<ts.MethodSignature>member);
+                        break;
+                    }
+                    case ts.SyntaxKind.PropertySignature: {
+                        this.fillInFields(<ts.PropertySignature>member);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    transfer2LiteralBuffer() {
+        let classTypeBuf = new LiteralBuffer();
+        let classTypeLiterals: Array<Literal> = new Array<Literal>();
+        // the first element is to determine the L2 type
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.CLASS));
+
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.heritages.length));
+        this.heritages.forEach(heritage => {
+            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, heritage));
+        });
+
+        // record fields and methods
+        this.transferFields2Literal(classTypeLiterals);
+        this.transferMethods2Literal(classTypeLiterals);
+
+        classTypeBuf.addLiterals(...classTypeLiterals);
+        return classTypeBuf;
+    }
+
+    private transferFields2Literal(classTypeLiterals: Array<Literal>) {
+        let transferredTarget: Map<string, Array<number>> = this.fields;
+
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.size));
+        transferredTarget.forEach((typeInfo, name) => {
+            classTypeLiterals.push(new Literal(LiteralTag.STRING, name));
+            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[0])); // typeIndex
+            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[1])); // accessFlag
+            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[2])); // readonly
+        });
+    }
+
+    private transferMethods2Literal(classTypeLiterals: Array<Literal>) {
+        let transferredTarget: Array<number> = this.methods;
+
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.length));
+        transferredTarget.forEach(method => {
+            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, method));
+        });
     }
 }

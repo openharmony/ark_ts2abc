@@ -712,6 +712,57 @@ static void ParseFunctionExportedType(const Json::Value &function, panda::pandas
     }
 }
 
+static void ParseFunctionDeclaredType(const Json::Value &function, panda::pandasm::Function &pandaFunc)
+{
+    std::string funcName = "";
+    if (function.isMember("name") && function["name"].isString()) {
+        funcName = function["name"].asString();
+        if (funcName != "func_main_0") {
+            return;
+        }
+    }
+
+    if (function.isMember("declaredSymbol2Types") && function["declaredSymbol2Types"].isArray()) {
+        auto declaredTypes = function["declaredSymbol2Types"];
+        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        std::vector<panda::pandasm::ScalarValue> symbolElements;
+        std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
+        for (Json::ArrayIndex i = 0; i < declaredTypes.size(); i++) {
+            auto declaredType = declaredTypes[i];
+            if (!declaredType.isObject()) {
+                continue;
+            }
+
+            std::string declaredSymbol = "";
+            if (declaredType.isMember("symbol") && declaredType["symbol"].isString()) {
+                declaredSymbol = declaredType["symbol"].asString();
+            }
+
+            uint32_t typeIndex = 0;
+            if (declaredType.isMember("type") && declaredType["type"].isInt()) {
+                typeIndex = declaredType["type"].asUInt();
+            }
+
+            panda::pandasm::ScalarValue symbol(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(declaredSymbol));
+            symbolElements.emplace_back(std::move(symbol));
+            panda::pandasm::ScalarValue tIndex(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            symbolTypeElements.emplace_back(std::move(tIndex));
+        }
+
+        std::string symbolAnnotationName = "declaredSymbols";
+        panda::pandasm::AnnotationElement declaredSymbolsElement(symbolAnnotationName,
+                                                               std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::STRING, symbolElements)));
+        funcAnnotation.AddElement(std::move(declaredSymbolsElement));
+
+        std::string symbolTypeAnnotationName = "declaredSymbolTypes";
+        panda::pandasm::AnnotationElement declaredSymbolTypesElement(symbolTypeAnnotationName,
+                                                               std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::U32, symbolTypeElements)));
+        funcAnnotation.AddElement(std::move(declaredSymbolTypesElement));
+
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(std::move(funcAnnotation));
+    }
+}
+
 static panda::pandasm::Function ParseFunction(const Json::Value &function)
 {
     auto pandaFunc = GetFunctionDefintion(function);
@@ -725,6 +776,7 @@ static panda::pandasm::Function ParseFunction(const Json::Value &function)
     ParseFunctionCallType(function, pandaFunc);
     ParseFunctionTypeInfo(function, pandaFunc);
     ParseFunctionExportedType(function, pandaFunc);
+    ParseFunctionDeclaredType(function, pandaFunc);
 
     return pandaFunc;
 }
@@ -836,6 +888,7 @@ static void ReplaceAllDistinct(std::string &str, const std::string &oldValue, co
     }
 }
 
+ .02
 static void ParseOptions(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
     GenerateESCallTypeAnnotationRecord(prog);

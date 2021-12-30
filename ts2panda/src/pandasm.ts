@@ -75,6 +75,7 @@ export class Function {
     public callType: number;
     public typeInfo: Array<TypeOfVreg>;
     public exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined;
+    public declaredSymbol2Types: Array<DeclaredSymbol2Type> | undefined;
 
     constructor(
         name: string,
@@ -87,7 +88,8 @@ export class Function {
         sourceCode: string | undefined = undefined,
         callType: number = 0,
         typeInfo: Array<TypeOfVreg>,
-        exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined = undefined
+        exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined = undefined,
+        declaredSymbol2Types: Array<DeclaredSymbol2Type> | undefined = undefined
     ) {
         this.name = name;
         this.signature = signature;
@@ -102,6 +104,7 @@ export class Function {
         this.callType = callType;
         this.typeInfo = typeInfo;
         this.exportedSymbol2Types = exportedSymbol2Types;
+        this.declaredSymbol2Types = declaredSymbol2Types;
     }
 }
 
@@ -186,6 +189,16 @@ export class TypeOfVreg {
 }
 
 export class ExportedSymbol2Type {
+    private symbol: string;
+    private type: number;
+
+    constructor(symbol: string, type: number) {
+        this.symbol = symbol;
+        this.type = type;
+    }
+}
+
+export class DeclaredSymbol2Type {
     private symbol: string;
     private type: number;
 

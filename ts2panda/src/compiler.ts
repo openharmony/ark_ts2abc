@@ -497,6 +497,7 @@ export class Compiler {
                 break;
             case ts.SyntaxKind.ExportDeclaration:
             case ts.SyntaxKind.NotEmittedStatement:
+            case ts.SyntaxKind.InterfaceDeclaration:
                 break;
             default:
                 throw new Error("Statement " + this.getNodeName(stmt) + " is unimplemented");

@@ -26,6 +26,7 @@ import { LOGD } from "./log";
 import { PandaGen } from "./pandagen";
 import {
     CatchTable,
+    DeclaredSymbol2Type,
     ExportedSymbol2Type,
     Function,
     Ins,
@@ -207,6 +208,15 @@ export class Ts2Panda {
             })
         }
 
+        let declareddTypes = PandaGen.getExportedTypes();
+        let declaredSymbol2Types = declareddTypes.size == 0 ? undefined : new Array<DeclaredSymbol2Type>();
+        if (funcName == "func_main_0") {
+            declareddTypes.forEach((type: number, symbol: string) => {
+                let declaredSymbol2Type = new DeclaredSymbol2Type(symbol, type);
+                declaredSymbol2Types!.push(declaredSymbol2Type);
+            })
+        }
+
         let variables, sourceCode;
         if (CmdOptions.isDebugMode()) {
             variables = pg.getVariableDebugInfoArray();
@@ -227,7 +237,8 @@ export class Ts2Panda {
             sourceCode,
             callType,
             typeInfo,
-            exportedSymbol2Types
+            exportedSymbol2Types,
+            declaredSymbol2Types
         );
         let catchTables = generateCatchTables(pg.getCatchMap());
         catchTables.forEach((catchTable) => {

@@ -167,6 +167,12 @@ export class Recorder {
                     }
                     break;
                 }
+                case ts.SyntaxKind.InterfaceDeclaration: {
+                    if (this.recordType) {
+                        TypeChecker.getInstance().formatNodeType(childNode);
+                    }
+                    break;
+                }
                 case ts.SyntaxKind.Identifier: {
                     this.recordVariableDecl(<ts.Identifier>childNode, scope);
                     break;

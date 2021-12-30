@@ -22,7 +22,7 @@ import { Pass } from "./pass";
 import { CacheExpander } from "./pass/cacheExpander";
 import { ICPass } from "./pass/ICPass";
 import { RegAlloc } from "./regAllocator";
-import { setGlobalStrict } from "./strictMode";
+import { setGlobalStrict, setGlobalDeclare, isGlobalDeclare } from "./strictMode";
 import { TypeChecker } from "./typeChecker";
 import { TypeRecorder } from "./typeRecorder";
 import jshelpers = require("./jshelpers");
@@ -32,6 +32,48 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
     let program = ts.createProgram(fileNames, options);
     let typeChecker = TypeChecker.getInstance();
     typeChecker.setTypeChecker(program.getTypeChecker());
+
+    for (let sourceFile of program.getSourceFiles()) {
+        if (sourceFile.isDeclarationFile && !program.isSourceFileDefaultLibrary(sourceFile)) {
+            setGlobalDeclare(checkIsGlobalDeclaration(sourceFile));
+            generateDTs(sourceFile, options);
+        }
+    }
+
+    function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
+        for (let statement of sourceFile.statements) {
+            if (statement.modifiers) {
+                for (let modifier of statement.modifiers) {
+                    if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+                        return false;
+                    }
+                }
+            } else if (statement.kind === ts.SyntaxKind.ExportAssignment) {
+                return false;
+            } else if (statement.kind === ts.SyntaxKind.ImportKeyword || statement.kind === ts.SyntaxKind.ImportDeclaration) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function generateDTs(node: ts.SourceFile, options: ts.CompilerOptions) {
+        let outputBinName = getOutputBinName(node);
+        let compilerDriver = new CompilerDriver(outputBinName);
+        setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
+        if (CmdOptions.isVariantBytecode()) {
+            LOGD("variant bytecode dump");
+            let passes: Pass[] = [
+                new CacheExpander(),
+                new ICPass(),
+                new RegAlloc()
+            ];
+            compilerDriver.setCustomPasses(passes);
+        }
+        compilerDriver.compile(node);
+        compilerDriver.showStatistics();
+    }
+
     let emitResult = program.emit(
         undefined,
         undefined,

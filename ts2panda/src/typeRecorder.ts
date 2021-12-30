@@ -35,6 +35,8 @@ export class TypeRecorder {
     // ---> export/import
     // exportedType: exportedName -> typeIndex
     private exportedType: Map<string, number> = new Map<string, number>();
+    // declaredType: declaredName -> typeIndex
+    private declaredType: Map<string, number> = new Map<string, number>();
     // namespace mapping: namepace -> filepath (import * as sth from "...")
     // later in PropertyAccessExpression we'll need this to map the symbol to filepath
     private namespaceMap: Map<string, string> = new Map<string, string>();
@@ -203,6 +205,13 @@ export class TypeRecorder {
         this.exportedType.set(exportedName, typeIndex);
     }
 
+    public setDeclaredType(exportedName: string, typeIndex: number, shifted: boolean) {
+        if (!shifted) {
+            typeIndex = this.shiftType(typeIndex);
+        }
+        this.declaredType.set(exportedName, typeIndex);
+    }
+
     public addAnonymousReExport(redirectName: string) {
         this.anonymousReExport.push(redirectName);
     }
@@ -234,6 +243,10 @@ export class TypeRecorder {
 
     public getExportedType() {
         return this.exportedType;
+    }
+
+    public getDeclaredType() {
+        return this.declaredType;
     }
 
     public getAnonymousReExport() {

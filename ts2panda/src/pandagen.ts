@@ -230,6 +230,14 @@ export class PandaGen {
         }
     }
 
+    static getDeclaredTypes() {
+        if (TypeRecorder.getInstance()) {
+            return TypeRecorder.getInstance().getDeclaredType();
+        } else {
+            return new Map<string, number>();
+        }
+    }
+
     public getSourceCodeDebugInfo() {
         return this.sourceCodeDebugInfo;
     }

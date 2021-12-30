@@ -5,7 +5,8 @@ import {
     ExternalType,
     UnionType,
     ArrayType,
-    FunctionType
+    FunctionType,
+    InterfaceType
 } from "./base/typeSystem";
 import { ModuleStmt } from "./modules";
 import { TypeRecorder } from "./typeRecorder";
@@ -23,6 +24,7 @@ export enum PrimitiveFlags {
     UNDEFINED = 32768,
     _LENGTH = 50
 }
+import { isGlobalDeclare } from "./strictMode";
 
 export class TypeChecker {
     private static instance: TypeChecker;
@@ -272,15 +274,34 @@ export class TypeChecker {
                 // Only create the type if it is exported. 
                 // Otherwise, waite until it gets instantiated
                 let classDeclNode = <ts.ClassDeclaration>ts.getOriginalNode(node);
-                if (this.checkExportKeyword(node)) {
+                if (this.checkExportKeyword(node) || this.checkDeclareKeyword(node)) {
                     let classType = new ClassType(classDeclNode, false);
                     let typeIndex = classType.getTypeIndex();
                     let className = classDeclNode.name;
                     let exportedName = "default";
                     if (className) {
                         exportedName = jshelpers.getTextOfIdentifierOrLiteral(className);
+                    } else {
+                        LOGD("ClassName NOT FOUND for:" + node.getFullText());
                     }
-                    TypeRecorder.getInstance().setExportedType(exportedName, typeIndex, false);
+                    if (this.checkExportKeyword(node)) {
+                        TypeRecorder.getInstance().setExportedType(exportedName, typeIndex, false);
+                    } else if (this.checkDeclareKeyword(node) && isGlobalDeclare()){
+                        TypeRecorder.getInstance().setDeclaredType(exportedName, typeIndex, false);
+                    }
+                }
+                break;
+            case ts.SyntaxKind.InterfaceDeclaration:
+                if (isGlobalDeclare()) {
+                    let interfaceDeclNode : ts.InterfaceDeclaration = <ts.InterfaceDeclaration>ts.getOriginalNode(node);
+                    console.log(interfaceDeclNode);
+                    let interfaceType = new InterfaceType(interfaceDeclNode);
+                    let interfaceName = interfaceDeclNode.name;
+                    if (interfaceName) {
+                        TypeRecorder.getInstance().setDeclaredType(jshelpers.getTextOfIdentifierOrLiteral(interfaceName), interfaceType.getTypeIndex(), false);
+                    } else {
+                        LOGD("InterfaceName NOT FOUND for:" + node.getFullText());
+                    }
                 }
                 break;
             case ts.SyntaxKind.ExportDeclaration:
@@ -304,4 +325,14 @@ export class TypeChecker {
         }
     }
 
+    public checkDeclareKeyword(node: ts.Node): boolean {
+        if (node.modifiers) {
+            for (let modifier of node.modifiers) {
+                if (modifier.kind === ts.SyntaxKind.DeclareKeyword) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
