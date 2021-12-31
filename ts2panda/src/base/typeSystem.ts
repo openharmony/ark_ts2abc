@@ -35,18 +35,19 @@ export enum PrimitiveType {
     SYMBOL,
     NULL,
     UNDEFINED,
+    INT,
     _LENGTH = 50
 }
 
 export enum L2Type {
+    _COUNTER,
     CLASS,
     CLASSINST,
     FUNCTION,
     UNION,
     ARRAY,
     OBJECT, // object literal
-    EXTERNAL,
-    _COUNTER
+    EXTERNAL
 }
 
 export enum ModifierAbstract {
@@ -203,7 +204,8 @@ export class TypeSummary extends BaseType {
 
 export class ClassType extends BaseType {
     modifier: number = 0; // 0 -> unabstract, 1 -> abstract;
-    heritages: Array<number> = new Array<number>();
+    extendsHeritage: number = -1;
+    implementsHeritages: Array<number> = new Array<number>();
     // fileds Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
     staticFields: Map<string, Array<number>> = new Map<string, Array<number>>();
     staticMethods: Map<string, number> = new Map<string, number>();
@@ -260,10 +262,15 @@ export class ClassType extends BaseType {
     private fillInHeritages(node: ts.ClassDeclaration | ts.ClassExpression) {
         if (node.heritageClauses) {
             for (let heritage of node.heritageClauses) {
+                let heritageFullName = heritage.getText();
                 for (let heritageType of heritage.types) {
                     let heritageIdentifier = <ts.Identifier>heritageType.expression;
                     let heritageTypeIndex = this.getOrCreateUserDefinedType(heritageIdentifier, false);
-                    this.heritages.push(heritageTypeIndex);
+                    if (heritageFullName.startsWith("extends ")) {
+                        this.extendsHeritage = heritageTypeIndex;
+                    } else if (heritageFullName.startsWith("implements ")) {
+                        this.implementsHeritages.push(heritageTypeIndex);
+                    }
                 }
             }
         }
@@ -366,18 +373,19 @@ export class ClassType extends BaseType {
         classTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.CLASS));
         classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.modifier));
 
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.heritages.length));
-        this.heritages.forEach(heritage => {
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.extendsHeritage));
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.implementsHeritages.length));
+        this.implementsHeritages.forEach(heritage => {
             classTypeLiterals.push(new Literal(LiteralTag.INTEGER, heritage));
         });
-
-        // record static methods and fields;
-        this.transferFields2Literal(classTypeLiterals, true);
-        this.transferMethods2Literal(classTypeLiterals, true);
 
         // record unstatic fields and methods
         this.transferFields2Literal(classTypeLiterals, false);
         this.transferMethods2Literal(classTypeLiterals, false);
+
+        // record static methods and fields;
+        this.transferFields2Literal(classTypeLiterals, true);
+        this.transferMethods2Literal(classTypeLiterals, true);
 
         classTypeBuf.addLiterals(...classTypeLiterals);
         return classTypeBuf;
