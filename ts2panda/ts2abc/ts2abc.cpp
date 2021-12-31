@@ -888,7 +888,6 @@ static void ReplaceAllDistinct(std::string &str, const std::string &oldValue, co
     }
 }
 
- .02
 static void ParseOptions(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
     GenerateESCallTypeAnnotationRecord(prog);
