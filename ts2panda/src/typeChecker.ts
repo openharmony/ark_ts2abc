@@ -6,7 +6,8 @@ import {
     UnionType,
     ArrayType,
     FunctionType,
-    InterfaceType
+    InterfaceType,
+    ObjectType
 } from "./base/typeSystem";
 import { ModuleStmt } from "./modules";
 import { TypeRecorder } from "./typeRecorder";
@@ -91,7 +92,10 @@ export class TypeChecker {
         return typeIndex;
     }
 
-    public getOrCreateRecordForTypeNode(typeNode: ts.TypeNode) {
+    public getOrCreateRecordForTypeNode(typeNode: ts.TypeNode | undefined) {
+        if (!typeNode) {
+            return PrimitiveType.ANY;
+        }
         let typeIndex = PrimitiveType.ANY;
         typeIndex = this.checkDeclarationType(typeNode);
         if (typeIndex == PrimitiveType.ANY && typeNode.kind == ts.SyntaxKind.TypeReference) {
@@ -137,6 +141,9 @@ export class TypeChecker {
                     return unionType.shiftedTypeIndex;
                 }
                 return PrimitiveType.ANY;
+            case ts.SyntaxKind.TypeLiteral:
+                let objectType = new ObjectType(<ts.TypeLiteralNode>typeNode);
+                return objectType.shiftedTypeIndex;
             default:
                 return PrimitiveType.ANY;
         }

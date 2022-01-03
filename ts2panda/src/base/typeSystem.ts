@@ -642,24 +642,6 @@ export class ArrayType extends BaseType {
         }
     }
 
-    getReferencedType(typeNode: ts.Node) {
-        let elementNode = (<ts.ArrayTypeNode><any>typeNode).elementType;
-        let typeIndex = this.typeChecker.checkDeclarationType(elementNode);
-        if (typeIndex) {
-            return typeIndex;
-        } else if (elementNode.kind == ts.SyntaxKind.TypeReference) {
-            let typeName = elementNode.getChildAt(0);
-            let typeDecl = this.typeChecker.getTypeDeclForInitializer(typeName, false);
-            if (typeDecl) {
-                typeIndex = this.typeChecker.checkForTypeDecl(typeName, typeDecl, false, true);
-            } else {
-                typeIndex = 0;
-            }
-            return typeIndex;
-        }
-        return 0;
-    }
-
     hasArrayTypeMapping(referedTypeIndex: number) {
         return this.typeRecorder.hasArrayTypeMapping(referedTypeIndex);
     }
@@ -673,28 +655,47 @@ export class ArrayType extends BaseType {
     }
 
     transfer2LiteralBuffer(): LiteralBuffer {
-        let classInstBuf = new LiteralBuffer();
-        let classInstLiterals: Array<Literal> = new Array<Literal>();
-        classInstLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.ARRAY));
-        classInstLiterals.push(new Literal(LiteralTag.INTEGER, this.referedTypeIndex));
-        classInstBuf.addLiterals(...classInstLiterals);
-        return classInstBuf;
+        let arrayBuf = new LiteralBuffer();
+        let arrayLiterals: Array<Literal> = new Array<Literal>();
+        arrayLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.ARRAY));
+        arrayLiterals.push(new Literal(LiteralTag.INTEGER, this.referedTypeIndex));
+        arrayBuf.addLiterals(...arrayLiterals);
+        return arrayBuf;
     }
 }
 
-export class ObjectLiteralType extends BaseType {
+export class ObjectType extends BaseType {
     private properties: Map<string, number> = new Map<string, number>();
-    private methods: Array<number> = new Array<number>();
+    typeIndex: number = PrimitiveType.ANY;
+    shiftedTypeIndex: number = PrimitiveType.ANY;
 
-    constructor(obj: ts.ObjectLiteralExpression) {
+    constructor(objNode: ts.TypeLiteralNode) {
         super();
+        this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
+        this.fillInMembers(objNode);
+        this.setTypeArrayBuffer(this, this.typeIndex);
+    }
 
-        // TODO extract object info here
+    fillInMembers(objNode: ts.TypeLiteralNode) {
+        for (let member of objNode.members) {
+            let propertySig = <ts.PropertySignature>member;
+            let name = member.name? member.name.getText() : "#undefined";
+            let typeIndex = this.typeChecker.getOrCreateRecordForTypeNode(propertySig.type);
+            this.properties.set(name, typeIndex);
+        }
     }
 
     transfer2LiteralBuffer(): LiteralBuffer {
         let objTypeBuf = new LiteralBuffer();
-
+        let objLiterals: Array<Literal> = new Array<Literal>();
+        objLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.OBJECT));
+        objLiterals.push(new Literal(LiteralTag.INTEGER, this.properties.size));
+        this.properties.forEach((typeIndex, name) => {
+            objLiterals.push(new Literal(LiteralTag.STRING, name));
+            objLiterals.push(new Literal(LiteralTag.INTEGER, typeIndex));
+        });
+        objTypeBuf.addLiterals(...objLiterals);
         return objTypeBuf;
     }
 }
