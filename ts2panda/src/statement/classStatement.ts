@@ -236,7 +236,7 @@ function createClassLiteralBuf(compiler: Compiler, classBuffer: LiteralBuffer,
 
     let pandaGen = compiler.getPandaGen();
     let parameterLength = getParameterLength4Ctor(stmt);
-    let buffIdx = classLiteralBuf.length;
+    let buffIdx = classLiteralBuf.length - 1;
     pandaGen.defineClassWithBuffer(stmt, internalName, buffIdx, parameterLength, vregs[0]);
     pandaGen.storeAccumulator(stmt, vregs[1]);
 }
