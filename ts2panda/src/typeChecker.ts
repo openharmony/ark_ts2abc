@@ -294,7 +294,6 @@ export class TypeChecker {
             case ts.SyntaxKind.InterfaceDeclaration:
                 if (isGlobalDeclare()) {
                     let interfaceDeclNode : ts.InterfaceDeclaration = <ts.InterfaceDeclaration>ts.getOriginalNode(node);
-                    console.log(interfaceDeclNode);
                     let interfaceType = new InterfaceType(interfaceDeclNode);
                     let interfaceName = interfaceDeclNode.name;
                     if (interfaceName) {

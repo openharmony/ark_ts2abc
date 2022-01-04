@@ -47,7 +47,8 @@ export enum L2Type {
     UNION,
     ARRAY,
     OBJECT, // object literal
-    EXTERNAL
+    EXTERNAL,
+    INTERFACE
 }
 
 export enum ModifierAbstract {
@@ -817,7 +818,7 @@ export class InterfaceType extends BaseType {
         let classTypeBuf = new LiteralBuffer();
         let classTypeLiterals: Array<Literal> = new Array<Literal>();
         // the first element is to determine the L2 type
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.CLASS));
+        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.INTERFACE));
 
         classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.heritages.length));
         this.heritages.forEach(heritage => {

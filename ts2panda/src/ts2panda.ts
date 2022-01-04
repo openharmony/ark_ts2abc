@@ -208,7 +208,7 @@ export class Ts2Panda {
             })
         }
 
-        let declareddTypes = PandaGen.getExportedTypes();
+        let declareddTypes = PandaGen.getDeclaredTypes();
         let declaredSymbol2Types = declareddTypes.size == 0 ? undefined : new Array<DeclaredSymbol2Type>();
         if (funcName == "func_main_0") {
             declareddTypes.forEach((type: number, symbol: string) => {
