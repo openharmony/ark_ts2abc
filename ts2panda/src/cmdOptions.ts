@@ -182,7 +182,7 @@ export class CmdOptions {
         if (!this.options) {
             return false;
         }
-        return this.options["record-type"];
+        return !this.options["record-type"];
     }
 
     static parseUserCmd(args: string[]): ts.ParsedCommandLine | undefined {

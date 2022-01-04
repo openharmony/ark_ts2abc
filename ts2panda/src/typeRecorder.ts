@@ -280,20 +280,20 @@ export class TypeRecorder {
         // console.log(jshelpers.getTextOfNode(node));
         // console.log("=========== currIndex ===========: ", currIndex);
         // console.log(PandaGen.getLiteralArrayBuffer()[currIndex]);
-        console.log("==============================");
-        console.log("type2Index: ");
-        console.log(this.printNodeMap(this.getType2Index()));
-        console.log("variable2Type: ");
-        console.log(this.printNodeMap(this.getVariable2Type()));
-        console.log("getTypeSet: ");
-        console.log(this.getTypeSet());
-        console.log("==============================");
-        console.log("exportedType:");
-        console.log(this.printExportMap(this.getExportedType()));
-        console.log("AnoymousRedirect:");
-        console.log(this.getAnonymousReExport());
-        console.log("namespace Map:");
-        console.log(this.getNamespaceMap());
-        console.log("==============================");
+        // console.log("==============================");
+        // console.log("type2Index: ");
+        // console.log(this.printNodeMap(this.getType2Index()));
+        // console.log("variable2Type: ");
+        // console.log(this.printNodeMap(this.getVariable2Type()));
+        // console.log("getTypeSet: ");
+        // console.log(this.getTypeSet());
+        // console.log("==============================");
+        // console.log("exportedType:");
+        // console.log(this.printExportMap(this.getExportedType()));
+        // console.log("AnoymousRedirect:");
+        // console.log(this.getAnonymousReExport());
+        // console.log("namespace Map:");
+        // console.log(this.getNamespaceMap());
+        // console.log("==============================");
     }
 }

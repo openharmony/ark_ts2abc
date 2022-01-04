@@ -61,14 +61,14 @@ ES5_LIST_FILE = os.path.join("test262", "es5_tests.txt")
 ES2015_LIST_FILE = os.path.join("test262", "es2015_tests.txt")
 CI_LIST_FILE = os.path.join("test262", "CI_tests.txt")
 
-TEST262_GIT_HASH = "7e60f78958c89cb14e36f4f28de8fe8e9768743d"
-HARNESS_GIT_HASH = "4092b799522ac20590c7b054632fe70494c32331"
-ESHOST_GIT_HASH = "a71a29820b132ffcb6bb58061cabdba96e457da6"
+TEST262_GIT_HASH = "9ca13b12728b7e0089c7eb03fa2bd17f8abe297f"
+HARNESS_GIT_HASH = "9c499f028eb24e67781435c0bb442e00343eb39d"
+ESHOST_GIT_HASH = "fa2d4d27d9d6152002bdef36ee2d17e98b886268"
 ESNEXT_GIT_HASH = "281eb10b2844929a7c0ac04527f5b42ce56509fd"
 
-TEST262_GIT_URL = "http://mgit-tm.rnd.huawei.com/a/hmf/ark_test262"
-ESHOST_GIT_URL = "http://mgit-tm.rnd.huawei.com/a/hmf/ark_test262_eshost"
-HARNESS_GIT_URL = "http://mgit-tm.rnd.huawei.com/a/hmf/ark_test262_harness"
+TEST262_GIT_URL = "https://gitee.com/Han00000000/test262.git"
+ESHOST_GIT_URL = "https://gitee.com/Han00000000/eshost.git"
+HARNESS_GIT_URL = "https://gitee.com/Han00000000/test262-harness.git"
 
 SKIP_LIST_FILE = os.path.join("test262", "skip_tests.json")
 ALL_SKIP_TESTS = []
