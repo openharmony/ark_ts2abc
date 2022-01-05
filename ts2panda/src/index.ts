@@ -33,10 +33,12 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
     let typeChecker = TypeChecker.getInstance();
     typeChecker.setTypeChecker(program.getTypeChecker());
 
-    for (let sourceFile of program.getSourceFiles()) {
-        if (sourceFile.isDeclarationFile && !program.isSourceFileDefaultLibrary(sourceFile)) {
-            setGlobalDeclare(checkIsGlobalDeclaration(sourceFile));
-            generateDTs(sourceFile, options);
+    if (CmdOptions.needRecordDtsType()) {
+        for (let sourceFile of program.getSourceFiles()) {
+            if (sourceFile.isDeclarationFile && !program.isSourceFileDefaultLibrary(sourceFile)) {
+                setGlobalDeclare(checkIsGlobalDeclaration(sourceFile));
+                generateDTs(sourceFile, options);
+            }
         }
     }
 
@@ -84,7 +86,6 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                 (ctx: ts.TransformationContext) => {
                     return (node: ts.SourceFile) => {
                         let outputBinName = getOutputBinName(node);
-                        // console.log("<==============> " + outputBinName + " <================>");
                         let compilerDriver = new CompilerDriver(outputBinName);
                         compilerDriver.compileForSyntaxCheck(node);
                         return node;

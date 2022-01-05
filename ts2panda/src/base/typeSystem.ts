@@ -145,7 +145,7 @@ export abstract class BaseType {
                 isUserDefinedType = true;
             }
             if (typeIndex == PrimitiveType.ANY) {
-                console.log("ERROR: Type cannot be found for: " + jshelpers.getTextOfNode(node));
+                LOGD("WARNING: Type cannot be found for: " + jshelpers.getTextOfNode(node));
                 typeIndex = PrimitiveType.ANY;
             }
             // set variable if variable node is given;
