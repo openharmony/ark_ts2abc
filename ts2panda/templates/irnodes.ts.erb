@@ -185,7 +185,8 @@ export abstract class Intrinsic extends IRNode {
 
 export class VReg {
   private static global_id = 0;
-  private typeIndex: number;
+  private typeIndex: number = 0;
+  private variableName: string = "";
   readonly id: number; // used for debug purpose to distinguish one instance from another
   num: number = -1;
   
@@ -202,7 +203,6 @@ export class VReg {
 
   constructor() {
     this.id = VReg.global_id++;
-    this.typeIndex = 0;
     
     // for debug purposes
     this.setStackTrace(null);
@@ -234,6 +234,14 @@ export class VReg {
 
   setTypeIndex(typeIndex: number) {
     this.typeIndex = typeIndex;
+  }
+
+  getVariableName() {
+    return this.variableName;
+  }
+
+  setVariableName(variableName: string) {
+    this.variableName = variableName;
   }
 }
 

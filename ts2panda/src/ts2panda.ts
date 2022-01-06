@@ -194,8 +194,8 @@ export class Ts2Panda {
         typeRecord.forEach((vreg) => {
             let typeOfVreg = new TypeOfVreg(vreg.num, vreg.getTypeIndex());
             typeInfo.push(typeOfVreg);
-
-            // console.log("\\\\\\\\\\\\ vreg num \\\\\\\\\\", vreg.num);
+            // console.log("---------------------------------------");
+            // console.log("\\\\\\\\\\\\ vreg name \\\\\\\\\\", vreg.getVariableName());
             // console.log("\\\\\\\\\\\\ vreg type \\\\\\\\\\", vreg.getTypeIndex());
         });
 

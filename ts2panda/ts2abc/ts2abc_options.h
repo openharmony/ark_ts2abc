@@ -191,7 +191,7 @@ namespace panda::ts2abc {
         panda::PandArg<bool> help_arg_{ "help", false,
                 R"(Print this message and exit)"};
         panda::PandArg<int> opt_level_arg_{ "opt-level", 0,
-                R"("Optimization level. Possible values: [0, 1, 2]. Default: 0\n" 
+                R"("Optimization level. Possible values: [0, 1, 2]. Default: 0\n"
                 "0: no optimizations\n    "
                 "1: basic bytecode optimizations, including valueNumber,"
                     "lowering, constantResolver, regAccAllocator\n    "

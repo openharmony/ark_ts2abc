@@ -42,13 +42,13 @@ export abstract class Variable {
     ) {
         this.name = name;
         this.vreg = undefined;
-        this.name = name;
-        this.typeIndex = 77;
+        this.typeIndex = 0;
     }
 
     bindVreg(vreg: VReg) {
         this.vreg = vreg;
         this.vreg.setTypeIndex(this.typeIndex);
+        this.vreg.setVariableName(this.name);
     }
 
     hasAlreadyBinded(): boolean {

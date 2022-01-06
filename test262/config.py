@@ -29,10 +29,10 @@ BASE_OUT_DIR = os.path.join("out", "test262")
 
 CUR_FILE_DIR = os.path.dirname(__file__)
 CODE_ROOT = os.path.abspath(os.path.join(CUR_FILE_DIR, "../../.."))
-ARK_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/ark/ark"
-ICUI_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/global/i18n_standard"
+ARK_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark"
+ICUI_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/global/i18n_standard"
 LLVM_DIR = f"{CODE_ROOT}/prebuilts/clang/ohos/linux-x86_64/llvm/lib/"
-ARK_JS_RUNTIME_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/ark/ark_js_runtime"
+ARK_JS_RUNTIME_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark_js_runtime"
 
 # " mode_type": {
 #     "1": "only default",

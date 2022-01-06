@@ -1,4 +1,5 @@
-/* * Copyright (c) 2021 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +19,39 @@
 #include "json/json.h"
 #include "ts2abc_options.h"
 #include "ts2abc.h"
+
+int Preprocess(const panda::ts2abc::Options &options, const panda::PandArgParser &argParser, std::string &output,
+    std::string &data, std::string &usage)
+{
+    std::string input;
+    if (!options.GetCompileByPipeArg()) {
+        input = options.GetTailArg1();
+        output = options.GetTailArg2();
+        if (input.empty() || output.empty()) {
+            std::cerr << "Incorrect args number" << std::endl;
+            std::cerr << "Usage example: ts2abc test.json test.abc"<< std::endl;
+            std::cerr << usage << std::endl;
+            std::cerr << argParser.GetHelpString();
+            return RETURN_FAILED;
+        }
+
+        if (!HandleJsonFile(input, data)) {
+            return RETURN_FAILED;
+        }
+    } else {
+        output = options.GetTailArg1();
+        if (output.empty()) {
+            std::cerr << usage << std::endl;
+            std::cerr << argParser.GetHelpString();
+            return RETURN_FAILED;
+        }
+
+        if (!ReadFromPipe(data)) {
+            return RETURN_FAILED;
+        }
+    }
+    return RETURN_SUCCESS;
+}
 
 int main(int argc, const char *argv[])
 {
@@ -46,41 +80,19 @@ int main(int argc, const char *argv[])
         return RETURN_SUCCESS;
     }
 
-    if ((options.GetOptLevelArg() < OptLevel::O_LEVEL0) || (options.GetOptLevelArg() > OptLevel::O_LEVEL2)) {
+    if ((options.GetOptLevelArg() < static_cast<int>(OptLevel::O_LEVEL0)) ||
+        (options.GetOptLevelArg() > static_cast<int>(OptLevel::O_LEVEL2))) {
         std::cerr << "Incorrect optimization level value" << std::endl;
         std::cerr << usage << std::endl;
         std::cerr << argParser.GetHelpString();
         return RETURN_FAILED;
     }
 
-    std::string input, output;
+    std::string output;
     std::string data = "";
 
-    if (!options.GetCompileByPipeArg()) {
-        input = options.GetTailArg1();
-        output = options.GetTailArg2();
-        if (input.empty() || output.empty()) {
-            std::cerr << "Incorrect args number" << std::endl;
-            std::cerr << "Usage example: ts2abc test.json test.abc"<< std::endl;
-            std::cerr << usage << std::endl;
-            std::cerr << argParser.GetHelpString();
-            return RETURN_FAILED;
-        }
-        
-        if (!HandleJsonFile(input, data)) {
-            return RETURN_FAILED;
-        }
-    } else {
-        output = options.GetTailArg1();
-        if (output.empty()) {
-            std::cerr << usage << std::endl;
-            std::cerr << argParser.GetHelpString();
-            return RETURN_FAILED;
-        }
-
-        if (!ReadFromPipe(data)) {
-            return RETURN_FAILED;
-        }
+    if (Preprocess(options, argParser, output, data, usage) == RETURN_FAILED) {
+        return RETURN_FAILED;
     }
 
     if (!GenerateProgram(data, output, options.GetOptLevelArg(), options.GetOptLogLevelArg())) {

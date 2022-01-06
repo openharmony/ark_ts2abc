@@ -1,4 +1,5 @@
-/* * Copyright (c) 2021 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +28,7 @@
 #include "assembly-emitter.h"
 #include "json/json.h"
 
-enum JsonType {
+enum class JsonType {
     FUNCTION = 0,
     RECORD,
     STRING,
@@ -38,7 +39,7 @@ enum JsonType {
 constexpr int RETURN_SUCCESS = 0;
 constexpr int RETURN_FAILED = 1;
 
-enum OptLevel {
+enum class OptLevel {
     O_LEVEL0 = 0,
     O_LEVEL1,
     O_LEVEL2
@@ -48,7 +49,7 @@ bool HandleJsonFile(const std::string &input, std::string &data);
 bool ReadFromPipe(std::string &data);
 bool GenerateProgram(const std::string &data, std::string output,
                      int optLevel,
-                     std::string optLogLevel);
+                     const std::string &optLogLevel);
 bool GetDebugLog();
 void ParseLogEnable(const Json::Value &rootValue);
 bool GetDebugModeEnabled();

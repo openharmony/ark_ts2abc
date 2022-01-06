@@ -1,4 +1,5 @@
-/* * Copyright (c) 2021 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -140,6 +141,7 @@ static void Logd(const char *format, ...)
         char logMsg[LOG_BUFFER_SIZE];
         int ret = vsnprintf_s(logMsg, sizeof(logMsg) - 1, sizeof(logMsg) - 1, format, valist);
         if (ret == -1) {
+            va_end(valist);
             return;
         }
         std::cout << logMsg << std::endl;
@@ -620,9 +622,12 @@ static void ParseFunctionCallType(const Json::Value &function, panda::pandasm::F
     }
     panda::pandasm::AnnotationData callTypeAnnotation("_ESCallTypeAnnotation");
     std::string annotationName = "callType";
-    panda::pandasm::AnnotationElement callTypeAnnotationElement(annotationName, std::make_unique<panda::pandasm::ScalarValue>(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(callType)));
+    panda::pandasm::AnnotationElement callTypeAnnotationElement(
+        annotationName, std::make_unique<panda::pandasm::ScalarValue>(
+        panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(callType)));
     callTypeAnnotation.AddElement(std::move(callTypeAnnotationElement));
-    const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(std::move(callTypeAnnotation));
+    const_cast<std::vector<panda::pandasm::AnnotationData>&>(
+        pandaFunc.metadata->GetAnnotations()).push_back(std::move(callTypeAnnotation));
 }
 
 static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::Function &pandaFunc)
@@ -637,7 +642,6 @@ static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::F
                 continue;
             }
 
-            // TODO add type-vreg info to function annotation
             uint32_t vregNum = 0;
             if (type.isMember("vregNum") && type["vregNum"].isInt()) {
                 vregNum = type["vregNum"].asUInt();
@@ -648,16 +652,21 @@ static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::F
                 typeIndex = type["typeIndex"].asUInt();
             }
 
-            panda::pandasm::ScalarValue vNum(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(vregNum));
+            panda::pandasm::ScalarValue vNum(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(vregNum));
             elements.emplace_back(std::move(vNum));
-            panda::pandasm::ScalarValue tIndex(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            panda::pandasm::ScalarValue tIndex(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
             elements.emplace_back(std::move(tIndex));
         }
 
         std::string annotationName = "typeOfVreg";
-        panda::pandasm::AnnotationElement typeOfVregElement(annotationName, std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::U32, elements)));
+        panda::pandasm::AnnotationElement typeOfVregElement(
+            annotationName, std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::U32, elements)));
         funcAnnotation.AddElement(std::move(typeOfVregElement));
-        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(std::move(funcAnnotation));
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(
+            std::move(funcAnnotation));
     }
 }
 
@@ -692,23 +701,28 @@ static void ParseFunctionExportedType(const Json::Value &function, panda::pandas
                 typeIndex = exportedType["type"].asUInt();
             }
 
-            panda::pandasm::ScalarValue symbol(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(exportedSymbol));
+            panda::pandasm::ScalarValue symbol(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(exportedSymbol));
             symbolElements.emplace_back(std::move(symbol));
-            panda::pandasm::ScalarValue tIndex(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            panda::pandasm::ScalarValue tIndex(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
             symbolTypeElements.emplace_back(std::move(tIndex));
         }
 
         std::string symbolAnnotationName = "exportedSymbols";
         panda::pandasm::AnnotationElement exportedSymbolsElement(symbolAnnotationName,
-                                                               std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::STRING, symbolElements)));
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::STRING, symbolElements)));
         funcAnnotation.AddElement(std::move(exportedSymbolsElement));
 
         std::string symbolTypeAnnotationName = "exportedSymbolTypes";
         panda::pandasm::AnnotationElement exportedSymbolTypesElement(symbolTypeAnnotationName,
-                                                               std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::U32, symbolTypeElements)));
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::U32, symbolTypeElements)));
         funcAnnotation.AddElement(std::move(exportedSymbolTypesElement));
 
-        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(std::move(funcAnnotation));
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(
+            pandaFunc.metadata->GetAnnotations()).push_back(std::move(funcAnnotation));
     }
 }
 
@@ -743,23 +757,28 @@ static void ParseFunctionDeclaredType(const Json::Value &function, panda::pandas
                 typeIndex = declaredType["type"].asUInt();
             }
 
-            panda::pandasm::ScalarValue symbol(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(declaredSymbol));
+            panda::pandasm::ScalarValue symbol(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(declaredSymbol));
             symbolElements.emplace_back(std::move(symbol));
-            panda::pandasm::ScalarValue tIndex(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            panda::pandasm::ScalarValue tIndex(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
             symbolTypeElements.emplace_back(std::move(tIndex));
         }
 
         std::string symbolAnnotationName = "declaredSymbols";
         panda::pandasm::AnnotationElement declaredSymbolsElement(symbolAnnotationName,
-                                                               std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::STRING, symbolElements)));
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::STRING, symbolElements)));
         funcAnnotation.AddElement(std::move(declaredSymbolsElement));
 
         std::string symbolTypeAnnotationName = "declaredSymbolTypes";
         panda::pandasm::AnnotationElement declaredSymbolTypesElement(symbolTypeAnnotationName,
-                                                               std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(panda::pandasm::Value::Type::U32, symbolTypeElements)));
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::U32, symbolTypeElements)));
         funcAnnotation.AddElement(std::move(declaredSymbolTypesElement));
 
-        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(std::move(funcAnnotation));
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(
+            std::move(funcAnnotation));
     }
 }
 
@@ -941,31 +960,31 @@ static int ParseSmallPieceJson(const std::string &subJson, panda::pandasm::Progr
         type = rootValue["type"].asInt();
     }
     switch (type) {
-        case JsonType::FUNCTION: {
+        case static_cast<int>(JsonType::FUNCTION): {
             if (rootValue.isMember("func_body") && rootValue["func_body"].isObject()) {
                 ParseSingleFunc(rootValue, prog);
             }
             break;
         }
-        case JsonType::RECORD: {
+        case static_cast<int>(JsonType::RECORD): {
             if (rootValue.isMember("rec_body") && rootValue["rec_body"].isObject()) {
                 ParseSingleRec(rootValue, prog);
             }
             break;
         }
-        case JsonType::STRING: {
+        case static_cast<int>(JsonType::STRING): {
             if (rootValue.isMember("string") && rootValue["string"].isString()) {
                 ParseSingleStr(rootValue, prog);
             }
             break;
         }
-        case JsonType::LITERALBUFFER: {
+        case static_cast<int>(JsonType::LITERALBUFFER): {
             if (rootValue.isMember("literalArray") && rootValue["literalArray"].isObject()) {
                 ParseSingleLiteralBuf(rootValue, prog);
             }
             break;
         }
-        case JsonType::OPTIONS: {
+        case static_cast<int>(JsonType::OPTIONS): {
             ParseOptions(rootValue, prog);
             break;
         }
@@ -1008,7 +1027,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-bool GenerateProgram(const std::string &data, std::string output, int optLevel, std::string optLogLevel)
+bool GenerateProgram(const std::string &data, std::string output, int optLevel, const std::string &optLogLevel)
 {
     panda::pandasm::Program prog = panda::pandasm::Program();
     prog.lang = panda::pandasm::extensions::Language::ECMASCRIPT;
@@ -1020,7 +1039,7 @@ bool GenerateProgram(const std::string &data, std::string output, int optLevel, 
     Logd("parsing done, calling pandasm\n");
 
 #ifdef ENABLE_BYTECODE_OPT
-    if (g_optLevel != O_LEVEL0 || optLevel != O_LEVEL0) {
+    if (g_optLevel != OptLevel::O_LEVEL0 || optLevel != OptLevel::O_LEVEL0) {
         optLogLevel = (optLogLevel != "error") ? optLogLevel : g_optLogLevel;
 
         const uint32_t componentMask = panda::Logger::Component::CLASS2PANDA | panda::Logger::Component::ASSEMBLER |

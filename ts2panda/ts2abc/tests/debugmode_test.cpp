@@ -30,8 +30,8 @@ namespace ARK::Ts2Abc::Ts2Abc {
 
     void DebugModeTest::SetUpTestCase() {}
     void DebugModeTest::TearDownTestCase() {}
-    void DebugModeTest::SetUp() {}
-    void DebugModeTest::TearDown() {}
+    const void DebugModeTest::SetUp() {}
+    const void DebugModeTest::TearDown() {}
 
     HWTEST_F(DebugModeTest, DebugModeTest_True, TestSize.Level0)
     {

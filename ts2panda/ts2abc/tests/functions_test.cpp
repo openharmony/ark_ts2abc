@@ -35,8 +35,8 @@ namespace ARK::Ts2Abc::Ts2Abc {
 
     void FunctionTest::SetUpTestCase() {}
     void FunctionTest::TearDownTestCase() {}
-    void FunctionTest::SetUp()
-    { 
+    const void FunctionTest::SetUp()
+    {
         std::string file = "../../ark/ts2abc/ts2panda/ts2abc/tests/sources/add.json";
         std::string data = "";
         int ret = HandleJsonFile(file, data);
@@ -46,7 +46,7 @@ namespace ARK::Ts2Abc::Ts2Abc {
         EXPECT_EQ(ret, RETURN_SUCCESS);
         function = rootValue["func_body"];
     }
-    void FunctionTest::TearDown() {}
+    const void FunctionTest::TearDown() {}
 
     HWTEST_F(FunctionTest, FunctionTest_GetFunctionDefintion, TestSize.Level0)
     {

@@ -36,26 +36,19 @@ import {
 } from "./variable";
 import { TypeRecorder } from "./typeRecorder";
 import { CmdOptions } from "./cmdOptions";
+import { PrimitiveType } from "./base/typeSystem";
 
 function setVariableOrParameterType(node: ts.Node, v: Variable | undefined) {
     if (v) {
         let typeIndex = TypeRecorder.getInstance().tryGetVariable2Type(ts.getOriginalNode(node));
-        if (typeIndex != -1) {
-            v.setTypeIndex(typeIndex);
-        }
-        // console.log("--node--", jshelpers.getTextOfNode(ts.getOriginalNode(node)));
-        // console.log("--node.type--", v.getTypeIndex());
+        v.setTypeIndex(typeIndex);
     }
 }
 
 function setClassOrFunctionType(node: ts.Node, v: Variable | undefined) {
     if (v) {
         let typeIndex = TypeRecorder.getInstance().tryGetTypeIndex(ts.getOriginalNode(node));
-        if (typeIndex != -1) {
-            v.setTypeIndex(typeIndex);
-        }
-        // console.log("--node--", jshelpers.getTextOfNode(ts.getOriginalNode(node)));
-        // console.log("--node.type--", v.getTypeIndex());
+        v.setTypeIndex(typeIndex);
     }
 }
 

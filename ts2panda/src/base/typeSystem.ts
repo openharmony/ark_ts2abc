@@ -27,7 +27,7 @@ import * as jshelpers from "../jshelpers";
 import { access } from "fs";
 
 export enum PrimitiveType {
-    ANY = -1,
+    ANY,
     NUMBER,
     BOOLEAN,
     BIGINT,
@@ -80,82 +80,24 @@ export abstract class BaseType {
     protected typeChecker = TypeChecker.getInstance();
     protected typeRecorder = TypeRecorder.getInstance();
 
-    // this is needed for type like class, since it's declaration is in a certain place
-    // other types like primitives don't need this
     protected addCurrentType(node: ts.Node, index: number) {
         this.typeRecorder.addType2Index(node, index);
     }
 
-    protected setVariable2Type(variableNode: ts.Node, index: number, isUserDefinedType: boolean) {
-        this.typeRecorder.setVariable2Type(variableNode, index, isUserDefinedType);
+    protected setVariable2Type(variableNode: ts.Node, index: number) {
+        this.typeRecorder.setVariable2Type(variableNode, index);
     }
 
     protected tryGetTypeIndex(typeNode: ts.Node) {
         return this.typeRecorder.tryGetTypeIndex(typeNode);
     }
 
-    protected createType(node: ts.Node, newExpressionFlag: boolean, variableNode?: ts.Node) {
-        switch (node.kind) {
-            case ts.SyntaxKind.MethodDeclaration:
-            case ts.SyntaxKind.Constructor:
-            case ts.SyntaxKind.GetAccessor:
-            case ts.SyntaxKind.SetAccessor: {
-                new FunctionType(<ts.FunctionLikeDeclaration>node, variableNode);
-                break;
-            }
-            case ts.SyntaxKind.ClassDeclaration: {
-                new ClassType(<ts.ClassDeclaration>node, newExpressionFlag, variableNode);
-                break;
-            }
-            // create other type as project goes on;
-            default:
-                LOGD("Error: Currently this type is not supported");
-                // throw new Error("Currently this type is not supported");
-        }
+    protected getOrCreateRecordForDeclNode(typeNode: ts.Node, variableNode?: ts.Node) {
+        return this.typeChecker.getOrCreateRecordForDeclNode(typeNode, variableNode);
     }
 
-    protected getOrCreateUserDefinedType(node: ts.Identifier, newExpressionFlag: boolean, variableNode?: ts.Node) {
-        let typeIndex = PrimitiveType.ANY;
-        let declNode = this.typeChecker.getTypeDeclForIdentifier(node);
-        if (declNode) {
-            typeIndex = this.tryGetTypeIndex(declNode);
-            if (typeIndex == PrimitiveType.ANY) {
-                this.createType(declNode, newExpressionFlag, variableNode);
-                typeIndex = this.tryGetTypeIndex(declNode);
-            }
-        }
-        return typeIndex;
-    }
-
-    protected getTypeIndexForDeclWithType(
-        node: ts.FunctionLikeDeclaration | ts.ParameterDeclaration | ts.PropertyDeclaration | ts.PropertySignature | ts.MethodSignature, variableNode?: ts.Node): number {
-        if (node.type) {
-            // check for newExpression 
-            let newExpressionFlag = false;
-            if (node.kind == ts.SyntaxKind.PropertyDeclaration && node.initializer && node.initializer.kind == ts.SyntaxKind.NewExpression) {
-                newExpressionFlag = true;
-            }
-            // get typeFlag to check if its a primitive type
-            let typeRef = node.type;
-            let typeIndex = this.typeChecker.checkDeclarationType(typeRef);
-            let isUserDefinedType = false;
-            if (typeIndex == PrimitiveType.ANY) {
-                let identifier = <ts.Identifier>typeRef.getChildAt(0);
-                typeIndex = this.getOrCreateUserDefinedType(identifier, newExpressionFlag, variableNode);
-                isUserDefinedType = true;
-            }
-            if (typeIndex == PrimitiveType.ANY) {
-                LOGD("WARNING: Type cannot be found for: " + jshelpers.getTextOfNode(node));
-                typeIndex = PrimitiveType.ANY;
-            }
-            // set variable if variable node is given;
-            if (variableNode) {
-                this.setVariable2Type(variableNode, typeIndex, isUserDefinedType);
-            }
-            return typeIndex!;
-        }
-        LOGD("WARNING: node type not found for: " + jshelpers.getTextOfNode(node));
-        return PrimitiveType.ANY;
+    protected getOrCreateRecordForTypeNode(typeNode: ts.TypeNode | undefined, variableNode?: ts.Node) {
+        return this.typeChecker.getOrCreateRecordForTypeNode(typeNode, variableNode);
     }
 
     protected getIndexFromTypeArrayBuffer(type: BaseType): number {
@@ -204,8 +146,8 @@ export class TypeSummary extends BaseType {
 }
 
 export class ClassType extends BaseType {
-    modifier: number = 0; // 0 -> unabstract, 1 -> abstract;
-    extendsHeritage: number = -1;
+    modifier: number = ModifierAbstract.NONABSTRACT; // 0 -> unabstract, 1 -> abstract;
+    extendsHeritage: number = PrimitiveType.ANY;
     implementsHeritages: Array<number> = new Array<number>();
     // fileds Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
     staticFields: Map<string, Array<number>> = new Map<string, Array<number>>();
@@ -213,35 +155,19 @@ export class ClassType extends BaseType {
     fields: Map<string, Array<number>> = new Map<string, Array<number>>();
     methods: Map<string, number> = new Map<string, number>();
     typeIndex: number;
+    shiftedTypeIndex: number;
 
-    constructor(classNode: ts.ClassDeclaration | ts.ClassExpression, newExpressionFlag: boolean, variableNode?: ts.Node) {
+    constructor(classNode: ts.ClassDeclaration | ts.ClassExpression) {
         super();
         this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
-        let shiftedIndex = this.typeIndex + PrimitiveType._LENGTH;
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
         // record type before its initialization, so its index can be recorded
         // in case there's recursive reference of this type
-        this.addCurrentType(classNode, shiftedIndex);
-
+        this.addCurrentType(classNode, this.shiftedTypeIndex);
         this.fillInModifiers(classNode);
         this.fillInHeritages(classNode);
         this.fillInFieldsAndMethods(classNode);
-
-        // initialization finished, add variable to type if variable is given
-        if (variableNode) {
-            // if the variable is a instance, create another classInstType instead of current classType itself
-            if (newExpressionFlag) {
-                new ClassInstType(variableNode, this.typeIndex);
-            } else {
-                this.setVariable2Type(variableNode, shiftedIndex, true);
-            }
-        }
         this.setTypeArrayBuffer(this, this.typeIndex);
-        // check typeRecorder
-        // this.typeRecorder.getLog(classNode, this.typeIndex);
-    }
-
-    public getTypeIndex() {
-        return this.typeIndex;
     }
 
     private fillInModifiers(node: ts.ClassDeclaration | ts.ClassExpression) {
@@ -266,7 +192,7 @@ export class ClassType extends BaseType {
                 let heritageFullName = heritage.getText();
                 for (let heritageType of heritage.types) {
                     let heritageIdentifier = <ts.Identifier>heritageType.expression;
-                    let heritageTypeIndex = this.getOrCreateUserDefinedType(heritageIdentifier, false);
+                    let heritageTypeIndex = this.getOrCreateRecordForDeclNode(heritageIdentifier, heritageIdentifier);
                     if (heritageFullName.startsWith("extends ")) {
                         this.extendsHeritage = heritageTypeIndex;
                     } else if (heritageFullName.startsWith("implements ")) {
@@ -278,22 +204,7 @@ export class ClassType extends BaseType {
     }
 
     private fillInFields(member: ts.PropertyDeclaration) {
-        // collect modifier info
-        let fieldName: string = "";
-        switch (member.name.kind) {
-            case ts.SyntaxKind.Identifier:
-            case ts.SyntaxKind.StringLiteral:
-            case ts.SyntaxKind.NumericLiteral:
-                fieldName = jshelpers.getTextOfIdentifierOrLiteral(member.name);
-                break;
-            case ts.SyntaxKind.ComputedPropertyName:
-                fieldName = "#computed";
-                break;
-            default:
-                throw new Error("Invalid proerty name");
-        }
-
-        // Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
+        let fieldName = jshelpers.getTextOfIdentifierOrLiteral(member.name);
         let fieldInfo = Array<number>(PrimitiveType.ANY, AccessFlag.PUBLIC, ModifierReadonly.NONREADONLY);
         let isStatic: boolean = false;
         if (member.modifiers) {
@@ -318,9 +229,10 @@ export class ClassType extends BaseType {
                 }
             }
         }
-        // collect type info
-        let variableNode = member.name ? member.name : undefined;
-        fieldInfo[0] = this.getTypeIndexForDeclWithType(member, variableNode);
+
+        let typeNode = member.type
+        let memberName = member.name
+        fieldInfo[0] = this.getOrCreateRecordForTypeNode(typeNode, memberName);
 
         if (isStatic) {
             this.staticFields.set(fieldName, fieldInfo);
@@ -335,7 +247,10 @@ export class ClassType extends BaseType {
          * create this type and add it into typeRecorder
          */
         let variableNode = member.name ? member.name : undefined;
-        let funcType = new FunctionType(<ts.FunctionLikeDeclaration>member, variableNode);
+        let funcType = new FunctionType(<ts.FunctionLikeDeclaration>member);
+        if (variableNode) {
+            this.setVariable2Type(variableNode, funcType.shiftedTypeIndex);
+        }
 
         // Then, get the typeIndex and fill in the methods array
         let typeIndex = this.tryGetTypeIndex(member);
@@ -416,16 +331,15 @@ export class ClassType extends BaseType {
 }
 
 export class ClassInstType extends BaseType {
-    shiftedReferredClassIndex: number = 0; // the referred class in the type system;
-    constructor(variableNode: ts.Node, referredClassIndex: number) {
+    shiftedReferredClassIndex: number; // the referred class in the type system;
+    typeIndex: number;
+    shiftedTypeIndex: number;
+    constructor(referredClassIndex: number) {
         super();
-        // use referedClassIndex to point to the actually class type of this instance
-        this.shiftedReferredClassIndex = referredClassIndex + PrimitiveType._LENGTH;
-
-        // map variable to classInstType, which has a newly generated index
-        let currIndex = this.getIndexFromTypeArrayBuffer(this);
-        let shiftedIndex = currIndex + PrimitiveType._LENGTH;
-        this.setVariable2Type(variableNode, shiftedIndex, true);
+        this.shiftedReferredClassIndex = referredClassIndex;
+        this.typeIndex = this.getIndexFromTypeArrayBuffer(this);
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
+        this.typeRecorder.setClass2InstanceMap(this.shiftedReferredClassIndex, this.shiftedTypeIndex);
     }
 
     transfer2LiteralBuffer(): LiteralBuffer {
@@ -442,19 +356,20 @@ export class ClassInstType extends BaseType {
 
 export class FunctionType extends BaseType {
     name: string = '';
-    accessFlag: number = 0; // 0 -> public -> 0, private -> 1, protected -> 2
-    modifierStatic: number = 0; // 0 -> unstatic, 1 -> static
+    accessFlag: number = AccessFlag.PUBLIC; // 0 -> public -> 0, private -> 1, protected -> 2
+    modifierStatic: number = ModifierStatic.NONSTATIC; // 0 -> unstatic, 1 -> static
     parameters: Array<number> = new Array<number>();
-    returnType: number = 0;
+    returnType: number = PrimitiveType.ANY;
     typeIndex: number;
+    shiftedTypeIndex: number;
 
-    constructor(funcNode: ts.FunctionLikeDeclaration | ts.MethodSignature, variableNode?: ts.Node) {
+    constructor(funcNode: ts.FunctionLikeDeclaration | ts.MethodSignature) {
         super();
         this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
-        let shiftedIndex = this.typeIndex + PrimitiveType._LENGTH;
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
         // record type before its initialization, so its index can be recorded
         // in case there's recursive reference of this type
-        this.addCurrentType(funcNode, shiftedIndex);
+        this.addCurrentType(funcNode, this.shiftedTypeIndex);
 
         if (funcNode.name) {
             this.name = jshelpers.getTextOfIdentifierOrLiteral(funcNode.name);
@@ -464,23 +379,11 @@ export class FunctionType extends BaseType {
         this.fillInModifiers(funcNode);
         this.fillInParameters(funcNode);
         this.fillInReturn(funcNode);
-
-        // initialization finished, add variable to type if variable is given
-        if (variableNode) {
-            this.setVariable2Type(variableNode, shiftedIndex, true);
-        }
         this.setTypeArrayBuffer(this, this.typeIndex);
-
-        // check typeRecorder
-        // this.typeRecorder.getLog(funcNode, this.typeIndex);
     }
 
     public getFunctionName() {
         return this.name;
-    }
-
-    public getTypeIndex() {
-        return this.typeIndex;
     }
 
     private fillInModifiers(node: ts.FunctionLikeDeclaration | ts.MethodSignature) {
@@ -506,15 +409,17 @@ export class FunctionType extends BaseType {
     private fillInParameters(node: ts.FunctionLikeDeclaration | ts.MethodSignature) {
         if (node.parameters) {
             for (let parameter of node.parameters) {
+                let typeNode = parameter.type;
                 let variableNode = parameter.name;
-                let typeIndex = this.getTypeIndexForDeclWithType(parameter, variableNode);
+                let typeIndex = this.getOrCreateRecordForTypeNode(typeNode, variableNode);
                 this.parameters.push(typeIndex);
             }
         }
     }
 
     private fillInReturn(node: ts.FunctionLikeDeclaration | ts.MethodSignature) {
-        let typeIndex = this.getTypeIndexForDeclWithType(node);
+        let typeNode = node.type;
+        let typeIndex = this.getOrCreateRecordForTypeNode(typeNode, typeNode);
         this.returnType = typeIndex;
     }
 
@@ -543,15 +448,13 @@ export class FunctionType extends BaseType {
 export class ExternalType extends BaseType {
     fullRedirectNath: string;
     typeIndex: number;
+    shiftedTypeIndex: number;
 
     constructor(importName: string, redirectPath: string) {
         super();
         this.fullRedirectNath = `#${importName}#${redirectPath}`;
         this.typeIndex = this.getIndexFromTypeArrayBuffer(this);
-    }
-
-    public getTypeIndex() {
-        return this.typeIndex;
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
     }
 
     transfer2LiteralBuffer(): LiteralBuffer {
@@ -602,7 +505,7 @@ export class UnionType extends BaseType {
     fillInUnionArray(typeNode: ts.Node, unionedTypeArray: Array<number>) {
         for (let element of (<ts.UnionType><any>typeNode).types) {
             let elementNode = <ts.TypeNode><any>element;
-            let typeIndex = this.typeChecker.getOrCreateRecordForTypeNode(elementNode);
+            let typeIndex = this.getOrCreateRecordForTypeNode(elementNode, elementNode);
             unionedTypeArray.push(typeIndex!);
         }
     }
@@ -617,7 +520,7 @@ export class UnionType extends BaseType {
         }
         UnionTypeBuf.addLiterals(...UnionTypeLiterals);
         return UnionTypeBuf;
-    }    
+    }
 }
 
 export class ArrayType extends BaseType {
@@ -627,7 +530,7 @@ export class ArrayType extends BaseType {
     constructor(typeNode: ts.Node) {
         super();
         let elementNode = (<ts.ArrayTypeNode><any>typeNode).elementType;
-        this.referedTypeIndex = this.typeChecker.getOrCreateRecordForTypeNode(elementNode);
+        this.referedTypeIndex = this.getOrCreateRecordForTypeNode(elementNode, elementNode);
         this.setOrReadFromArrayRecord();
     }
 
@@ -649,7 +552,7 @@ export class ArrayType extends BaseType {
     getFromArrayTypeMap(referedTypeIndex: number) {
         return this.typeRecorder.getFromArrayTypeMap(referedTypeIndex);
     }
-    
+
     setArrayTypeMap(referedTypeIndex: number, shiftedTypeIndex: number) {
         return this.typeRecorder.setArrayTypeMap(referedTypeIndex, shiftedTypeIndex);
     }
@@ -680,8 +583,8 @@ export class ObjectType extends BaseType {
     fillInMembers(objNode: ts.TypeLiteralNode) {
         for (let member of objNode.members) {
             let propertySig = <ts.PropertySignature>member;
-            let name = member.name? member.name.getText() : "#undefined";
-            let typeIndex = this.typeChecker.getOrCreateRecordForTypeNode(propertySig.type);
+            let name = member.name ? member.name.getText() : "#undefined";
+            let typeIndex = this.getOrCreateRecordForTypeNode(propertySig.type, member.name);
             this.properties.set(name, typeIndex);
         }
     }
@@ -706,28 +609,18 @@ export class InterfaceType extends BaseType {
     fields: Map<string, Array<number>> = new Map<string, Array<number>>();
     methods: Array<number> = new Array<number>();
     typeIndex: number;
+    shiftedTypeIndex: number;
 
-    constructor(interfaceNode: ts.InterfaceDeclaration, variableNode?: ts.Node) {
+    constructor(interfaceNode: ts.InterfaceDeclaration) {
         super();
         this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
-        let shiftedIndex = this.typeIndex + PrimitiveType._LENGTH;
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
         // record type before its initialization, so its index can be recorded
         // in case there's recursive reference of this type
-        this.addCurrentType(interfaceNode, shiftedIndex);
-
+        this.addCurrentType(interfaceNode, this.shiftedTypeIndex);
         this.fillInHeritages(interfaceNode);
         this.fillInFieldsAndMethods(interfaceNode);
-
-        // initialization finished, add variable to type if variable is given
-        if (variableNode) {
-            // if the variable is a instance, create another classInstType instead of current classType itself
-            this.setVariable2Type(variableNode, shiftedIndex, true);
-        }
         this.setTypeArrayBuffer(this, this.typeIndex);
-    }
-
-    public getTypeIndex() {
-        return this.typeIndex;
     }
 
     private fillInHeritages(node: ts.InterfaceDeclaration) {
@@ -735,7 +628,7 @@ export class InterfaceType extends BaseType {
             for (let heritage of node.heritageClauses) {
                 for (let heritageType of heritage.types) {
                     let heritageIdentifier = <ts.Identifier>heritageType.expression;
-                    let heritageTypeIndex = this.getOrCreateUserDefinedType(heritageIdentifier, false);
+                    let heritageTypeIndex = this.getOrCreateRecordForDeclNode(heritageIdentifier, heritageIdentifier);
                     this.heritages.push(heritageTypeIndex);
                 }
             }
@@ -743,22 +636,7 @@ export class InterfaceType extends BaseType {
     }
 
     private fillInFields(member: ts.PropertySignature) {
-        // collect modifier info
-        let fieldName: string = "";
-        switch (member.name.kind) {
-            case ts.SyntaxKind.Identifier:
-            case ts.SyntaxKind.StringLiteral:
-            case ts.SyntaxKind.NumericLiteral:
-                fieldName = jshelpers.getTextOfIdentifierOrLiteral(member.name);
-                break;
-            case ts.SyntaxKind.ComputedPropertyName:
-                fieldName = "#computed";
-                break;
-            default:
-                throw new Error("Invalid proerty name");
-        }
-
-        // Array: [typeIndex] [public -> 0, private -> 1, protected -> 2] [readonly -> 1]
+        let fieldName = jshelpers.getTextOfIdentifierOrLiteral(member.name);
         let fieldInfo = Array<number>(PrimitiveType.ANY, AccessFlag.PUBLIC, ModifierReadonly.NONREADONLY);
         if (member.modifiers) {
             for (let modifier of member.modifiers) {
@@ -778,10 +656,9 @@ export class InterfaceType extends BaseType {
                 }
             }
         }
-        // collect type info
-        let variableNode = member.name ? member.name : undefined;
-        fieldInfo[0] = this.getTypeIndexForDeclWithType(member, variableNode);
-
+        let typeNode = member.type;
+        let memberName = member.name;
+        fieldInfo[0] = this.getOrCreateRecordForTypeNode(typeNode, memberName);
         this.fields.set(fieldName, fieldInfo);
     }
 
@@ -791,8 +668,10 @@ export class InterfaceType extends BaseType {
          * create this type and add it into typeRecorder
          */
         let variableNode = member.name ? member.name : undefined;
-        let funcType = new FunctionType(<ts.MethodSignature>member, variableNode);
-
+        let funcType = new FunctionType(<ts.MethodSignature>member);
+        if (variableNode) {
+            this.setVariable2Type(variableNode, funcType.shiftedTypeIndex);
+        }
         // Then, get the typeIndex and fill in the methods array
         let typeIndex = this.tryGetTypeIndex(member);
         this.methods.push(typeIndex!);
@@ -802,7 +681,7 @@ export class InterfaceType extends BaseType {
         if (node.members) {
             for (let member of node.members) {
                 switch (member.kind) {
-                    case ts.SyntaxKind.MethodSignature:{
+                    case ts.SyntaxKind.MethodSignature: {
                         this.fillInMethods(<ts.MethodSignature>member);
                         break;
                     }

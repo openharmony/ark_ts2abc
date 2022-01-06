@@ -14,18 +14,8 @@ import { TypeRecorder } from "./typeRecorder";
 import * as jshelpers from "./jshelpers";
 import { LOGD } from "./log";
 import { PrimitiveType } from "./base/typeSystem";
-
-export enum PrimitiveFlags {
-    ANY = 1,
-    NUMBER = 8,
-    BOOLEAN = 1048592,
-    STRING = 4,
-    SYMBOL = 4096,
-    NULL = 65536,
-    UNDEFINED = 32768,
-    _LENGTH = 50
-}
 import { isGlobalDeclare } from "./strictMode";
+import { syncBuiltinESMExports } from "module";
 
 export class TypeChecker {
     private static instance: TypeChecker;
@@ -47,32 +37,36 @@ export class TypeChecker {
         return this.compiledTypeChecker;
     }
 
+    public getTypeAtLocation(node: ts.Node) {
+        if (!node) {
+            return undefined;
+        }
+        try {
+            return this.compiledTypeChecker.getTypeAtLocation(node);
+        } catch {
+            LOGD("Get getTypeAtLocation filed for : " + node.getFullText());
+            return undefined;
+        }
+    }
+
     public getTypeDeclForIdentifier(node: ts.Node) {
         if (!node) {
             return undefined;
         }
-        if (node.kind == ts.SyntaxKind.ClassExpression) {
-            return node;
+        let symbol;
+        try {
+            symbol = this.compiledTypeChecker.getSymbolAtLocation(node);
+        } catch {
+            LOGD("Get getSymbolAtLocation filed for : " + node.getFullText());
+            return undefined;
         }
-        let symbol = this.compiledTypeChecker.getSymbolAtLocation(node);
         if (symbol && symbol.declarations) {
             return symbol.declarations[0];
         }
-        LOGD("TypeDecl NOT FOUND for: " + node.getFullText());
         return undefined;
     }
 
-    public getTypeFlagsAtLocation(node: ts.Node): string | undefined {
-        let typeFlag = this.compiledTypeChecker.getTypeAtLocation(node).getFlags();
-        if (typeFlag) {
-            return PrimitiveFlags[typeFlag];
-        } else {
-            LOGD("typeFlag not found: ", typeFlag);
-            return undefined
-        }
-    }
-
-    public checkExportKeyword(node: ts.Node): boolean {
+    public hasExportKeyword(node: ts.Node): boolean {
         if (node.modifiers) {
             for (let modifier of node.modifiers) {
                 if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
@@ -83,34 +77,89 @@ export class TypeChecker {
         return false;
     }
 
-    public checkPotentialPrimitiveType(node: ts.TypeNode): number | undefined {
-        let typeFlagName = this.getTypeFlagsAtLocation(node);
-        let typeIndex = undefined;
-        if (typeFlagName && typeFlagName in PrimitiveType) {
-            typeIndex = PrimitiveType[typeFlagName as keyof typeof PrimitiveType];
-        }
-        return typeIndex;
-    }
-
-    public getOrCreateRecordForTypeNode(typeNode: ts.TypeNode | undefined) {
-        if (!typeNode) {
-            return PrimitiveType.ANY;
-        }
-        let typeIndex = PrimitiveType.ANY;
-        typeIndex = this.checkDeclarationType(typeNode);
-        if (typeIndex == PrimitiveType.ANY && typeNode.kind == ts.SyntaxKind.TypeReference) {
-            let typeName = typeNode.getChildAt(0);
-            let typeDecl = this.getTypeDeclForInitializer(typeName, false);
-            if (typeDecl) {
-                typeIndex = this.checkForTypeDecl(typeName, typeDecl, false, true);
-            } else {
-                typeIndex = PrimitiveType.ANY;
+    public hasDeclareKeyword(node: ts.Node): boolean {
+        if (node.modifiers) {
+            for (let modifier of node.modifiers) {
+                if (modifier.kind === ts.SyntaxKind.DeclareKeyword) {
+                    return true;
+                }
             }
         }
-        return typeIndex;
+        return false;
     }
 
-    public checkDeclarationType(typeNode: ts.TypeNode | undefined) {
+    public getDeclNodeForInitializer(initializer: ts.Node) {
+        switch (initializer.kind) {
+            case ts.SyntaxKind.Identifier:
+                return this.getTypeDeclForIdentifier(initializer);
+            case ts.SyntaxKind.NewExpression:
+                let initializerExpression = <ts.NewExpression>initializer;
+                let expression = initializerExpression.expression;
+                if (expression.kind == ts.SyntaxKind.ClassExpression) {
+                    return expression;
+                }
+                return this.getTypeDeclForIdentifier(expression);
+            case ts.SyntaxKind.ClassExpression:
+                return initializer;
+            case ts.SyntaxKind.PropertyAccessExpression:
+                return initializer;
+            default:
+                return undefined;
+        }
+    }
+
+    public getTypeForClassDeclOrExp(typeDeclNode: ts.Node, getTypeForInstace: boolean): number {
+        let classTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(typeDeclNode);
+        if (classTypeIndex == PrimitiveType.ANY) {
+            let classType = new ClassType(<ts.ClassDeclaration>typeDeclNode);
+            classTypeIndex = classType.shiftedTypeIndex;
+        }
+        if (getTypeForInstace) {
+            // class type was already created, need to get the classInstance
+            if (!TypeRecorder.getInstance().hasClass2InstanceMap(classTypeIndex)) {
+                new ClassInstType(classTypeIndex);
+            }
+            classTypeIndex = TypeRecorder.getInstance().getClass2InstanceMap(classTypeIndex)!;
+        }
+        return classTypeIndex;
+    }
+
+    public getTypeForPropertyAccessExpression(typeDeclNode: ts.Node) {
+        let propertyAccessExpression = <ts.PropertyAccessExpression>typeDeclNode;
+        let localName = jshelpers.getTextOfIdentifierOrLiteral(propertyAccessExpression.expression);
+        let externalName = jshelpers.getTextOfIdentifierOrLiteral(propertyAccessExpression.name);
+        if (TypeRecorder.getInstance().inNampespaceMap(localName)) {
+            let redirectPath = TypeRecorder.getInstance().getPathForNamespace(localName)!;
+            let externalType = new ExternalType(externalName, redirectPath);
+            let ImportTypeIndex = externalType.shiftedTypeIndex;
+            return ImportTypeIndex;
+        }
+        return PrimitiveType.ANY;
+    }
+
+    public getTypeFromDecl(typeDeclNode: ts.Node, getTypeForInstace: boolean): number {
+        if (!typeDeclNode) {
+            return PrimitiveType.ANY;
+        }
+        switch (typeDeclNode.kind) {
+            // Type found to be defined a classDeclaration or classExpression
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.ClassExpression:
+                return this.getTypeForClassDeclOrExp(typeDeclNode, getTypeForInstace);
+            case ts.SyntaxKind.ImportSpecifier:
+            case ts.SyntaxKind.ImportClause:
+                let ImportTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(typeDeclNode);
+                if (ImportTypeIndex != PrimitiveType.ANY) {
+                    return ImportTypeIndex;
+                }
+                return PrimitiveType.ANY;
+            case ts.SyntaxKind.PropertyAccessExpression:
+                return this.getTypeForPropertyAccessExpression(typeDeclNode);
+        }
+        return PrimitiveType.ANY;
+    }
+
+    public getTypeFromAnotation(typeNode: ts.TypeNode | undefined) {
         if (!typeNode) {
             return PrimitiveType.ANY;
         }
@@ -149,164 +198,101 @@ export class TypeChecker {
         }
     }
 
-    public getTypeDeclForInitializer(initializer: ts.Node, exportNeeded:boolean) {
-        switch (initializer.kind) {
-            // only create the type when it was used (initialized) or TODO: exported
-            // NewExpression initializer means that the type is a new class (TODO: or other object later, but is there any?)
-            case ts.SyntaxKind.NewExpression:
-                let initializerExpression = <ts.NewExpression>initializer;
-                return this.getTypeDeclForIdentifier(initializerExpression.expression);
-            case ts.SyntaxKind.ClassExpression:
-                if (exportNeeded) {
-                    return initializer;
-                }
-                break;
-            // Or the initializer is a variable
-            case ts.SyntaxKind.Identifier:
-                // other types, functions/primitives...
-                return this.getTypeDeclForIdentifier(initializer);
-            case ts.SyntaxKind.PropertyAccessExpression:
-                return initializer;
-            default:
-                return null;
-        }
-    }
-
-    // If newExpressionFlag is ture, the type has to be created no matter the export is needed or not;
-    // while newExpressionFlag if false, the export has to be needed.
-    public checkForTypeDecl(originalName: ts.Node, typeDeclNode: ts.Node, exportNeeded: boolean, newExpressionFlag: boolean): number {
-        if (!typeDeclNode) {
+    public getOrCreateRecordForDeclNode(initializer: ts.Node | undefined, variableNode?: ts.Node) {
+        if (!initializer) {
             return PrimitiveType.ANY;
         }
-        switch (typeDeclNode.kind) {
-            // Type found to be defined a classDeclaration or classExpression
-            case ts.SyntaxKind.ClassDeclaration:
-            case ts.SyntaxKind.ClassExpression:
-                let origTypeDeclNode = <ts.ClassDeclaration>ts.getOriginalNode(typeDeclNode);
-                let classTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(origTypeDeclNode);
-                if (classTypeIndex == PrimitiveType.ANY) {
-                    new ClassType(<ts.ClassDeclaration>origTypeDeclNode, newExpressionFlag, originalName);
-                    if (newExpressionFlag) {
-                        classTypeIndex = TypeRecorder.getInstance().tryGetVariable2Type(originalName);
-                    } else {
-                        classTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(origTypeDeclNode);
-                    }
-                } else if (newExpressionFlag) {
-                    // class type is created, need to add current variable to classInstance
-                    classTypeIndex = classTypeIndex + 1;
-                    TypeRecorder.getInstance().setVariable2Type(originalName, classTypeIndex, true);
-                }
-                if (exportNeeded) {
-                    let exportedName = jshelpers.getTextOfIdentifierOrLiteral(originalName);
-                    TypeRecorder.getInstance().setExportedType(exportedName, classTypeIndex, true);
-                }
-                return classTypeIndex;
-            // The type was passed by a variable, need to keep search in deep
-            case ts.SyntaxKind.VariableDeclaration:
-                let varDeclNode = <ts.VariableDeclaration>typeDeclNode;
-                let nextInitializer = varDeclNode.initializer;
-                if (nextInitializer) {
-                    let nextTypeDeclNode = this.getTypeDeclForInitializer(nextInitializer, exportNeeded);
-                    if (nextTypeDeclNode) {
-                        return this.checkForTypeDecl(originalName, nextTypeDeclNode, exportNeeded, newExpressionFlag);
-                    }
-                }
-                return PrimitiveType.ANY;
-            case ts.SyntaxKind.ImportSpecifier:
-            case ts.SyntaxKind.ImportClause:
-                let ImportTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(typeDeclNode);
-                if (ImportTypeIndex != PrimitiveType.ANY) {
-                    TypeRecorder.getInstance().setVariable2Type(originalName, ImportTypeIndex, true);
-                    return ImportTypeIndex;
-                }
-                // console.log("-> ERROR: missing imported type for: ", jshelpers.getTextOfIdentifierOrLiteral(originalName));
-                return PrimitiveType.ANY;
-            case ts.SyntaxKind.PropertyAccessExpression:
-                let propertyAccessExpression = <ts.PropertyAccessExpression>typeDeclNode;
-                let localName = jshelpers.getTextOfIdentifierOrLiteral(propertyAccessExpression.expression);
-                let externalName = jshelpers.getTextOfIdentifierOrLiteral(propertyAccessExpression.name);
-                if (TypeRecorder.getInstance().inNampespaceMap(localName)) {
-                    let redirectPath = TypeRecorder.getInstance().getPathForNamespace(localName)!;
-                    let externalType = new ExternalType(externalName, redirectPath);
-                    let ImportTypeIndex = externalType.getTypeIndex();
-                    let shiftedTypeIndex = TypeRecorder.getInstance().shiftType(ImportTypeIndex);
-                    TypeRecorder.getInstance().setVariable2Type(originalName, shiftedTypeIndex, true);
-                    return shiftedTypeIndex;
-                }
-                // console.log("-> ERROR: missing imported type for: ", jshelpers.getTextOfIdentifierOrLiteral(originalName));
-                return PrimitiveType.ANY;
+        let typeIndex = PrimitiveType.ANY;
+        let declNode = this.getDeclNodeForInitializer(initializer);
+        typeIndex = this.getTypeFromDecl(declNode, initializer.kind == ts.SyntaxKind.NewExpression);
+        if (variableNode) {
+            TypeRecorder.getInstance().setVariable2Type(variableNode, typeIndex);
         }
-        return PrimitiveType.ANY;
+        return typeIndex;
     }
 
-    public checkTypeForVariableDeclaration(node: ts.VariableDeclaration, exportNeeded: boolean) {
-        let name = node.name;
-        let initializer = node.initializer;
-        let type = (<ts.VariableDeclaration>ts.getOriginalNode(node)).type;
-        // first check if this is a primitive or union declaration
-        let typeIndex = this.checkDeclarationType(type);
-        if (typeIndex != PrimitiveType.ANY) {
-            let isUserDefinedType = typeIndex <= PrimitiveType._LENGTH ? false : true;
-            TypeRecorder.getInstance().setVariable2Type(name, typeIndex, isUserDefinedType);
-        } else if (initializer) {
-            let typeDeclNode = this.getTypeDeclForInitializer(initializer, exportNeeded);
-            let newExpressionFlag = initializer.kind == ts.SyntaxKind.NewExpression;
-            if (typeDeclNode) {
-                this.checkForTypeDecl(name, typeDeclNode, exportNeeded, newExpressionFlag);
+    public getOrCreateRecordForTypeNode(typeNode: ts.TypeNode | undefined, variableNode?: ts.Node) {
+        if (!typeNode) {
+            return PrimitiveType.ANY;
+        }
+        let typeIndex = PrimitiveType.ANY;
+        typeIndex = this.getTypeFromAnotation(typeNode);
+        if (typeIndex == PrimitiveType.ANY && typeNode.kind == ts.SyntaxKind.TypeReference) {
+            let typeName = typeNode.getChildAt(0);
+            let typeDecl = this.getDeclNodeForInitializer(typeName);
+            typeIndex = this.getTypeFromDecl(typeDecl, true);
+        }
+        if (variableNode) {
+            TypeRecorder.getInstance().setVariable2Type(variableNode, typeIndex);
+        }
+        return typeIndex;
+    }
+
+    public formatVariableStatement(variableStatementNode: ts.VariableStatement) {
+        let decList = variableStatementNode.declarationList;
+        decList.declarations.forEach(declaration => {
+            let variableNode = declaration.name;
+            let typeNode = declaration.type;
+            let initializer = declaration.initializer;
+            let typeIndex = this.getOrCreateRecordForTypeNode(typeNode, variableNode);
+            if (typeIndex == PrimitiveType.ANY) {
+                typeIndex = this.getOrCreateRecordForDeclNode(initializer, variableNode);
             }
+            if (this.hasExportKeyword(variableStatementNode) && typeIndex != PrimitiveType.ANY) {
+                let exportedName = jshelpers.getTextOfIdentifierOrLiteral(variableNode);
+                TypeRecorder.getInstance().setExportedType(exportedName, typeIndex);
+            }
+        });
+    }
+
+    public formatClassDeclaration(classDeclNode: ts.ClassDeclaration) {
+        let classType = new ClassType(classDeclNode);
+        let typeIndex = classType.shiftedTypeIndex;
+        let className = classDeclNode.name;
+        let exportedName = "default";
+        if (className) {
+            exportedName = jshelpers.getTextOfIdentifierOrLiteral(className);
+        }
+        if (this.hasExportKeyword(classDeclNode)) {
+            TypeRecorder.getInstance().setExportedType(exportedName, typeIndex);
+        } else if (this.hasDeclareKeyword(classDeclNode) && isGlobalDeclare()) {
+            TypeRecorder.getInstance().setDeclaredType(exportedName, typeIndex);
         }
     }
 
-    // Entry for type recording, only process node that will need a type to be created
+    // Entry for type recording
     public formatNodeType(node: ts.Node, importOrExportStmt?: ModuleStmt) {
         if (this.compiledTypeChecker === null) {
             return;
         }
-        switch(node.kind) {
+        switch (node.kind) {
             case ts.SyntaxKind.VariableStatement:
-                // For varibaleStatemnt, need to check what kind of type the variable was set to
-                const variableStatementNode = <ts.VariableStatement>node;
-                const decList = variableStatementNode.declarationList;
-                let exportNeeded = this.checkExportKeyword(node);
-                decList.declarations.forEach(declaration => {
-                    this.checkTypeForVariableDeclaration(declaration, exportNeeded);
-                });
+                let variableStatementNode = <ts.VariableStatement>ts.getOriginalNode(node);
+                this.formatVariableStatement(variableStatementNode);
                 break;
             case ts.SyntaxKind.FunctionDeclaration:
                 let functionDeclNode = <ts.FunctionDeclaration>ts.getOriginalNode(node);
-                let functionName = functionDeclNode.name? functionDeclNode.name : undefined;
-                new FunctionType(functionDeclNode, functionName);
+                let functionName = functionDeclNode.name ? functionDeclNode.name : undefined;
+                let funcType = new FunctionType(functionDeclNode);
+                if (functionName) {
+                    TypeRecorder.getInstance().setVariable2Type(functionName, funcType.shiftedTypeIndex);
+                }
                 break;
             case ts.SyntaxKind.ClassDeclaration:
-                // Only create the type if it is exported. 
-                // Otherwise, waite until it gets instantiated
+                // Create the type if it is exported or declared. Otherwise, waite until it gets instantiated
                 let classDeclNode = <ts.ClassDeclaration>ts.getOriginalNode(node);
-                if (this.checkExportKeyword(node) || this.checkDeclareKeyword(node)) {
-                    let classType = new ClassType(classDeclNode, false);
-                    let typeIndex = classType.getTypeIndex();
-                    let className = classDeclNode.name;
-                    let exportedName = "default";
-                    if (className) {
-                        exportedName = jshelpers.getTextOfIdentifierOrLiteral(className);
-                    } else {
-                        LOGD("ClassName NOT FOUND for:" + node.getFullText());
-                    }
-                    if (this.checkExportKeyword(node)) {
-                        TypeRecorder.getInstance().setExportedType(exportedName, typeIndex, false);
-                    } else if (this.checkDeclareKeyword(node) && isGlobalDeclare()){
-                        TypeRecorder.getInstance().setDeclaredType(exportedName, typeIndex, false);
-                    }
+                if (this.hasExportKeyword(node) || this.hasDeclareKeyword(node)) {
+                    this.formatClassDeclaration(classDeclNode);
                 }
                 break;
             case ts.SyntaxKind.InterfaceDeclaration:
                 if (isGlobalDeclare()) {
-                    let interfaceDeclNode : ts.InterfaceDeclaration = <ts.InterfaceDeclaration>ts.getOriginalNode(node);
+                    let interfaceDeclNode = <ts.InterfaceDeclaration>ts.getOriginalNode(node);
                     let interfaceType = new InterfaceType(interfaceDeclNode);
                     let interfaceName = interfaceDeclNode.name;
                     if (interfaceName) {
-                        TypeRecorder.getInstance().setDeclaredType(jshelpers.getTextOfIdentifierOrLiteral(interfaceName), interfaceType.getTypeIndex(), false);
-                    } else {
-                        LOGD("InterfaceName NOT FOUND for:" + node.getFullText());
+                        let name = jshelpers.getTextOfIdentifierOrLiteral(interfaceName);
+                        TypeRecorder.getInstance().setDeclaredType(name, interfaceType.shiftedTypeIndex);
                     }
                 }
                 break;
@@ -321,24 +307,16 @@ export class TypeChecker {
                 }
                 break;
             case ts.SyntaxKind.ExportAssignment:
-                let exportAssignmentNode = <ts.ExportAssignment>node;
-                let expression = exportAssignmentNode.expression;
+                let expression = (<ts.ExportAssignment>node).expression;
                 let exportedName = "default";
-                let expressionType = this.compiledTypeChecker.getTypeAtLocation(expression);
-                let typeNode = expressionType.getSymbol()?.valueDeclaration;
-                TypeRecorder.getInstance().addNonReExportedType(exportedName, typeNode);
+                let expressionType = this.getTypeAtLocation(expression);
+                if (expressionType) {
+                    let typeNode = expressionType.getSymbol().valueDeclaration;
+                    TypeRecorder.getInstance().addNonReExportedType(exportedName, typeNode, expression);
+                }
                 break;
         }
     }
 
-    public checkDeclareKeyword(node: ts.Node): boolean {
-        if (node.modifiers) {
-            for (let modifier of node.modifiers) {
-                if (modifier.kind === ts.SyntaxKind.DeclareKeyword) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+
 }

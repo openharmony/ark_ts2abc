@@ -39,7 +39,7 @@ const ts2pandaOptions = [
     { name: 'bc-version', alias: 'v', type: Boolean, defaultValue: false, description: "Print ark bytecode version" },
     { name: 'bc-min-version', type: Boolean, defaultValue: false, description: "Print ark bytecode minimum supported version" },
     { name: 'included-files', alias: 'i', type: String, lazyMultiple: true, defaultValue: [], description: "The list of dependent files." },
-    { name: 'record-type', alias: 'p', type: Boolean, defaultValue: true, description: "Record type info. Default: true" },
+    { name: 'record-type', alias: 'p', type: Boolean, defaultValue: false, description: "Record type info. Default: true" },
     { name: 'dts-type-record', alias: 'q', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" }
 ]
 
@@ -183,7 +183,8 @@ export class CmdOptions {
         if (!this.options) {
             return false;
         }
-        return this.options["record-type"];
+
+        return !this.options["record-type"];
     }
 
     static needRecordDtsType(): boolean {

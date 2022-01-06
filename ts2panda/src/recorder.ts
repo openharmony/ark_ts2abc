@@ -308,7 +308,7 @@ export class Recorder {
             case VarDeclarationKind.VAR:
                 break;
             case VarDeclarationKind.LET:
-                if (parent.parent.kind == ts.SyntaxKind.CatchClause) {
+                    if (parent.parent.kind == ts.SyntaxKind.CatchClause) {
                     decl = new CatchParameter(name, node);
                 } else {
                     decl = new LetDecl(name, node);
@@ -345,9 +345,13 @@ export class Recorder {
         if (!ts.isStringLiteral(node.moduleSpecifier)) {
             throw new Error("moduleSpecifier must be a stringLiteral");
         }
-        let moduleRequest = jshelpers.getTextOfIdentifierOrLiteral(node.moduleSpecifier);
-        let importStmt = new ModuleStmt(node, moduleRequest);
-
+        let importStmt: ModuleStmt;
+        if (node.moduleSpecifier) {
+            let moduleRequest = jshelpers.getTextOfIdentifierOrLiteral(node.moduleSpecifier);
+            importStmt = new ModuleStmt(node, moduleRequest);
+        } else {
+            importStmt = new ModuleStmt(node);
+        }
         if (node.importClause) {
             let importClause: ts.ImportClause = node.importClause;
 
@@ -389,20 +393,20 @@ export class Recorder {
     }
 
     private recordExportInfo(node: ts.ExportDeclaration): ModuleStmt {
-        var node = <ts.ExportDeclaration>ts.getOriginalNode(node);
+        let origNode = <ts.ExportDeclaration>ts.getOriginalNode(node);
         let exportStmt: ModuleStmt;
-        if (node.moduleSpecifier) {
-            if (!ts.isStringLiteral(node.moduleSpecifier)) {
+        if (origNode.moduleSpecifier) {
+            if (!ts.isStringLiteral(origNode.moduleSpecifier)) {
                 throw new Error("moduleSpecifier must be a stringLiteral");
             }
-            exportStmt = new ModuleStmt(node, jshelpers.getTextOfIdentifierOrLiteral(node.moduleSpecifier));
+            exportStmt = new ModuleStmt(origNode, jshelpers.getTextOfIdentifierOrLiteral(origNode.moduleSpecifier));
         } else {
-            exportStmt = new ModuleStmt(node);
+            exportStmt = new ModuleStmt(origNode);
         }
 
-        if (node.exportClause) {
+        if (origNode.exportClause) {
             exportStmt.setCopyFlag(false);
-            let namedBindings: ts.NamedExportBindings = node.exportClause;
+            let namedBindings: ts.NamedExportBindings = origNode.exportClause;
             if (ts.isNamespaceExport(namedBindings)) {
                 exportStmt.setNameSpace(jshelpers.getTextOfIdentifierOrLiteral((<ts.NamespaceExport>namedBindings).name));
             }
@@ -412,7 +416,7 @@ export class Recorder {
                     let name: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
                     if (name == 'default') {
                         if (this.defaultUsed) {
-                            throw new DiagnosticError(node, DiagnosticCode.Duplicate_identifier_0, jshelpers.getSourceFileOfNode(node), [name]);
+                            throw new DiagnosticError(origNode, DiagnosticCode.Duplicate_identifier_0, jshelpers.getSourceFileOfNode(origNode), [name]);
                         } else {
                             this.defaultUsed = true;
                         }

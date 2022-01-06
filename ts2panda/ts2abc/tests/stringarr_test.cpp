@@ -30,8 +30,8 @@ namespace ARK::Ts2Abc::Ts2Abc {
 
     void StringArrTest::SetUpTestCase() {}
     void StringArrTest::TearDownTestCase() {}
-    void StringArrTest::SetUp() {}
-    void StringArrTest::TearDown() {}
+    const void StringArrTest::SetUp() {}
+    const void StringArrTest::TearDown() {}
 
     HWTEST_F(StringArrTest, StringArrTest_With0, TestSize.Level0)
     {

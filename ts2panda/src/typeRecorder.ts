@@ -30,20 +30,18 @@ export class TypeRecorder {
     private variable2Type: Map<ts.Node, number> = new Map<ts.Node, number>();
     private userDefinedTypeSet: Set<number> = new Set<number>();;
     private typeSummary: TypeSummary = new TypeSummary();
+    private class2InstanceMap: Map<number, number> = new Map<number, number>();
     private arrayTypeMap: Map<number, number> = new Map<number, number>();
     private unionTypeMap: Map<string, number> = new Map<string, number>();
-    // ---> export/import
-    // exportedType: exportedName -> typeIndex
     private exportedType: Map<string, number> = new Map<string, number>();
-    // declaredType: declaredName -> typeIndex
     private declaredType: Map<string, number> = new Map<string, number>();
     // namespace mapping: namepace -> filepath (import * as sth from "...")
-    // later in PropertyAccessExpression we'll need this to map the symbol to filepath
+    // In PropertyAccessExpression we'll need this to map the symbol to filepath
     private namespaceMap: Map<string, string> = new Map<string, string>();
     // (export * from "..."), if the symbol isn't in the reExportedType map, search here.
     private anonymousReExport: Array<string> = new Array<string>();
 
-    private constructor() {}
+    private constructor() { }
 
     public static getInstance(): TypeRecorder {
         return TypeRecorder.instance;
@@ -71,9 +69,9 @@ export class TypeRecorder {
         this.addUserDefinedTypeSet(index);
     }
 
-    public setVariable2Type(variableNode: ts.Node, index: number, isUserDefinedType: boolean) {
+    public setVariable2Type(variableNode: ts.Node, index: number) {
         this.variable2Type.set(variableNode, index);
-        if (isUserDefinedType) {
+        if (index > PrimitiveType._LENGTH) {
             this.addUserDefinedTypeSet(index);
         }
     }
@@ -122,17 +120,33 @@ export class TypeRecorder {
         return this.unionTypeMap.get(unionStr);
     }
 
-    // ---> exported/imported
+    public setClass2InstanceMap(classIndex: number, instanceIndex: number) {
+        this.class2InstanceMap.set(classIndex, instanceIndex)
+    }
+
+    public hasClass2InstanceMap(classIndex: number) {
+        return this.class2InstanceMap.has(classIndex);
+    }
+
+    public getClass2InstanceMap(classIndex: number) {
+        return this.class2InstanceMap.get(classIndex);
+    }
+
+    // exported/imported
     public addImportedType(moduleStmt: ModuleStmt) {
         moduleStmt.getBindingNodeMap().forEach((externalNode, localNode) => {
             let externalName = jshelpers.getTextOfIdentifierOrLiteral(externalNode);
             let importDeclNode = TypeChecker.getInstance().getTypeDeclForIdentifier(localNode);
             let externalType = new ExternalType(externalName, moduleStmt.getModuleRequest());
-            this.addType2Index(importDeclNode, this.shiftType(externalType.getTypeIndex()));
+            this.addType2Index(importDeclNode, externalType.shiftedTypeIndex);
+            this.setVariable2Type(localNode, externalType.shiftedTypeIndex);
         });
 
         if (moduleStmt.getNameSpace() != "") {
             this.setNamespaceMap(moduleStmt.getNameSpace(), moduleStmt.getModuleRequest());
+            let externalType = new ExternalType("*", moduleStmt.getNameSpace());
+            let ImportTypeIndex = externalType.shiftedTypeIndex;
+            this.addUserDefinedTypeSet(ImportTypeIndex);
         }
     }
 
@@ -142,17 +156,15 @@ export class TypeRecorder {
             if (moduleStmt.getNameSpace() != "") {
                 // re-export * as namespace
                 let externalType = new ExternalType("*", moduleStmt.getModuleRequest());
-                let typeIndex = this.shiftType(externalType.getTypeIndex());
-                this.setExportedType(moduleStmt.getNameSpace(), typeIndex, true);
+                let typeIndex = externalType.shiftedTypeIndex;
+                this.setExportedType(moduleStmt.getNameSpace(), typeIndex);
                 this.addUserDefinedTypeSet(typeIndex);
             } else if (moduleStmt.getBindingNameMap().size != 0) {
                 // re-export via clause
                 moduleStmt.getBindingNameMap().forEach((originalName, exportedName) => {
-                    // let redirectName = this.createRedirectName(originalName, moduleStmt.getModuleRequest());
-                    // this.setReExportedType(exportedName, redirectName);
                     let externalType = new ExternalType(originalName, moduleStmt.getModuleRequest());
-                    let typeIndex = this.shiftType(externalType.getTypeIndex());
-                    this.setExportedType(exportedName, typeIndex, true);
+                    let typeIndex = externalType.shiftedTypeIndex;
+                    this.setExportedType(exportedName, typeIndex);
                     this.addUserDefinedTypeSet(typeIndex);
                 });
             } else {
@@ -161,54 +173,39 @@ export class TypeRecorder {
             }
         } else {
             // named export via clause, could came from imported or local
-            // propertyName is local name, name is external name
             moduleStmt.getBindingNodeMap().forEach((localNode, externalNode) => {
                 let exportedName = jshelpers.getTextOfIdentifierOrLiteral(externalNode);
-                let nodeType = TypeChecker.getInstance().getTypeChecker().getTypeAtLocation(localNode);
+                let nodeType = TypeChecker.getInstance().getTypeAtLocation(localNode);
                 let typeNode = nodeType.getSymbol()?.valueDeclaration;
-                this.addNonReExportedType(exportedName, typeNode!);
+                if (typeNode) {
+                    this.addNonReExportedType(exportedName, typeNode!, localNode);
+                }
             });
         }
     }
 
-    public addNonReExportedType(exportedName: string, typeNode: ts.Node) {
+    public addNonReExportedType(exportedName: string, typeNode: ts.Node, localNode: ts.Node) {
         // Check if type of localName was already stroed in typeRecord
         // Imported type should already be stored in typeRecord by design
         let typeIndexForType = this.tryGetTypeIndex(typeNode);
         let typeIndexForVariable = this.tryGetVariable2Type(typeNode);
         if (typeIndexForType != PrimitiveType.ANY) {
-            this.setExportedType(exportedName, typeIndexForType, true);
+            this.setExportedType(exportedName, typeIndexForType);
         } else if (typeIndexForVariable != PrimitiveType.ANY) {
-            this.setExportedType(exportedName, typeIndexForVariable, true);
+            this.setExportedType(exportedName, typeIndexForVariable);
         } else {
             // not found in typeRecord. Need to create the type and
             // add to typeRecord with its localName and to exportedType with its exportedName
-            if (typeNode.kind == ts.SyntaxKind.ClassDeclaration) {
-                let classType = new ClassType(<ts.ClassDeclaration>typeNode, false);
-                let typeIndex = classType.getTypeIndex();
-                this.setExportedType(exportedName, typeIndex, false);
-            }
-
-            // Checking for duplicated export name should already be done by
-            // some kind of syntax checker, so no need to worry about duplicated export
+            let typeIndex = TypeChecker.getInstance().getTypeFromDecl(typeNode, localNode.kind == ts.SyntaxKind.NewExpression);
+            this.setExportedType(exportedName, typeIndex);
         }
     }
 
-    public shiftType(typeIndex: number) {
-        return typeIndex + PrimitiveType._LENGTH;
-    }
-
-    public setExportedType(exportedName: string, typeIndex: number, shifted: boolean) {
-        if (!shifted) {
-            typeIndex = this.shiftType(typeIndex);
-        }
+    public setExportedType(exportedName: string, typeIndex: number) {
         this.exportedType.set(exportedName, typeIndex);
     }
 
-    public setDeclaredType(exportedName: string, typeIndex: number, shifted: boolean) {
-        if (!shifted) {
-            typeIndex = this.shiftType(typeIndex);
-        }
+    public setDeclaredType(exportedName: string, typeIndex: number) {
         this.declaredType.set(exportedName, typeIndex);
     }
 
@@ -287,6 +284,8 @@ export class TypeRecorder {
         // console.log(this.printNodeMap(this.getVariable2Type()));
         // console.log("getTypeSet: ");
         // console.log(this.getTypeSet());
+        // console.log("class instance Map:");
+        // console.log(this.class2InstanceMap);
         // console.log("==============================");
         // console.log("exportedType:");
         // console.log(this.printExportMap(this.getExportedType()));
