@@ -137,6 +137,15 @@ export class TypeChecker {
         return PrimitiveType.ANY;
     }
 
+    public getInterfaceDeclaration(typeDeclNode: ts.Node) {
+        let interfaceTypeIndex = TypeRecorder.getInstance().tryGetTypeIndex(typeDeclNode);
+        if (interfaceTypeIndex == PrimitiveType.ANY) {
+            let interefaceType = new InterfaceType(<ts.InterfaceDeclaration>typeDeclNode);
+            interfaceTypeIndex = interefaceType.shiftedTypeIndex;
+        }
+        return interfaceTypeIndex;        
+    }
+
     public getTypeFromDecl(typeDeclNode: ts.Node, getTypeForInstace: boolean): number {
         if (!typeDeclNode) {
             return PrimitiveType.ANY;
@@ -155,6 +164,8 @@ export class TypeChecker {
                 return PrimitiveType.ANY;
             case ts.SyntaxKind.PropertyAccessExpression:
                 return this.getTypeForPropertyAccessExpression(typeDeclNode);
+            case ts.SyntaxKind.InterfaceDeclaration:
+                return this.getInterfaceDeclaration(typeDeclNode);
         }
         return PrimitiveType.ANY;
     }

@@ -695,42 +695,42 @@ export class InterfaceType extends BaseType {
     }
 
     transfer2LiteralBuffer() {
-        let classTypeBuf = new LiteralBuffer();
-        let classTypeLiterals: Array<Literal> = new Array<Literal>();
+        let interfaceTypeBuf = new LiteralBuffer();
+        let interfaceTypeLiterals: Array<Literal> = new Array<Literal>();
         // the first element is to determine the L2 type
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.INTERFACE));
+        interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, L2Type.INTERFACE));
 
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.heritages.length));
+        interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, this.heritages.length));
         this.heritages.forEach(heritage => {
-            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, heritage));
+            interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, heritage));
         });
 
         // record fields and methods
-        this.transferFields2Literal(classTypeLiterals);
-        this.transferMethods2Literal(classTypeLiterals);
+        this.transferFields2Literal(interfaceTypeLiterals);
+        this.transferMethods2Literal(interfaceTypeLiterals);
 
-        classTypeBuf.addLiterals(...classTypeLiterals);
-        return classTypeBuf;
+        interfaceTypeBuf.addLiterals(...interfaceTypeLiterals);
+        return interfaceTypeBuf;
     }
 
-    private transferFields2Literal(classTypeLiterals: Array<Literal>) {
+    private transferFields2Literal(interfaceTypeLiterals: Array<Literal>) {
         let transferredTarget: Map<string, Array<number>> = this.fields;
 
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.size));
+        interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.size));
         transferredTarget.forEach((typeInfo, name) => {
-            classTypeLiterals.push(new Literal(LiteralTag.STRING, name));
-            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[0])); // typeIndex
-            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[1])); // accessFlag
-            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[2])); // readonly
+            interfaceTypeLiterals.push(new Literal(LiteralTag.STRING, name));
+            interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[0])); // typeIndex
+            interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[1])); // accessFlag
+            interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, typeInfo[2])); // readonly
         });
     }
 
-    private transferMethods2Literal(classTypeLiterals: Array<Literal>) {
+    private transferMethods2Literal(interfaceTypeLiterals: Array<Literal>) {
         let transferredTarget: Array<number> = this.methods;
 
-        classTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.length));
+        interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, transferredTarget.length));
         transferredTarget.forEach(method => {
-            classTypeLiterals.push(new Literal(LiteralTag.INTEGER, method));
+            interfaceTypeLiterals.push(new Literal(LiteralTag.INTEGER, method));
         });
     }
 }
