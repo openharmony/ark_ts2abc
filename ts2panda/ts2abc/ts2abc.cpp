@@ -1027,7 +1027,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-bool GenerateProgram(const std::string &data, std::string output, int optLevel, const std::string &optLogLevel)
+bool GenerateProgram(const std::string &data, std::string output, int optLevel, std::string optLogLevel)
 {
     panda::pandasm::Program prog = panda::pandasm::Program();
     prog.lang = panda::pandasm::extensions::Language::ECMASCRIPT;
@@ -1039,7 +1039,7 @@ bool GenerateProgram(const std::string &data, std::string output, int optLevel, 
     Logd("parsing done, calling pandasm\n");
 
 #ifdef ENABLE_BYTECODE_OPT
-    if (g_optLevel != OptLevel::O_LEVEL0 || optLevel != OptLevel::O_LEVEL0) {
+    if (g_optLevel != static_cast<int>(OptLevel::O_LEVEL0) || optLevel != static_cast<int>(OptLevel::O_LEVEL0)) {
         optLogLevel = (optLogLevel != "error") ? optLogLevel : g_optLogLevel;
 
         const uint32_t componentMask = panda::Logger::Component::CLASS2PANDA | panda::Logger::Component::ASSEMBLER |

@@ -49,7 +49,7 @@ bool HandleJsonFile(const std::string &input, std::string &data);
 bool ReadFromPipe(std::string &data);
 bool GenerateProgram(const std::string &data, std::string output,
                      int optLevel,
-                     const std::string &optLogLevel);
+                     std::string optLogLevel);
 bool GetDebugLog();
 void ParseLogEnable(const Json::Value &rootValue);
 bool GetDebugModeEnabled();
