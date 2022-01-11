@@ -505,7 +505,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
             new LdaDyn(new VReg()),
             new StaDyn(new VReg()),
             ...insnsStoreLexVar_outer_2,
-            new EcmaDefinefuncdyn("#2#", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("#1#", new Imm(ResultType.Int, 0), new VReg()),
             // returnStatement
             new StaDyn(new VReg()),
             new LdaDyn(new VReg()),
@@ -542,7 +542,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         expect(outerA instanceof LocalVariable, "a in outer is local variable").to.be.true;
         // expect((<FunctionScope>outerScope).hasLexEnv(), "outer scope need to create lex env").to.be.true;
         expect((<FunctionScope>outerScope).getNumLexEnv(), "number of lexvar at outer scope").to.be.equal(2);
-        let anonymousPg = snippetCompiler.getPandaGenByName("#2#");
+        let anonymousPg = snippetCompiler.getPandaGenByName("#1#");
         let anonymousScope = anonymousPg!.getScope();
         let anonymousA = anonymousScope!.findLocal("a");
         let searchRlt = anonymousScope!.find("a");
