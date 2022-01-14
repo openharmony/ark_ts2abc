@@ -146,10 +146,12 @@ export class Ts2Panda {
 
     static dumpConstantPool(ts2abc: any): void {
         let literalArrays = PandaGen.getLiteralArrayBuffer();
-        // console.log("-------- LiteralArrayBuffer --------");
-        // for (let e of PandaGen.getLiteralArrayBuffer()) {
-        //     console.log(JSON.parse(JSON.stringify(e)));
-        // }
+        if (CmdOptions.enableTypeLog()) {
+            console.log("-------- LiteralArrayBuffer --------");
+            for (let e of PandaGen.getLiteralArrayBuffer()) {
+                console.log(JSON.parse(JSON.stringify(e)));
+            }
+        }
 
         if (CmdOptions.isEnableDebugLog()) {
             Ts2Panda.jsonString += escapeUnicode(JSON.stringify(literalArrays, null, 2));
@@ -183,7 +185,7 @@ export class Ts2Panda {
         ts2abc.stdio[3].write(jsonOpt + '\n');
     }
 
-    static dumpPandaGen(pg: PandaGen, ts2abc: any): void {
+    static dumpPandaGen(pg: PandaGen, ts2abc: any, recordType?: boolean): void {
         let funcName = pg.internalName;
         let funcSignature = Ts2Panda.getFuncSignature(pg);
         let funcInsnsAndRegsNum = Ts2Panda.getFuncInsnsAndRegsNum(pg);
@@ -194,9 +196,12 @@ export class Ts2Panda {
         typeRecord.forEach((vreg) => {
             let typeOfVreg = new TypeOfVreg(vreg.num, vreg.getTypeIndex());
             typeInfo.push(typeOfVreg);
-            // console.log("---------------------------------------");
-            // console.log("\\\\\\\\\\\\ vreg name \\\\\\\\\\", vreg.getVariableName());
-            // console.log("\\\\\\\\\\\\ vreg type \\\\\\\\\\", vreg.getTypeIndex());
+            if (CmdOptions.enableTypeLog()) {
+                console.log("---------------------------------------");
+                console.log("- vreg name:", vreg.getVariableName());
+                console.log("- vreg local num:", vreg.num);
+                console.log("- vreg type:", vreg.getTypeIndex());
+            }
         });
 
         let exportedTypes = PandaGen.getExportedTypes();

@@ -30,7 +30,7 @@ export enum PrimitiveType {
     ANY,
     NUMBER,
     BOOLEAN,
-    BIGINT,
+    VOID,
     STRING,
     SYMBOL,
     NULL,
@@ -46,7 +46,7 @@ export enum L2Type {
     FUNCTION,
     UNION,
     ARRAY,
-    OBJECT, // object literal
+    OBJECT,
     EXTERNAL,
     INTERFACE
 }
@@ -178,7 +178,7 @@ export class ClassType extends BaseType {
                         this.modifier = ModifierAbstract.ABSTRACT;
                         break;
                     }
-                    case ts.SyntaxKind.ExportKeyword: {
+                    default: {
                         break;
                     }
                 }
@@ -224,6 +224,9 @@ export class ClassType extends BaseType {
                     }
                     case ts.SyntaxKind.ReadonlyKeyword: {
                         fieldInfo[2] = ModifierReadonly.READONLY;
+                        break;
+                    }
+                    default: {
                         break;
                     }
                 }
@@ -277,6 +280,8 @@ export class ClassType extends BaseType {
                         this.fillInFields(<ts.PropertyDeclaration>member);
                         break;
                     }
+                    default:
+                        break;
                 }
             }
         }
@@ -400,7 +405,10 @@ export class FunctionType extends BaseType {
                     }
                     case ts.SyntaxKind.StaticKeyword: {
                         this.modifierStatic = ModifierStatic.STATIC;
+                        break;
                     }
+                    default:
+                        break;
                 }
             }
         }
@@ -481,13 +489,13 @@ export class UnionType extends BaseType {
         let unionStr = typeNode.getText();
         if (this.hasUnionTypeMapping(unionStr)) {
             this.shiftedTypeIndex = this.getFromUnionTypeMap(unionStr)!;
-        } else {
-            this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
-            this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
-            this.fillInUnionArray(typeNode, this.unionedTypeArray);
-            this.setUnionTypeMap(unionStr, this.shiftedTypeIndex);
-            this.setTypeArrayBuffer(this, this.typeIndex);
+            return;
         }
+        this.typeIndex = this.getIndexFromTypeArrayBuffer(new PlaceHolderType());
+        this.shiftedTypeIndex = this.typeIndex + PrimitiveType._LENGTH;
+        this.fillInUnionArray(typeNode, this.unionedTypeArray);
+        this.setUnionTypeMap(unionStr, this.shiftedTypeIndex);
+        this.setTypeArrayBuffer(this, this.typeIndex);
     }
 
     hasUnionTypeMapping(unionStr: string) {
@@ -653,6 +661,8 @@ export class InterfaceType extends BaseType {
                         fieldInfo[2] = ModifierReadonly.READONLY;
                         break;
                     }
+                    default:
+                        break;
                 }
             }
         }
@@ -689,6 +699,8 @@ export class InterfaceType extends BaseType {
                         this.fillInFields(<ts.PropertySignature>member);
                         break;
                     }
+                    default:
+                        break;
                 }
             }
         }

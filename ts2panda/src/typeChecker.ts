@@ -166,8 +166,9 @@ export class TypeChecker {
                 return this.getTypeForPropertyAccessExpression(typeDeclNode);
             case ts.SyntaxKind.InterfaceDeclaration:
                 return this.getInterfaceDeclaration(typeDeclNode);
+            default:
+                return PrimitiveType.ANY;
         }
-        return PrimitiveType.ANY;
     }
 
     public getTypeFromAnotation(typeNode: ts.TypeNode | undefined) {
@@ -180,7 +181,7 @@ export class TypeChecker {
             case ts.SyntaxKind.BooleanKeyword:
             case ts.SyntaxKind.SymbolKeyword:
             case ts.SyntaxKind.UndefinedKeyword:
-            case ts.SyntaxKind.BigIntKeyword:
+            case ts.SyntaxKind.VoidKeyword:
             case ts.SyntaxKind.LiteralType:
                 let typeName = typeNode.getText().toUpperCase();
                 let typeIndex = PrimitiveType.ANY;
@@ -325,6 +326,8 @@ export class TypeChecker {
                     let typeNode = expressionType.getSymbol().valueDeclaration;
                     TypeRecorder.getInstance().addNonReExportedType(exportedName, typeNode, expression);
                 }
+                break;
+            default:
                 break;
         }
     }

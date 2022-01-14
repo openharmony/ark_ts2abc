@@ -40,7 +40,8 @@ const ts2pandaOptions = [
     { name: 'bc-min-version', type: Boolean, defaultValue: false, description: "Print ark bytecode minimum supported version" },
     { name: 'included-files', alias: 'i', type: String, lazyMultiple: true, defaultValue: [], description: "The list of dependent files." },
     { name: 'record-type', alias: 'p', type: Boolean, defaultValue: false, description: "Record type info. Default: true" },
-    { name: 'dts-type-record', alias: 'q', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" }
+    { name: 'dts-type-record', alias: 'q', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" },
+    { name: 'debug-type', alias: 'g', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" }
 ]
 
 
@@ -192,6 +193,13 @@ export class CmdOptions {
             return false;
         }
         return this.options["dts-type-record"];
+    }
+
+    static enableTypeLog(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["debug-type"];
     }
 
     static parseUserCmd(args: string[]): ts.ParsedCommandLine | undefined {

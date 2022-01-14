@@ -231,7 +231,7 @@ export class CompilerDriver {
         if (CmdOptions.isAssemblyMode()) {
             this.writeBinaryFile(pandaGen);
         } else {
-            Ts2Panda.dumpPandaGen(pandaGen, this.getTs2abcProcess());
+            Ts2Panda.dumpPandaGen(pandaGen, this.getTs2abcProcess(), recorder.recordType);
         }
 
         if (CmdOptions.showHistogramStatistics()) {

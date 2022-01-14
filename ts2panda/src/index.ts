@@ -28,6 +28,40 @@ import { TypeRecorder } from "./typeRecorder";
 import jshelpers = require("./jshelpers");
 import path = require("path");
 
+function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
+    for (let statement of sourceFile.statements) {
+        if (statement.modifiers) {
+            for (let modifier of statement.modifiers) {
+                if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
+                    return false;
+                }
+            }
+        } else if (statement.kind === ts.SyntaxKind.ExportAssignment) {
+            return false;
+        } else if (statement.kind === ts.SyntaxKind.ImportKeyword || statement.kind === ts.SyntaxKind.ImportDeclaration) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function generateDTs(node: ts.SourceFile, options: ts.CompilerOptions) {
+    let outputBinName = getOutputBinName(node);
+    let compilerDriver = new CompilerDriver(outputBinName);
+    setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
+    if (CmdOptions.isVariantBytecode()) {
+        LOGD("variant bytecode dump");
+        let passes: Pass[] = [
+            new CacheExpander(),
+            new ICPass(),
+            new RegAlloc()
+        ];
+        compilerDriver.setCustomPasses(passes);
+    }
+    compilerDriver.compile(node);
+    compilerDriver.showStatistics();
+}
+
 function main(fileNames: string[], options: ts.CompilerOptions) {
     let program = ts.createProgram(fileNames, options);
     let typeChecker = TypeChecker.getInstance();
@@ -40,40 +74,6 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                 generateDTs(sourceFile, options);
             }
         }
-    }
-
-    function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
-        for (let statement of sourceFile.statements) {
-            if (statement.modifiers) {
-                for (let modifier of statement.modifiers) {
-                    if (modifier.kind === ts.SyntaxKind.ExportKeyword) {
-                        return false;
-                    }
-                }
-            } else if (statement.kind === ts.SyntaxKind.ExportAssignment) {
-                return false;
-            } else if (statement.kind === ts.SyntaxKind.ImportKeyword || statement.kind === ts.SyntaxKind.ImportDeclaration) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function generateDTs(node: ts.SourceFile, options: ts.CompilerOptions) {
-        let outputBinName = getOutputBinName(node);
-        let compilerDriver = new CompilerDriver(outputBinName);
-        setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
-        if (CmdOptions.isVariantBytecode()) {
-            LOGD("variant bytecode dump");
-            let passes: Pass[] = [
-                new CacheExpander(),
-                new ICPass(),
-                new RegAlloc()
-            ];
-            compilerDriver.setCustomPasses(passes);
-        }
-        compilerDriver.compile(node);
-        compilerDriver.showStatistics();
     }
 
     let emitResult = program.emit(

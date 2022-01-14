@@ -83,7 +83,9 @@ export class Recorder {
         this.recordInfo(this.node, this.scope);
         if (this.recordType) {
             TypeRecorder.getInstance().setTypeSummary();
-            TypeRecorder.getInstance().getLog();
+            if (CmdOptions.enableTypeLog()) {
+                TypeRecorder.getInstance().getLog();
+            }
         } else {
             PandaGen.clearLiteralArrayBuffer();
         }
