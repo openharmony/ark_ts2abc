@@ -80,7 +80,7 @@ ark_gen_file("ts2abc_irnodes_ts") {
 action("npm_run_build") {
   visibility = [ ":*" ]
   deps = [
-    "$ts2abc_root:node_modules",
+    # "$ts2abc_root:node_modules",
     "$ts2abc_root:ts2abc_diagnostic_ts",
     "$ts2abc_root:ts2abc_irnodes_ts",
     "$ts2abc_root:ts2abc_src",
