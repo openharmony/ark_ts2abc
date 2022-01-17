@@ -52,6 +52,10 @@ export class LiteralBuffer {
       this.literalBuffer.push(...literals);
   }
 
+  getLiterals() {
+    return this.literalBuffer;
+  }
+
   isEmpty() {
       return this.literalBuffer.length == 0;
   }
