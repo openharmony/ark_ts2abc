@@ -59,4 +59,11 @@ export class LiteralBuffer {
   isEmpty() {
       return this.literalBuffer.length == 0;
   }
+
+  getLiteral(index: number) {
+    if (index >= this.literalBuffer.length || this.literalBuffer.length <=0) {
+      return ;
+    }
+    return this.literalBuffer[index];
+  }
 }

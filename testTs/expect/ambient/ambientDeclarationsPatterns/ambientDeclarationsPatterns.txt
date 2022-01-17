@@ -1,0 +1,4 @@
+{'literalBuffer': [{'tag': 2, 'value': 7}, {'tag': 5, 'value': '#foo#foobarbaz'}]}
+{'literalBuffer': [{'tag': 2, 'value': 7}, {'tag': 5, 'value': '#baz#foobarbaz'}]}
+{'literalBuffer': [{'tag': 2, 'value': 7}, {'tag': 5, 'value': '#foos#foosball'}]}
+{'literalBuffer': [{'tag': 2, 'value': 7}, {'tag': 5, 'value': '#fileText#./file!text'}]}
