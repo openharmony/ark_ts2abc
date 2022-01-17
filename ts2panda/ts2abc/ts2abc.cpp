@@ -403,6 +403,10 @@ static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::In
             if (debugPosInfo.isMember("wholeLine") && debugPosInfo["wholeLine"].isString()) {
                 insDebug.whole_line = debugPosInfo["wholeLine"].asString();
             }
+
+            if (debugPosInfo.isMember("columnNum") && debugPosInfo["columnNum"].isInt()) {
+                insDebug.column_number = debugPosInfo["columnNum"].asInt();
+            }
         }
 
         if (debugPosInfo.isMember("lineNum") && debugPosInfo["lineNum"].isInt()) {
