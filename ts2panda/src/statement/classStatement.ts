@@ -60,7 +60,7 @@ export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDe
     let classBuffer = new LiteralBuffer();
     let propertyIndex = 0;
     let staticItemsNum = 0;
-    let hasConstructor = isContainConstruct(stmt);
+    let hasConstructor = extractCtorOfClass(stmt) == undefined ? false : true;
 
     for (; propertyIndex < properties.length; propertyIndex++) {
         let prop = properties[propertyIndex];
@@ -131,44 +131,25 @@ export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDe
 
 export function AddCtor2Class(recorder: Recorder, classNode: ts.ClassLikeDeclaration, scope: Scope) {
     let ctorNode;
-    let hasHeritage = classNode.heritageClauses && classNode.heritageClauses.length;
-    let statement: ts.Statement | undefined;
-    let superCallNode = ts.createSuper();
-    if (hasHeritage) {
-        let parameter = ts.createParameter(undefined, undefined, ts.createToken(ts.SyntaxKind.DotDotDotToken), "args");
-        ctorNode = ts.createConstructor(undefined, undefined, [parameter], undefined);
-        let callNode = ts.createCall(
-            superCallNode,
-            undefined,
-            [ts.createSpread(ts.createIdentifier("args"))]
-        );
-        superCallNode.parent = callNode;
-        superCallNode.pos = classNode.pos;
-        superCallNode.end = classNode.pos;
-        statement = ts.createExpressionStatement(callNode);
-        callNode.parent = statement;
-        callNode.pos = classNode.pos;
-        callNode.end = classNode.pos;
+    if (jshelpers.getClassExtendsHeritageElement(classNode)) {
+        let parameter = ts.factory.createParameterDeclaration(undefined, undefined, ts.factory.createToken(ts.SyntaxKind.DotDotDotToken), "args");
+        ctorNode = ts.factory.createConstructorDeclaration(undefined, undefined, [parameter], undefined);
     } else {
-        ctorNode = ts.createConstructor(undefined, undefined, [], undefined);
+        ctorNode = ts.factory.createConstructorDeclaration(undefined, undefined, [], undefined);
     }
 
-    if (statement) {
-        ctorNode.body = ts.createBlock([statement]);
-        statement.parent = ctorNode;
-        statement.pos = classNode.pos;
-        statement.end = classNode.pos;
-    } else {
-        ctorNode.body = ts.createBlock([]);
-    }
+    ctorNode = jshelpers.setParent(ctorNode, classNode)!;
+    ctorNode = ts.setTextRange(ctorNode, classNode);
 
-    ctorNode.parent = classNode;
-    ctorNode.pos = classNode.pos;
-    ctorNode.end = classNode.pos;
-    ctorNode.body!.parent = ctorNode;
+    let body = ts.factory.createBlock([]);
+    body = jshelpers.setParent(body, ctorNode)!;
+    body = ts.setTextRange(body, classNode)!;
+
+    ctorNode = ts.factory.updateConstructorDeclaration(ctorNode, undefined, undefined, ctorNode.parameters, body);
+    ctorNode = jshelpers.setParent(ctorNode, classNode)!;
+    ctorNode = ts.setTextRange(ctorNode, classNode);
 
     let parentScope = <LocalScope>recorder.getScopeOfNode(classNode);
-    recorder.compilerDriver.getFuncId(classNode);
     let funcScope = recorder.buildVariableScope(scope, ctorNode);
     funcScope.setParent(parentScope);
 
@@ -180,6 +161,19 @@ export function AddCtor2Class(recorder: Recorder, classNode: ts.ClassLikeDeclara
 
     recorder.recordFuncName(ctorNode);
     recorder.recordFunctionParameters(ctorNode);
+
+    recorder.setCtorOfClass(classNode, ctorNode);
+}
+
+export function compileDefaultConstructor(compiler: Compiler, ctrNode: ts.ConstructorDeclaration) {
+    let callNode = ts.factory.createCallExpression(ts.factory.createSuper(), undefined,
+        [ts.factory.createSpreadElement(ts.factory.createIdentifier("args"))]);
+
+    callNode = jshelpers.setParent(callNode, ctrNode)!;
+    callNode = ts.setTextRange(callNode, ctrNode)!
+
+    compileSuperCall(compiler, callNode, [], true);
+    compileConstructor(compiler, ctrNode, false);
 }
 
 function compileUnCompiledProperty(compiler: Compiler, properties: Property[], classReg: VReg) {
@@ -234,20 +228,87 @@ function compileUnCompiledVariable(compiler: Compiler, prop: Property, classReg:
 
 function createClassLiteralBuf(compiler: Compiler, classBuffer: LiteralBuffer,
     stmt: ts.ClassLikeDeclaration, vregs: VReg[]) {
-    let pandaGen = compiler.getPandaGen();
     let classLiteralBuf = PandaGen.getLiteralArrayBuffer();
-    let buffIdx = classLiteralBuf.length;
-    let internalName = compiler.getCompilerDriver().getInternalNameForCtor(stmt);
     classLiteralBuf.push(classBuffer);
 
+    let ctorNode = compiler.getRecorder().getCtorOfClass(stmt);
+    let internalName = compiler.getCompilerDriver().getInternalNameForCtor(stmt, <ts.ConstructorDeclaration>ctorNode);
+
+    let pandaGen = compiler.getPandaGen();
     let parameterLength = getParameterLength4Ctor(stmt);
+    let buffIdx = classLiteralBuf.length - 1;
     pandaGen.defineClassWithBuffer(stmt, internalName, buffIdx, parameterLength, vregs[0]);
     pandaGen.storeAccumulator(stmt, vregs[1]);
 }
 
+export function compileDefaultInitClassMembers(compiler: Compiler, node: ts.ConstructorDeclaration) {
+    let pandaGen = compiler.getPandaGen();
+    let members = node.parent!.members;
+    for (let index = 0; index < members.length; index++) {
+        let decl = members[index];
+        if (ts.isPropertyDeclaration(decl) && !jshelpers.hasStaticModifier(decl)) {
+            if (!decl.initializer) {
+                continue;
+            }
+
+            let prop: VReg | string = "";
+            let thisReg: VReg = pandaGen.getTemp();
+            compiler.getThis(node, thisReg);
+
+            compiler.compileExpression(decl.initializer);
+
+            switch (decl.name.kind) {
+                case ts.SyntaxKind.Identifier:
+                case ts.SyntaxKind.StringLiteral:
+                case ts.SyntaxKind.NumericLiteral: {
+                    prop = jshelpers.getTextOfIdentifierOrLiteral(decl.name);
+                    pandaGen.storeObjProperty(node, thisReg, prop);
+                    break;
+                }
+                case ts.SyntaxKind.ComputedPropertyName: {
+                    // need to store the init value first
+                    let initVal: VReg = pandaGen.getTemp();
+                    pandaGen.storeAccumulator(node, initVal);
+
+                    prop = pandaGen.getTemp();
+                    compiler.compileExpression(decl.name.expression);
+                    pandaGen.storeAccumulator(node, prop);
+
+                    pandaGen.loadAccumulator(node, initVal);
+                    pandaGen.storeObjProperty(node, thisReg, prop);
+                    pandaGen.freeTemps(initVal, prop);
+                    break;
+                }
+                default:
+                    throw new Error("Private Identifier has not been supported")
+
+            }
+
+            pandaGen.freeTemps(thisReg);
+        }
+    }
+}
+
+export function compileReturnThis4Ctor(compiler: Compiler, node: ts.ConstructorDeclaration, unreachableFlag: boolean) {
+    let pandaGen = compiler.getPandaGen();
+
+    if (unreachableFlag) {
+        return;
+    }
+
+    let thisReg = pandaGen.getTemp();
+    compiler.getThis(node, thisReg);
+    pandaGen.loadAccumulator(node, thisReg);
+
+    checkValidUseSuperBeforeSuper(compiler, node);
+
+    pandaGen.return(node);
+    pandaGen.freeTemps(thisReg);
+}
+
 export function compileConstructor(compiler: Compiler, node: ts.ConstructorDeclaration, unreachableFlag: boolean) {
     let pandaGen = compiler.getPandaGen();
-    let members = node.parent.members;
+    let members = node.parent!.members;
 
     for (let index = 0; index < members.length; index++) {
         let decl = members[index];
@@ -330,19 +391,26 @@ export function compileSuperCall(compiler: Compiler, node: ts.CallExpression, ar
 function loadCtorObj(node: ts.CallExpression, compiler: Compiler) {
     let recorder = compiler.getRecorder();
     let pandaGen = compiler.getPandaGen();
-    let nearestFunc = jshelpers.getContainingFunction(node);
+    let nearestFunc = jshelpers.getContainingFunctionDeclaration(node);
+    if (!nearestFunc) {
+        return;
+    }
+
     let nearestFuncScope = <FunctionScope>recorder.getScopeOfNode(nearestFunc);
+    if (!nearestFuncScope) {
+        return;
+    }
 
     if (ts.isConstructorDeclaration(nearestFunc)) {
         let funcObj = <Variable>nearestFuncScope.findLocal("4funcObj");
         pandaGen.loadAccumulator(node, getVregisterCache(pandaGen, CacheList.FUNC));
     } else {
-        let outerFunc = jshelpers.getContainingFunction(nearestFunc);
-        let outerFuncScope = <FunctionScope>recorder.getScopeOfNode(outerFunc);
+        let outerFunc = jshelpers.getContainingFunctionDeclaration(nearestFunc);
+        let outerFuncScope = <FunctionScope>recorder.getScopeOfNode(outerFunc!);
         outerFuncScope.pendingCreateEnv();
         let level = 1;
-        while (!ts.isConstructorDeclaration(outerFunc)) {
-            outerFunc = jshelpers.getContainingFunction(outerFunc);
+        while (!ts.isConstructorDeclaration(outerFunc!)) {
+            outerFunc = jshelpers.getContainingFunctionDeclaration(outerFunc!);
             outerFuncScope.pendingCreateEnv();
             level++;
         }
@@ -355,16 +423,16 @@ function loadCtorObj(node: ts.CallExpression, compiler: Compiler) {
 
 }
 
-export function isContainConstruct(stmt: ts.ClassLikeDeclaration) {
+export function extractCtorOfClass(stmt: ts.ClassLikeDeclaration) {
     let members = stmt.members;
     for (let index = 0; index < members.length; index++) {
         let member = members[index];
         if (ts.isConstructorDeclaration(member)) {
-            return true
+            return member;
         }
     }
 
-    return false;
+    return undefined;
 }
 
 export function defineClassMember(
@@ -429,7 +497,7 @@ export function getClassNameForConstructor(classNode: ts.ClassLikeDeclaration) {
     let className = "";
 
     if (!isAnonymousClass(classNode)) {
-        className = jshelpers.getTextOfIdentifierOrLiteral(classNode.name);
+        className = jshelpers.getTextOfIdentifierOrLiteral(classNode.name!);
     } else {
         let outerNode = findOuterNodeOfParenthesis(classNode);
 
@@ -651,7 +719,7 @@ function scalarArrayEquals(node1: ts.Node | undefined, node2: ts.Node | undefine
         let val1Modifs = node1.modifiers;
         let val2Modifs = node2.modifiers;
         if (val1Modifs && val2Modifs) {
-            return val1Modifs.length == val2Modifs.length && val1Modifs.every(function(v, i) { return v === val2Modifs![i] });;
+            return val1Modifs.length == val2Modifs.length && val1Modifs.every(function (v, i) { return v === val2Modifs![i] });;
         }
 
         if (!val1Modifs && !val2Modifs) {

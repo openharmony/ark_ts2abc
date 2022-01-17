@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/test.gni")
 
 declare_args() {
   buildtool_linux = "//build/toolchain/linux:clang_x64"
@@ -27,12 +28,11 @@ declare_args() {
   ts2abc_build_path = ""
 }
 
+node_modules = "//prebuilts/build-tools/common/ts2abc/node_modules"
 if (build_public_version) {
   nodejs_dir = "//prebuilts/build-tools/common/nodejs"
-  node_modules = "//prebuilts/build-tools/common/ts2abc/node_modules"
 } else {
   nodejs_dir = "//prebuilts/ace-toolkit/nodejs"
-  node_modules = "//prebuilts/ace-toolkit/ace-loader/panda/node_modules"
 }
 
 if (host_toolchain == buildtool_mac) {
@@ -149,5 +149,81 @@ template("ts2abc_gen_abc") {
     }
 
     outputs = invoker.out_puts
+  }
+}
+
+template("ts2abc_unittest_action") {
+  _target_name_ = "${target_name}"
+  invoker.module_out_path = "ark/ts2abc"
+
+  # unittest for phone running
+  ohos_unittest(_target_name_) {
+    configs = [ "${ts2abc_root}/ts2abc:ts2abc_config" ]
+    deps = [ "${ts2abc_root}/ts2abc:ts2abc_static" ]
+    forward_variables_from(invoker, "*")
+  }
+
+  _module_out_path_ = invoker.module_out_path
+
+  # unittest for host running
+  action("${_target_name_}Action") {
+    testonly = true
+    _host_test_target_ = ":${_target_name_}(${host_toolchain})"
+    _root_out_dir_ = get_label_info(_host_test_target_, "root_out_dir")
+
+    deps = [ _host_test_target_ ]
+
+    script = "${ts2abc_root}/scripts/run_tests_executable.sh"
+
+    args = [ rebase_path(_root_out_dir_) +
+             "/tests/unittest/${_module_out_path_}/${_target_name_}" ]
+
+    inputs = [
+      "$_root_out_dir_/tests/unittest/${_module_out_path_}/${_target_name_}",
+    ]
+    outputs = [ "$target_out_dir/${_target_name_}/" ]
+  }
+}
+
+# ts2abc performs the ut test
+#
+# Mandatory arguments:
+# js_file: The name of the test use case file to execute , ex expression/TemplateExpression.test.js
+template("ts2abc_unittest") {
+  assert(defined(invoker.js_file), "js_file is required!")
+
+  action("$target_name") {
+    script = "${ts2abc_root}/scripts/run_tests.py"
+    deps = [ "${ts2abc_root}:ts2abc_tests" ]
+
+    args = [
+      "--src-dir",
+      rebase_path("${ts2abc_root}"),
+      "--dist-dir",
+      rebase_path(target_out_dir + "/.."),
+      "--node-modules",
+      rebase_path("${node_modules}"),
+      "--js-file",
+      invoker.js_file,
+      "--gn-build",
+    ]
+
+    if (host_toolchain == buildtool_linux) {
+      args += [
+        "--platform",
+        "linux",
+      ]
+    } else if (host_toolchain == buildtool_mac) {
+      args += [
+        "--platform",
+        "mac",
+      ]
+    } else {
+      args += [
+        "--platform",
+        "win",
+      ]
+    }
+    outputs = [ "$target_out_dir/${target_name}/" ]
   }
 }

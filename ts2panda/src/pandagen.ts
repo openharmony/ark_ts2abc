@@ -183,6 +183,8 @@ import { CatchTable } from "./statement/tryStatement";
 import {
     Variable
 } from "./variable";
+import { BaseType } from "./base/typeSystem";
+import { TypeRecorder } from "./typeRecorder";
 
 export class PandaGen {
     private debugTag: string = "PandaGen";
@@ -203,7 +205,7 @@ export class PandaGen {
     private icSize: number = 0;
     private callType: number = 0;
 
-    private static literalArrayBuffer: Array<LiteralBuffer> = [];
+    private static literalArrayBuffer: Array<LiteralBuffer> = new Array<LiteralBuffer>();
 
     constructor(internalName: string, parametersCount: number, scope: Scope | undefined = undefined) {
         this.internalName = internalName;
@@ -218,6 +220,22 @@ export class PandaGen {
 
     public getCallType(): number {
         return this.callType;
+    }
+    
+    static getExportedTypes() {
+        if (TypeRecorder.getInstance()) {
+            return TypeRecorder.getInstance().getExportedType();
+        } else {
+            return new Map<string, number>();
+        }
+    }
+
+    static getDeclaredTypes() {
+        if (TypeRecorder.getInstance()) {
+            return TypeRecorder.getInstance().getDeclaredType();
+        } else {
+            return new Map<string, number>();
+        }
     }
 
     public getSourceCodeDebugInfo() {
@@ -264,6 +282,16 @@ export class PandaGen {
 
     setICSize(total: number) {
         this.icSize = total;
+    }
+
+    static appendTypeArrayBuffer(type: BaseType): number {
+        let index = PandaGen.literalArrayBuffer.length;
+        PandaGen.literalArrayBuffer.push(type.transfer2LiteralBuffer());
+        return index;
+    }
+
+    static setTypeArrayBuffer(type: BaseType, index: number) {
+        PandaGen.literalArrayBuffer[index] = type.transfer2LiteralBuffer();
     }
 
     getFirstStmt() {

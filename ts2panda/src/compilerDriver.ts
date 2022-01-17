@@ -43,6 +43,7 @@ import {
 import { getClassNameForConstructor } from "./statement/classStatement";
 import { checkDuplicateDeclaration, checkExportEntries } from "./syntaxChecker";
 import { Ts2Panda } from "./ts2panda";
+import { TypeRecorder } from "./typeRecorder";
 
 export class PendingCompilationUnit {
     constructor(
@@ -143,6 +144,12 @@ export class CompilerDriver {
         return spArray.reverse();
     }
 
+    compileForSyntaxCheck(node: ts.SourceFile): void {
+       let recorder = this.compilePrologue(node, false);
+       checkDuplicateDeclaration(recorder);
+       checkExportEntries(recorder);
+    }
+
     compile(node: ts.SourceFile): void {
         if (CmdOptions.showASTStatistics()) {
             let statics: number[] = new Array(ts.SyntaxKind.Count).fill(0);
@@ -155,7 +162,7 @@ export class CompilerDriver {
             });
         }
 
-        let recorder = this.compilePrologue(node);
+        let recorder = this.compilePrologue(node, true);
 
         // initiate ts2abc
         if (!CmdOptions.isAssemblyMode()) {
@@ -224,7 +231,7 @@ export class CompilerDriver {
         if (CmdOptions.isAssemblyMode()) {
             this.writeBinaryFile(pandaGen);
         } else {
-            Ts2Panda.dumpPandaGen(pandaGen, this.getTs2abcProcess());
+            Ts2Panda.dumpPandaGen(pandaGen, this.getTs2abcProcess(), recorder.recordType);
         }
 
         if (CmdOptions.showHistogramStatistics()) {
@@ -233,7 +240,7 @@ export class CompilerDriver {
     }
 
     compileUnitTest(node: ts.SourceFile): void {
-        let recorder = this.compilePrologue(node);
+        let recorder = this.compilePrologue(node, true);
 
         for (let i = 0; i < this.pendingCompilationUnits.length; i++) {
             let unit: PendingCompilationUnit = this.pendingCompilationUnits[i];
@@ -261,7 +268,16 @@ export class CompilerDriver {
         this.compilationUnits.push(pandaGen);
     }
 
-    private compilePrologue(node: ts.SourceFile) {
+    private isTypeScriptSourceFile(node: ts.SourceFile) {
+        let fileName = node.fileName;
+        if (fileName && fileName.endsWith(".ts")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private compilePrologue(node: ts.SourceFile, recordType: boolean) {
         let topLevelScope: GlobalScope | ModuleScope;
         if (CmdOptions.isModules()) {
             topLevelScope = new ModuleScope(node);
@@ -269,12 +285,15 @@ export class CompilerDriver {
             topLevelScope = new GlobalScope(node);
         }
 
-        let recorder = new Recorder(node, topLevelScope, this);
+        let isTsFile = this.isTypeScriptSourceFile(node);
+        let enableTypeRecord = recordType && CmdOptions.needRecordType() && isTsFile;
+        if (enableTypeRecord) {
+            TypeRecorder.createInstance();
+        }
+        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, isTsFile);
         recorder.record();
-
-        checkDuplicateDeclaration(recorder);
-        checkExportEntries(recorder);
-        addVariableToScope(recorder);
+  
+        addVariableToScope(recorder, enableTypeRecord);
         let postOrderVariableScopes = this.postOrderAnalysis(topLevelScope);
 
         for (let variableScope of postOrderVariableScopes) {
@@ -320,7 +339,7 @@ export class CompilerDriver {
             name = "func_main_0";
         } else if (ts.isConstructorDeclaration(node)) {
             let classNode = node.parent;
-            name = this.getInternalNameForCtor(classNode);
+            name = this.getInternalNameForCtor(classNode, node);
         } else {
             let funcNode = <ts.FunctionLikeDeclaration>node;
             name = (<FunctionScope>recorder.getScopeOfNode(funcNode)).getFuncName();
@@ -349,11 +368,11 @@ export class CompilerDriver {
         return name;
     }
 
-    getInternalNameForCtor(node: ts.ClassLikeDeclaration) {
+    getInternalNameForCtor(node: ts.ClassLikeDeclaration, ctor: ts.ConstructorDeclaration) {
         let name = getClassNameForConstructor(node);
-        name = `#${this.getFuncId(node)}#${name}`
+        name = `#${this.getFuncId(ctor)}#${name}`
         if (name.lastIndexOf(".") != -1) {
-            name = `#${this.getFuncId(node)}#`
+            name = `#${this.getFuncId(ctor)}#`
         }
         return name;
     }

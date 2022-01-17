@@ -22,22 +22,29 @@ import path = require("path");
 import { execute } from "./base/util";
 
 const ts2pandaOptions = [
-    { name: 'variant-bytecode', alias: 'r', type: Boolean, defaultValue: true, description: "emit 2nd bytecode to pandafile."},
-    { name: 'modules', alias: 'm', type: Boolean, defaultValue: false, description: "compile as module."},
-    { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log."},
-    { name: 'dump-assembly', alias: 'a', type: Boolean, defaultValue: false, description: "dump assembly to file."},
-    { name: 'debug', alias: 'd', type: Boolean, defaultValue: false, description: "compile with debug info."},
-    { name: 'show-statistics', alias: 's', type: String, lazyMultiple: true, defaultValue: "", description: "show compile statistics(ast, histogram, hoisting, all)."},
-    { name: 'output', alias: 'o', type: String, defaultValue: "", description: "set output file."},
-    { name: 'timeout', alias: 't', type: Number, defaultValue: 0, description: "js to abc timeout threshold(unit: seconds)."},
-    { name: 'opt-log-level', type: String, defaultValue: "error", description: "specifie optimizer log level. Possible values: ['debug', 'info', 'error', 'fatal']"},
-    { name: 'opt-level', type: Number, defaultValue: 1, description: "Optimization level. Possible values: [0, 1, 2]. Default: 0\n    0: no optimizations\n    \
+    { name: 'variant-bytecode', alias: 'r', type: Boolean, defaultValue: true, description: "emit 2nd bytecode to pandafile." },
+    { name: 'modules', alias: 'm', type: Boolean, defaultValue: false, description: "compile as module." },
+    { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log." },
+    { name: 'dump-assembly', alias: 'a', type: Boolean, defaultValue: false, description: "dump assembly to file." },
+    { name: 'debug', alias: 'd', type: Boolean, defaultValue: false, description: "compile with debug info." },
+    { name: 'show-statistics', alias: 's', type: String, lazyMultiple: true, defaultValue: "", description: "show compile statistics(ast, histogram, hoisting, all)." },
+    { name: 'output', alias: 'o', type: String, defaultValue: "", description: "set output file." },
+    { name: 'timeout', alias: 't', type: Number, defaultValue: 0, description: "js to abc timeout threshold(unit: seconds)." },
+    { name: 'opt-log-level', type: String, defaultValue: "error", description: "specifie optimizer log level. Possible values: ['debug', 'info', 'error', 'fatal']" },
+    {
+        name: 'opt-level', type: Number, defaultValue: 1, description: "Optimization level. Possible values: [0, 1, 2]. Default: 0\n    0: no optimizations\n    \
                                                                     1: basic bytecode optimizations, including valueNumber, lowering, constantResolver, regAccAllocator\n    \
                                                                     2: other bytecode optimizations, unimplemented yet"},
-    { name: 'help', alias: 'h', type: Boolean, description: "Show usage guide."},
-    { name: 'bc-version', alias: 'v', type: Boolean, defaultValue: false, description: "Print ark bytecode version"},
-    { name: 'bc-min-version', type: Boolean, defaultValue: false, description: "Print ark bytecode minimum supported version"}
+    { name: 'help', alias: 'h', type: Boolean, description: "Show usage guide." },
+    { name: 'bc-version', alias: 'v', type: Boolean, defaultValue: false, description: "Print ark bytecode version" },
+    { name: 'bc-min-version', type: Boolean, defaultValue: false, description: "Print ark bytecode minimum supported version" },
+    { name: 'included-files', alias: 'i', type: String, lazyMultiple: true, defaultValue: [], description: "The list of dependent files." },
+    { name: 'record-type', alias: 'p', type: Boolean, defaultValue: false, description: "Record type info. Default: true" },
+    { name: 'dts-type-record', alias: 'q', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" },
+    { name: 'debug-type', alias: 'g', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" }
 ]
+
+
 
 export class CmdOptions {
     private static parsedResult: ts.ParsedCommandLine;
@@ -152,7 +159,7 @@ export class CmdOptions {
         return this.options["bc-version"];
     }
 
-    static getVersion(isBcVersion : boolean = true) : void {
+    static getVersion(isBcVersion: boolean = true): void {
         let js2abc = path.join(path.resolve(__dirname, '../bin'), "js2abc");
         let version_arg = isBcVersion ? "--bc-version" : "--bc-min-version"
         execute(`${js2abc}`, [version_arg]);
@@ -163,6 +170,36 @@ export class CmdOptions {
             return false;
         }
         return this.options["bc-min-version"];
+    }
+
+    static getIncludedFiles(): string[] {
+        if (!this.options) {
+            return [];
+        }
+
+        return this.options["included-files"];
+    }
+
+    static needRecordType(): boolean {
+        if (!this.options) {
+            return false;
+        }
+
+        return !this.options["record-type"];
+    }
+
+    static needRecordDtsType(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["dts-type-record"];
+    }
+
+    static enableTypeLog(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["debug-type"];
     }
 
     static parseUserCmd(args: string[]): ts.ParsedCommandLine | undefined {
@@ -186,4 +223,5 @@ export class CmdOptions {
         this.parsedResult = ts.parseCommandLine(this.options._unknown!);
         return this.parsedResult;
     }
+
 }

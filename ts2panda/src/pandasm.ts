@@ -73,6 +73,9 @@ export class Function {
     public sourceFile: string;
     public sourceCode: string | undefined;
     public callType: number;
+    public typeInfo: Array<TypeOfVreg>;
+    public exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined;
+    public declaredSymbol2Types: Array<DeclaredSymbol2Type> | undefined;
 
     constructor(
         name: string,
@@ -83,7 +86,10 @@ export class Function {
         variables: Array<VariableDebugInfo> | undefined = undefined,
         sourceFile: string = "",
         sourceCode: string | undefined = undefined,
-        callType: number = 0
+        callType: number = 0,
+        typeInfo: Array<TypeOfVreg>,
+        exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined = undefined,
+        declaredSymbol2Types: Array<DeclaredSymbol2Type> | undefined = undefined
     ) {
         this.name = name;
         this.signature = signature;
@@ -96,6 +102,9 @@ export class Function {
         this.sourceFile = sourceFile;
         this.sourceCode = sourceCode;
         this.callType = callType;
+        this.typeInfo = typeInfo;
+        this.exportedSymbol2Types = exportedSymbol2Types;
+        this.declaredSymbol2Types = declaredSymbol2Types;
     }
 }
 
@@ -166,6 +175,36 @@ export class CatchTable {
         this.tryBeginLabel = tryBeginLabel;
         this.tryEndLabel = tryEndLabel;
         this.catchBeginLabel = catchBeginLabel;
+    }
+}
+
+export class TypeOfVreg {
+    private vregNum: number;
+    private typeIndex: number;
+
+    constructor(vregNum: number, typeIndex: number) {
+        this.vregNum = vregNum;
+        this.typeIndex = typeIndex;
+    }
+}
+
+export class ExportedSymbol2Type {
+    private symbol: string;
+    private type: number;
+
+    constructor(symbol: string, type: number) {
+        this.symbol = symbol;
+        this.type = type;
+    }
+}
+
+export class DeclaredSymbol2Type {
+    private symbol: string;
+    private type: number;
+
+    constructor(symbol: string, type: number) {
+        this.symbol = symbol;
+        this.type = type;
     }
 }
 

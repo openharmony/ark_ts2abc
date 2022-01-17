@@ -30,10 +30,37 @@ import {
     VariableScope
 } from "./scope";
 import { isGlobalIdentifier } from "./syntaxCheckHelper";
-import { VarDeclarationKind } from "./variable";
+import {
+    VarDeclarationKind,
+    Variable
+} from "./variable";
+import { TypeRecorder } from "./typeRecorder";
+import { CmdOptions } from "./cmdOptions";
+import { PrimitiveType } from "./base/typeSystem";
 
+function setVariableOrParameterType(node: ts.Node, v: Variable | undefined) {
+    if (v) {
+        let typeIndex = TypeRecorder.getInstance().tryGetVariable2Type(ts.getOriginalNode(node));
+        v.setTypeIndex(typeIndex);
+    }
+}
 
-function addInnerArgs(node: ts.Node, scope: VariableScope): void {
+function setClassOrFunctionType(node: ts.Node, v: Variable | undefined) {
+    if (v) {
+        let typeIndex = TypeRecorder.getInstance().tryGetTypeIndex(ts.getOriginalNode(node));
+        v.setTypeIndex(typeIndex);
+    }
+}
+
+function setTypeIndex(node: ts.Node, v: Variable | undefined, isClassOrFunction: boolean) {
+    if (isClassOrFunction) {
+        setClassOrFunctionType(node, v);
+    } else {
+        setVariableOrParameterType(node, v);
+    }
+}
+
+function addInnerArgs(node: ts.Node, scope: VariableScope, enableTypeRecord: boolean): void {
     // the first argument for js function is func_obj
     scope.addParameter("4funcObj", VarDeclarationKind.CONST, -1);
     // the second argument for newTarget
@@ -48,7 +75,7 @@ function addInnerArgs(node: ts.Node, scope: VariableScope): void {
 
     if (node.kind != ts.SyntaxKind.SourceFile) {
         let funcNode = <ts.FunctionLikeDeclaration>node;
-        addParameters(funcNode, scope);
+        addParameters(funcNode, scope, enableTypeRecord);
     }
 
     if (scope.getUseArgs()) {
@@ -66,24 +93,29 @@ function addInnerArgs(node: ts.Node, scope: VariableScope): void {
     }
 }
 
-export function addVariableToScope(recorder: Recorder) {
+export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean) {
     let scopeMap = recorder.getScopeMap();
     let hoistMap = recorder.getHoistMap();
 
     scopeMap.forEach((scope, node) => {
         let hoistDecls = [];
         if (scope instanceof VariableScope) {
-            addInnerArgs(node, scope);
+            addInnerArgs(node, scope, enableTypeRecord);
 
             hoistDecls = <Decl[]>hoistMap.get(scope);
             if (hoistDecls) {
                 hoistDecls.forEach(hoistDecl => {
+                    let v: Variable | undefined;
                     if (hoistDecl instanceof VarDecl) {
-                        scope.add(hoistDecl.name, VarDeclarationKind.VAR);
+                        v = scope.add(hoistDecl.name, VarDeclarationKind.VAR);
                     } else if (hoistDecl instanceof FuncDecl) {
-                        scope.add(hoistDecl.name, VarDeclarationKind.FUNCTION);
+                        v = scope.add(hoistDecl.name, VarDeclarationKind.FUNCTION);
                     } else {
                         throw new Error("Wrong type of declaration to be hoisted")
+                    }
+
+                    if (enableTypeRecord) {
+                        setTypeIndex(hoistDecl.node, v, hoistDecl instanceof FuncDecl);
                     }
                 })
             }
@@ -98,22 +130,22 @@ export function addVariableToScope(recorder: Recorder) {
             if (hoistDecls && hoistDecls.includes(decl)) {
                 continue;
             }
-
+            let v: Variable | undefined;
             if (decl instanceof LetDecl) {
-                scope.add(decl.name, VarDeclarationKind.LET, InitStatus.UNINITIALIZED);
+                v = scope.add(decl.name, VarDeclarationKind.LET, InitStatus.UNINITIALIZED);
             } else if (decl instanceof ConstDecl) {
-                scope.add(decl.name, VarDeclarationKind.CONST, InitStatus.UNINITIALIZED);
+                v = scope.add(decl.name, VarDeclarationKind.CONST, InitStatus.UNINITIALIZED);
             } else if (decl instanceof FuncDecl) {
-                scope.add(decl.name, VarDeclarationKind.FUNCTION);
+                v = scope.add(decl.name, VarDeclarationKind.FUNCTION);
             } else if (decl instanceof CatchParameter) {
-                scope.add(decl.name, VarDeclarationKind.LET);
+                v = scope.add(decl.name, VarDeclarationKind.LET);
             } else if (decl instanceof ClassDecl) {
                 let classNode = decl.node;
                 if (ts.isClassDeclaration(classNode)) {
-                    scope.add(decl.name, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
+                    v = scope.add(decl.name, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
                 } else {
                     let classScope = <Scope>recorder.getScopeOfNode(classNode);
-                    classScope.add(decl.name, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
+                    v = classScope.add(decl.name, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
                 }
             } else {
                 /**
@@ -123,14 +155,17 @@ export function addVariableToScope(recorder: Recorder) {
                  * but it should be added to scope
                  */
                 if (isGlobalIdentifier(decls[j].name)) {
-                    scope.add(decls[j].name, VarDeclarationKind.VAR);
+                    v = scope.add(decls[j].name, VarDeclarationKind.VAR);
                 }
+            }
+            if (enableTypeRecord) {
+                setTypeIndex(decl.node, v, decl instanceof ClassDecl || decl instanceof FuncDecl);
             }
         }
     })
 }
 
-function addParameters(node: ts.FunctionLikeDeclaration, scope: VariableScope): void {
+function addParameters(node: ts.FunctionLikeDeclaration, scope: VariableScope, enableTypeRecord: boolean): void {
     let patternParams: Array<ts.BindingPattern> = new Array<ts.BindingPattern>();
     for (let i = 0; i < node.parameters.length; ++i) {
         let param = node.parameters[i];
@@ -142,7 +177,11 @@ function addParameters(node: ts.FunctionLikeDeclaration, scope: VariableScope): 
             name = jshelpers.getTextOfIdentifierOrLiteral(<ts.Identifier>param.name);
         }
 
-        scope.addParameter(name, VarDeclarationKind.VAR, i + 1);
+        let v = scope.addParameter(name, VarDeclarationKind.VAR, i + 1);
+
+        if (enableTypeRecord) {
+            setTypeIndex(param.name, v, false);
+        }
     }
 
     for (let i = 0; i < patternParams.length; i++) {

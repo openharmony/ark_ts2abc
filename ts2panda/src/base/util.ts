@@ -14,7 +14,7 @@
  */
 
 import path = require("path");
-import { isContainConstruct } from "../statement/classStatement";
+import { extractCtorOfClass } from "../statement/classStatement";
 import { LocalVariable, Variable } from "../variable";
 import * as ts from "typescript";
 import {
@@ -274,7 +274,7 @@ export function getParamLengthOfFunc(node: ts.FunctionLikeDeclaration) {
 }
 
 export function getParameterLength4Ctor(node: ts.ClassLikeDeclaration) {
-    if (!isContainConstruct(node)) {
+    if (!extractCtorOfClass(node)) {
         return 0;
     }
 

@@ -84,7 +84,11 @@ import {
 import {
     checkValidUseSuperBeforeSuper,
     compileClassDeclaration,
-    compileConstructor
+    compileConstructor,
+    compileDefaultConstructor,
+    compileDefaultInitClassMembers,
+    compileReturnThis4Ctor,
+    extractCtorOfClass
 } from "./statement/classStatement";
 import { compileForOfStatement } from "./statement/forOfStatement";
 import { LabelTarget } from "./statement/labelTarget";
@@ -269,6 +273,10 @@ export class Compiler {
         let statements = body.statements;
         let unreachableFlag = false;
 
+        if (body.parent && ts.isConstructorDeclaration(body.parent)) {
+            compileDefaultInitClassMembers(this, body.parent)
+        }
+
         statements.forEach((stmt) => {
             this.compileStatement(stmt);
             if (stmt.kind == ts.SyntaxKind.ReturnStatement) {
@@ -277,8 +285,7 @@ export class Compiler {
         });
 
         if (body.parent && ts.isConstructorDeclaration(body.parent)) {
-
-            compileConstructor(this, body.parent, unreachableFlag);
+            compileReturnThis4Ctor(this, body.parent, unreachableFlag);
             return;
         }
 
@@ -393,6 +400,14 @@ export class Compiler {
         let pandaGen = this.pandaGen;
         this.compileFunctionParameterDeclaration(decl);
 
+        if (ts.isConstructorDeclaration(decl)) {
+            let classNode = <ts.ClassLikeDeclaration>decl.parent;
+            if (jshelpers.getClassExtendsHeritageElement(classNode) && !extractCtorOfClass(classNode)) {
+                compileDefaultConstructor(this, decl);
+                return;
+            }
+        }
+
         if (decl.kind == ts.SyntaxKind.FunctionExpression) {
             if (decl.name) {
                 let funcName = jshelpers.getTextOfIdentifierOrLiteral(decl.name);
@@ -481,6 +496,8 @@ export class Compiler {
                 this.compileExportAssignment(<ts.ExportAssignment>stmt);
                 break;
             case ts.SyntaxKind.ExportDeclaration:
+            case ts.SyntaxKind.NotEmittedStatement:
+            case ts.SyntaxKind.InterfaceDeclaration:
                 break;
             default:
                 throw new Error("Statement " + this.getNodeName(stmt) + " is unimplemented");
@@ -611,7 +628,7 @@ export class Compiler {
     compileFinallyBeforeCFC(endTry: TryStatement | undefined, cfc: ControlFlowChange, continueTargetLabel: Label | undefined) {// compile finally before control flow change
         let startTry = TryStatement.getCurrentTryStatement();
         let originTry = startTry;
-        for (; startTry != endTry; startTry = startTry ?.getOuterTryStatement()) {
+        for (; startTry != endTry; startTry = startTry?.getOuterTryStatement()) {
 
             if (startTry && startTry.trybuilder) {
                 let inlineFinallyBegin = new Label();
@@ -673,7 +690,7 @@ export class Compiler {
         // try-catch-finally statements must have been transformed into
         // two nested try statements with only "catch" or "finally" each.
         if (stmt.catchClause && stmt.finallyBlock) {
-            transformTryCatchFinally(stmt, this.recorder);
+            stmt = transformTryCatchFinally(stmt, this.recorder);
         }
 
         let tryBuilder = new TryBuilder(this, this.pandaGen, stmt);
@@ -858,6 +875,8 @@ export class Compiler {
                 break;
             case ts.SyntaxKind.ClassExpression:
                 compileClassDeclaration(this, <ts.ClassLikeDeclaration>expr);
+                break;
+            case ts.SyntaxKind.PartiallyEmittedExpression:
                 break;
             default:
                 throw new Error("Expression of type " + this.getNodeName(expr) + " is unimplemented");
