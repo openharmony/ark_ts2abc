@@ -1,0 +1,11 @@
+{
+    "import" : [
+        "./testTs/test/ambient/ambientDeclarationsPatterns/ambientDeclarationsPatterns.ts",
+        "./testTs/test/ambient/ambientShorthand_merging/ambientShorthand_merging.ts",
+        "./testTs/test/ambient/ambientShorthand_reExport/ambientShorthand_reExport.ts",
+        "./testTs/test/declarationEmit/typeReferenceRelatedFiles/typeReferenceRelatedFiles.ts",
+        "./testTs/test/externalModules/typeOnly/importDefaultNamedType/importDefaultNamedType.ts",
+        "./testTs/test/moduleResolution/scopedPackages/scopedPackages.ts",
+        "./testTs/test/moduleResolution/scopedPackagesClassic/scopedPackagesClassic.ts"        
+    ]
+}

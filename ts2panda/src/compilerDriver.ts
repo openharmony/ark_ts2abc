@@ -189,6 +189,10 @@ export class CompilerDriver {
                     writeFileSync(jsonFileName, Ts2Panda.jsonString);
                     LOGD("Successfully generate ", `${jsonFileName}`);
                 }
+                if (CmdOptions.isOutputType()) {
+                    let typeFileName = this.fileName.substring(0, this.fileName.lastIndexOf(".")).concat(".txt");
+                    writeFileSync(typeFileName, Ts2Panda.dumpTypeLiteralArrayBuffer());
+                }
 
                 Ts2Panda.clearDumpData();
             } catch (err) {

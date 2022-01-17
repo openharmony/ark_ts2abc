@@ -39,6 +39,7 @@ import {
     getRangeStartVregPos
 } from "./base/util";
 import { TypeOfVreg } from "./pandasm";
+import { LiteralBuffer } from "./base/literal";
 
 const dollarSign: RegExp = /\$/g;
 
@@ -142,6 +143,19 @@ export class Ts2Panda {
             jsonStrUnicode = "$" + jsonStrUnicode.replace(dollarSign, '#$') + "$";
             ts2abc.stdio[3].write(jsonStrUnicode + '\n');
         });
+    }
+
+    static dumpTypeLiteralArrayBuffer() {
+        let literalArrays = PandaGen.getLiteralArrayBuffer();
+        let countType: LiteralBuffer = literalArrays[0];
+        let jsonTypeString: string = ""
+        let typeCount = countType.getLiteral(1)?.getValue();
+        if (typeCount) {
+            for (let i = 0; i < typeCount; i++) {
+                jsonTypeString += escapeUnicode(JSON.stringify(literalArrays[1+i], null, 2));
+            }
+        }
+        return jsonTypeString;
     }
 
     static dumpConstantPool(ts2abc: any): void {
