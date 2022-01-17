@@ -44,6 +44,7 @@ import { getClassNameForConstructor } from "./statement/classStatement";
 import { checkDuplicateDeclaration, checkExportEntries } from "./syntaxChecker";
 import { Ts2Panda } from "./ts2panda";
 import { TypeRecorder } from "./typeRecorder";
+import { LiteralBuffer } from "./base/literal";
 
 export class PendingCompilationUnit {
     constructor(
@@ -239,12 +240,15 @@ export class CompilerDriver {
         }
     }
 
-    compileUnitTest(node: ts.SourceFile): void {
+    compileUnitTest(node: ts.SourceFile, literalBufferArray?: Array<LiteralBuffer>): void {
         let recorder = this.compilePrologue(node, true);
 
         for (let i = 0; i < this.pendingCompilationUnits.length; i++) {
             let unit: PendingCompilationUnit = this.pendingCompilationUnits[i];
             this.compileUnitTestImpl(unit.decl, unit.scope, unit.internalName, recorder);
+        }
+        if (literalBufferArray) {
+            PandaGen.getLiteralArrayBuffer().forEach(val => literalBufferArray.push(val));
         }
 
         PandaGen.clearLiteralArrayBuffer();

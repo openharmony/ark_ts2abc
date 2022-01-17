@@ -30,6 +30,7 @@ import {
 } from "../../src/scope";
 import { setGlobalStrict } from "../../src/strictMode";
 import { creatAstFromSnippet } from "./asthelper";
+import { LiteralBuffer } from "../../src/base/literal";
 
 const compileOptions = {
     outDir: "../tmp/build",
@@ -138,7 +139,7 @@ export function checkInstructions(actual: IRNode[], expected: IRNode[], checkFn?
     return true;
 }
 
-export function compileAllSnippet(snippet: string, passes?: Pass[]): PandaGen[] {
+export function compileAllSnippet(snippet: string, passes?: Pass[], literalBufferArray?: Array<LiteralBuffer>): PandaGen[] {
     let sourceFile = creatAstFromSnippet(snippet);
     jshelpers.bindSourceFile(sourceFile, {});
     setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(sourceFile, compileOptions));
@@ -147,9 +148,8 @@ export function compileAllSnippet(snippet: string, passes?: Pass[]): PandaGen[] 
     if (!passes) {
         passes = [];
     }
-
     compilerDriver.setCustomPasses(passes);
-    compilerDriver.compileUnitTest(sourceFile);
+    compilerDriver.compileUnitTest(sourceFile, literalBufferArray);
     return compilerDriver.getCompilationUnits();
 }
 
@@ -176,8 +176,8 @@ export function getCompileOptions(): ts.CompilerOptions {
 
 export class SnippetCompiler {
     pandaGens: PandaGen[] = [];
-    compile(snippet: string, passes?: Pass[]) {
-        this.pandaGens = compileAllSnippet(snippet, passes);
+    compile(snippet: string, passes?: Pass[], literalBufferArray?: Array<LiteralBuffer>) {
+        this.pandaGens = compileAllSnippet(snippet, passes, literalBufferArray);
         return this.pandaGens;
     }
 
