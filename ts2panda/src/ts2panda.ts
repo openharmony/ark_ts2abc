@@ -24,9 +24,21 @@ import {
 } from "./irnodes";
 import { LOGD } from "./log";
 import { PandaGen } from "./pandagen";
-import { CatchTable, Function, Ins, Signature } from "./pandasm";
+import {
+    CatchTable,
+    DeclaredSymbol2Type,
+    ExportedSymbol2Type,
+    Function,
+    Ins,
+    Signature
+} from "./pandasm";
 import { generateCatchTables } from "./statement/tryStatement";
-import { escapeUnicode, isRangeInst, getRangeStartVregPos } from "./base/util";
+import {
+    escapeUnicode,
+    isRangeInst,
+    getRangeStartVregPos
+} from "./base/util";
+import { TypeOfVreg } from "./pandasm";
 
 const dollarSign: RegExp = /\$/g;
 
@@ -35,7 +47,8 @@ const JsonType = {
     "record": 1,
     "string": 2,
     "literal_arr": 3,
-    "options": 4
+    "options": 4,
+    "type_arr": 5
 };
 export class Ts2Panda {
     static strings: Set<string> = new Set();
@@ -119,7 +132,7 @@ export class Ts2Panda {
             Ts2Panda.jsonString += escapeUnicode(JSON.stringify(strings_arr, null, 2));
         }
 
-        strings_arr.forEach(function(str){
+        strings_arr.forEach(function(str) {
             let strObject = {
                 "type": JsonType.string,
                 "string": str
@@ -133,11 +146,18 @@ export class Ts2Panda {
 
     static dumpConstantPool(ts2abc: any): void {
         let literalArrays = PandaGen.getLiteralArrayBuffer();
+        if (CmdOptions.enableTypeLog()) {
+            console.log("-------- LiteralArrayBuffer --------");
+            for (let e of PandaGen.getLiteralArrayBuffer()) {
+                console.log(JSON.parse(JSON.stringify(e)));
+            }
+        }
+
         if (CmdOptions.isEnableDebugLog()) {
             Ts2Panda.jsonString += escapeUnicode(JSON.stringify(literalArrays, null, 2));
         }
 
-        literalArrays.forEach(function(literalArray){
+        literalArrays.forEach(function(literalArray) {
             let literalArrayObject = {
                 "type": JsonType.literal_arr,
                 "literalArray": literalArray
@@ -148,7 +168,7 @@ export class Ts2Panda {
         });
     }
 
-    static dumpCmdOptions(ts2abc: any): void  {
+    static dumpCmdOptions(ts2abc: any): void {
         let options = {
             "type": JsonType.options,
             "module_mode": CmdOptions.isModules(),
@@ -165,12 +185,42 @@ export class Ts2Panda {
         ts2abc.stdio[3].write(jsonOpt + '\n');
     }
 
-    static dumpPandaGen(pg: PandaGen, ts2abc: any): void {
+    static dumpPandaGen(pg: PandaGen, ts2abc: any, recordType?: boolean): void {
         let funcName = pg.internalName;
         let funcSignature = Ts2Panda.getFuncSignature(pg);
         let funcInsnsAndRegsNum = Ts2Panda.getFuncInsnsAndRegsNum(pg);
         let sourceFile = pg.getSourceFileDebugInfo();
         let callType = pg.getCallType();
+        let typeRecord = pg.getLocals();
+        let typeInfo = new Array<TypeOfVreg>();
+        typeRecord.forEach((vreg) => {
+            let typeOfVreg = new TypeOfVreg(vreg.num, vreg.getTypeIndex());
+            typeInfo.push(typeOfVreg);
+            if (CmdOptions.enableTypeLog()) {
+                console.log("---------------------------------------");
+                console.log("- vreg name:", vreg.getVariableName());
+                console.log("- vreg local num:", vreg.num);
+                console.log("- vreg type:", vreg.getTypeIndex());
+            }
+        });
+
+        let exportedTypes = PandaGen.getExportedTypes();
+        let exportedSymbol2Types = exportedTypes.size == 0 ? undefined : new Array<ExportedSymbol2Type>();
+        if (funcName == "func_main_0") {
+            exportedTypes.forEach((type: number, symbol: string) => {
+                let exportedSymbol2Type = new ExportedSymbol2Type(symbol, type);
+                exportedSymbol2Types!.push(exportedSymbol2Type);
+            })
+        }
+
+        let declareddTypes = PandaGen.getDeclaredTypes();
+        let declaredSymbol2Types = declareddTypes.size == 0 ? undefined : new Array<DeclaredSymbol2Type>();
+        if (funcName == "func_main_0") {
+            declareddTypes.forEach((type: number, symbol: string) => {
+                let declaredSymbol2Type = new DeclaredSymbol2Type(symbol, type);
+                declaredSymbol2Types!.push(declaredSymbol2Type);
+            })
+        }
 
         let variables, sourceCode;
         if (CmdOptions.isDebugMode()) {
@@ -190,7 +240,10 @@ export class Ts2Panda {
             variables,
             sourceFile,
             sourceCode,
-            callType
+            callType,
+            typeInfo,
+            exportedSymbol2Types,
+            declaredSymbol2Types
         );
         let catchTables = generateCatchTables(pg.getCatchMap());
         catchTables.forEach((catchTable) => {

@@ -17,6 +17,7 @@ import * as ts from "typescript";
 import jshelpers from "./jshelpers";
 
 let globalStrict = true;
+let globalDeclare = false;
 
 export function checkStrictModeStatementList(node: ts.Node): boolean {
     let statements;
@@ -89,4 +90,12 @@ export function isStrictMode(node: ts.Node): boolean {
     }
 
     return checkStrictMode(node);
+}
+
+export function setGlobalDeclare(flag: boolean) {
+    globalDeclare = flag;
+}
+
+export function isGlobalDeclare() {
+    return globalDeclare;
 }

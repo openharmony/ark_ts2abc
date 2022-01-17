@@ -43,7 +43,7 @@ $ ./build.sh --product-name Hi3516DV300 --build-target ark_ts2abc
 使用ts2abc组件将JavaScript文件转换为方舟字节码文件
 
 ```
-$ cd out/ohos-arm-release/clang_x64/ark/ark/build
+$ cd out/hi3516dv300/clang_x64/ark/ark/build
 $ npm install
 $ node --expose-gc src/index.js [options] file.js
 ```

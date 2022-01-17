@@ -31,14 +31,23 @@ from config import *
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ark-tool',
+                        default=DEFAULT_ARK_TOOL,
+                        required=False,
                         help="ark's binary tool")
     parser.add_argument('--ark-frontend-tool',
+                        default=DEFAULT_ARK_FRONTEND_TOOL,
+                        required=False,
                         help="ark frontend conversion tool")
     parser.add_argument("--libs-dir",
+                        default=DEFAULT_LIBS_DIR,
+                        required=False,
                         help="The path collection of dependent so has been divided by':'")
     parser.add_argument("--js-file",
+                        required=True,
                         help="js file")
     parser.add_argument('--ark-frontend',
+                        default=DEFAULT_ARK_FRONTEND,
+                        required=False,
                         nargs='?', choices=ARK_FRONTEND_LIST, type=str,
                         help="Choose one of them")
     parser.add_argument('--ark-arch',
@@ -173,7 +182,7 @@ class ArkProgram():
         return retcode
 
     def execute(self):
-        
+
         os.environ["LD_LIBRARY_PATH"] = self.libs_dir
         file_name_pre = os.path.splitext(self.js_file)[0]
         cmd_args = []

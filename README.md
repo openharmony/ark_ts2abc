@@ -43,7 +43,7 @@ Install `node` and `npm`
 convert JS to ARK bytecode
 
 ```
-$ cd out/ohos-arm-release/clang_x64/ark/ark/build
+$ cd out//hi3516dv300/clang_x64/ark/ark/build
 $ npm install
 $ node --expose-gc src/index.js [options] file.js
 ```

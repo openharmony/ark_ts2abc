@@ -25,9 +25,17 @@ ohos_copy("ts2abc_src") {
   module_install_name = ""
 }
 
+action("npm_install") {
+  visibility = [ ":*" ]
+  script = "scripts/npm-install.sh"
+  args = [ rebase_path(node_path) ]
+  outputs = [ target_out_dir + "/$target_name/node_modules" ]
+  inputs = [ "${ts2abc_root}/package.json" ]
+}
+
 ohos_copy("node_modules") {
   sources = [ rebase_path("${node_modules}") ]
-
+  deps = [ ":npm_install" ]
   outputs = [ target_out_dir + "/node_modules" ]
   module_install_name = ""
 }
@@ -334,5 +342,10 @@ ohos_copy("copy_ts2abc_tests") {
 }
 
 group("ts2abc_unittests") {
+  testonly = true
   deps = [ "tests:ts2abc_tests(${buildtool_linux})" ]
+
+  # if (host_os == "linux") {
+  #   deps += [ "${ts2abc_root}/ts2abc/tests:unittest" ]
+  # }
 }

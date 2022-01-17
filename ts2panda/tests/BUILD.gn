@@ -26,7 +26,6 @@ action("ts2abc_tests") {
     rebase_path(target_out_dir + "/.."),
     "--node-modules",
     rebase_path("${node_modules}"),
-    "--gn-build",
   ]
 
   if (host_toolchain == buildtool_linux) {

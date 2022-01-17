@@ -103,10 +103,6 @@ function getTextOfNode(node, includeTrivia) {
   return ts.getTextOfNode(node, includeTrivia);
 }
 
-function getContainingClass(node) {
-  return ts.getContainingClass(node);
-}
-
 function nodePosToString(node) {
   return ts.nodePosToString(node);
 }
@@ -247,8 +243,8 @@ function isSuperProperty(node) {
   return ts.isSuperProperty(node);
 }
 
-function getClassExtendsHeritageElement(node) {
-  return ts.getClassExtendsHeritageElement(node);
+function setParent(child, parent) {
+  return ts.setParent(child, parent);
 }
 
 module.exports = {
@@ -274,7 +270,6 @@ module.exports = {
   getSourceFileOfNode: getSourceFileOfNode,
   isIterationStatement: isIterationStatement,
   getTextOfNode: getTextOfNode,
-  getContainingClass: getContainingClass,
   nodePosToString: nodePosToString,
   getContainingFunctionDeclaration: getContainingFunctionDeclaration,
   tokenToString: tokenToString,
@@ -310,5 +305,5 @@ module.exports = {
   isThisIdentifier: isThisIdentifier,
   isThisProperty: isThisProperty,
   isSuperProperty: isSuperProperty,
-  getClassExtendsHeritageElement: getClassExtendsHeritageElement,
+  setParent: setParent,
 };

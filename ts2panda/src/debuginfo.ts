@@ -167,15 +167,46 @@ export class DebugInfo {
         return DebugInfo.lastNode;
     }
 
+    public static searchForPos(node: ts.Node) {
+        let file = jshelpers.getSourceFileOfNode(node);
+        if (!file) {
+            return undefined;
+        }
+
+        let pos : number = 0;
+        let tempWholeLineText : string = ""
+        if (node.pos === -1 || node.end === -1) {
+            let parent = node.parent;
+            while (parent) {
+                if (parent.pos !== -1 && parent.end !== -1) {
+                    pos = parent.pos;
+                    tempWholeLineText = parent.getText();
+                    break;
+                }
+                parent = parent.parent;
+            }
+        } else {
+            pos = node.getStart();
+        }
+
+        let loc = file.getLineAndCharacterOfPosition(pos); 
+        let wholeLineText = tempWholeLineText || node.getText();
+        return {
+            loc: loc,
+            wholeLineText: wholeLineText
+        }
+    }
+
     public static setPosInfoForUninitializeIns(posInfo: DebugPosInfo, pandaGen: PandaGen) {
         let firstStmt = pandaGen.getFirstStmt();
         if (firstStmt) {
-            let file = jshelpers.getSourceFileOfNode(firstStmt);
-            let loc = file.getLineAndCharacterOfPosition(firstStmt.getStart());
-            let wholeLineText = firstStmt.getText();
-            posInfo.setSourecLineNum(loc.line);
-            posInfo.setSourecColumnNum(loc.character);
-            posInfo.setWholeLine(wholeLineText);
+            let res = this.searchForPos(firstStmt);
+            if (!res) {
+                return;
+            }
+            posInfo.setSourecLineNum(res.loc.line);
+            posInfo.setSourecColumnNum(res.loc.character);
+            posInfo.setWholeLine(res.wholeLineText);
         }
     }
 
@@ -199,14 +230,13 @@ export class DebugInfo {
         let wholeLineText = "";
         if (DebugInfo.isNode(node)) {
             let tsNode = <ts.Node>(node);
-            let file = jshelpers.getSourceFileOfNode(node);
-            if (!file) {
+            let res = this.searchForPos(tsNode);
+            if (!res) {
                 return;
             }
-            let loc = file.getLineAndCharacterOfPosition(tsNode.getStart());
-            wholeLineText = tsNode.getText();
-            lineNumber = loc.line;
-            columnNumber = loc.character;
+            wholeLineText = res.wholeLineText;
+            lineNumber = res.loc.line;
+            columnNumber = res.loc.character;
         }
 
         for (let i = 0; i < insns.length; i++) {

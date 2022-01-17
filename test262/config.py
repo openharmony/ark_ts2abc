@@ -29,9 +29,10 @@ BASE_OUT_DIR = os.path.join("out", "test262")
 
 CUR_FILE_DIR = os.path.dirname(__file__)
 CODE_ROOT = os.path.abspath(os.path.join(CUR_FILE_DIR, "../../.."))
-ARK_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/ark/ark"
-ICUI_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/global/i18n_standard"
+ARK_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark"
+ICUI_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/global/i18n_standard"
 LLVM_DIR = f"{CODE_ROOT}/prebuilts/clang/ohos/linux-x86_64/llvm/lib/"
+ARK_JS_RUNTIME_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark_js_runtime"
 
 # " mode_type": {
 #     "1": "only default",
@@ -45,8 +46,8 @@ TEST_ES2015_DIR = os.path.join(DATA_DIR, "test_es2015")
 TEST_CI_DIR = os.path.join(DATA_DIR, "test_CI")
 
 DEFAULT_ARK_FRONTEND_TOOL = os.path.join(ARK_DIR, "build", "src", "index.js")
-DEFAULT_ARK_TOOL = os.path.join(ARK_DIR, "..", "ark_js_runtime", "ark_js_vm")
-DEFAULT_LIBS_DIR = f"{ARK_DIR}:{ICUI_DIR}:{LLVM_DIR}"
+DEFAULT_ARK_TOOL = os.path.join(ARK_JS_RUNTIME_DIR, "ark_js_vm")
+DEFAULT_LIBS_DIR = f"{ARK_DIR}:{ICUI_DIR}:{LLVM_DIR}:{ARK_JS_RUNTIME_DIR}"
 
 DEFAULT_HOST_TYPE = "panda"
 DEFAULT_HOST_PATH = "python3"
@@ -83,6 +84,7 @@ ARK_ARCH_LIST = [
     "aarch64",
     "arm"
 ]
+
 DEFAULT_ARK_ARCH = ARK_ARCH_LIST[0]
 
 MODULE_FILES_LIST = [

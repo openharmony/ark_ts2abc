@@ -134,8 +134,8 @@ function compileNormalReturn(stmt: ts.ReturnStatement, returnValue: VReg, compil
 }
 
 function isReturnInDerivedCtor(stmt: ts.ReturnStatement) {
-    let funcNode = jshelpers.getContainingFunction(stmt);
-    if (!ts.isConstructorDeclaration(funcNode)) {
+    let funcNode = jshelpers.getContainingFunctionDeclaration(stmt);
+    if (!funcNode || !ts.isConstructorDeclaration(funcNode)) {
         return false;
     }
 

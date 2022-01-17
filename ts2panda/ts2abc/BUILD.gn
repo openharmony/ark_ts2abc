@@ -21,6 +21,7 @@ config("ts2abc_config") {
   include_dirs = [
     ".",
     "$jsoncpp_root/include",
+    "$ark_root/libpandabase",
   ]
 
   if (enable_bytecode_optimizer) {
@@ -46,7 +47,10 @@ config("ts2abc_config") {
 }
 
 ohos_executable("ts2abc") {
-  sources = [ "ts2abc.cpp" ]
+  sources = [
+    "main.cpp",
+    "ts2abc.cpp",
+  ]
 
   configs = [ ":ts2abc_config" ]
 

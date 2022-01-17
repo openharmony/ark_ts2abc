@@ -1,4 +1,5 @@
-/* * Copyright (c) 2021 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +26,7 @@
 #include "json/json.h"
 #include "ts2abc_options.h"
 #include "securec.h"
+#include "ts2abc.h"
 
 #ifdef ENABLE_BYTECODE_OPT
 #include "optimize_bytecode.h"
@@ -52,22 +54,11 @@ namespace {
     constexpr bool IS_DEFINED = true;
     // Temprorary map to simplify debuging
     std::unordered_map<std::string, panda::pandasm::Opcode> g_opcodeMap = {
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) { name, panda::pandasm::Opcode::opcode },
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) {name, panda::pandasm::Opcode::opcode},
         PANDA_INSTRUCTION_LIST(OPLIST)
 #undef OPLIST
-            { "", panda::pandasm::Opcode::INVALID },
+            {"", panda::pandasm::Opcode::INVALID},
     };
-
-    enum JsonType {
-        FUNCTION = 0,
-        RECORD,
-        STRING,
-        LITERALBUFFER,
-        OPTIONS
-    };
-
-    const int RETURN_SUCCESS = 0;
-    const int RETURN_FAILED = 1;
 }
 
 // pandasm hellpers
@@ -121,15 +112,36 @@ static bool IsValidInt32(double value)
         value >= static_cast<double>(std::numeric_limits<int>::min()));
 }
 
+bool GetDebugLog()
+{
+    return g_debugLogEnabled;
+}
+
+static void SetDebugLog(bool debugLog)
+{
+    g_debugLogEnabled = debugLog;
+}
+
+bool GetDebugModeEnabled()
+{
+    return g_debugModeEnabled;
+}
+
+static void SetDebugModeEnabled(bool value)
+{
+    g_debugModeEnabled = value;
+}
+
 // Unified interface for debug log print
 static void Logd(const char *format, ...)
 {
-    if (g_debugLogEnabled) {
+    if (GetDebugLog()) {
         va_list valist;
         va_start(valist, format);
         char logMsg[LOG_BUFFER_SIZE];
         int ret = vsnprintf_s(logMsg, sizeof(logMsg) - 1, sizeof(logMsg) - 1, format, valist);
         if (ret == -1) {
+            va_end(valist);
             return;
         }
         std::cout << logMsg << std::endl;
@@ -195,7 +207,7 @@ static std::string ParseUnicodeEscapeString(const std::string &data)
     return newData;
 }
 
-static std::string ParseString(const std::string &data)
+std::string ParseString(const std::string &data)
 {
     if (data.find("\\u") != std::string::npos) {
         return ParseUnicodeEscapeString(data);
@@ -379,7 +391,7 @@ static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::In
     panda::pandasm::debuginfo::Ins insDebug;
     if (ins.isMember("debug_pos_info") && ins["debug_pos_info"].isObject()) {
         auto debugPosInfo = ins["debug_pos_info"];
-        if (g_debugModeEnabled) {
+        if (GetDebugModeEnabled()) {
             if (debugPosInfo.isMember("boundLeft") && debugPosInfo["boundLeft"].isInt()) {
                 insDebug.bound_left = debugPosInfo["boundLeft"].asInt();
             }
@@ -415,7 +427,7 @@ static panda::pandasm::Ins ParseInstruction(const Json::Value &ins)
 
 static int ParseVariablesDebugInfo(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
-    if (!g_debugModeEnabled) {
+    if (!GetDebugModeEnabled()) {
         return RETURN_SUCCESS;
     }
 
@@ -464,7 +476,7 @@ static int ParseSourceFileDebugInfo(const Json::Value &function, panda::pandasm:
         pandaFunc.source_file = function["sourceFile"].asString();
     }
 
-    if (g_debugModeEnabled) {
+    if (GetDebugModeEnabled()) {
         if (function.isMember("sourceCode") && function["sourceCode"].isString()) {
             pandaFunc.source_code = function["sourceCode"].asString();
         }
@@ -496,7 +508,7 @@ static panda::pandasm::Function::CatchBlock ParsecatchBlock(const Json::Value &c
     return pandaCatchBlock;
 }
 
-static panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
+panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
 {
     std::string funcName = "";
     if (function.isMember("name") && function["name"].isString()) {
@@ -610,12 +622,164 @@ static void ParseFunctionCallType(const Json::Value &function, panda::pandasm::F
     }
     panda::pandasm::AnnotationData callTypeAnnotation("_ESCallTypeAnnotation");
     std::string annotationName = "callType";
-    panda::pandasm::AnnotationElement callTypeAnnotationElement(annotationName,
-        std::make_unique<panda::pandasm::ScalarValue>(
+    panda::pandasm::AnnotationElement callTypeAnnotationElement(
+        annotationName, std::make_unique<panda::pandasm::ScalarValue>(
         panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(callType)));
     callTypeAnnotation.AddElement(std::move(callTypeAnnotationElement));
-    const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(
-        std::move(callTypeAnnotation));
+    const_cast<std::vector<panda::pandasm::AnnotationData>&>(
+        pandaFunc.metadata->GetAnnotations()).push_back(std::move(callTypeAnnotation));
+}
+
+static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::Function &pandaFunc)
+{
+    if (function.isMember("typeInfo") && function["typeInfo"].isArray()) {
+        auto typeInfo = function["typeInfo"];
+        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        std::vector<panda::pandasm::ScalarValue> elements;
+        for (Json::ArrayIndex i = 0; i < typeInfo.size(); i++) {
+            auto type = typeInfo[i];
+            if (!type.isObject()) {
+                continue;
+            }
+
+            uint32_t vregNum = 0;
+            if (type.isMember("vregNum") && type["vregNum"].isInt()) {
+                vregNum = type["vregNum"].asUInt();
+            }
+
+            uint32_t typeIndex = 0;
+            if (type.isMember("typeIndex") && type["typeIndex"].isInt()) {
+                typeIndex = type["typeIndex"].asUInt();
+            }
+
+            panda::pandasm::ScalarValue vNum(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(vregNum));
+            elements.emplace_back(std::move(vNum));
+            panda::pandasm::ScalarValue tIndex(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            elements.emplace_back(std::move(tIndex));
+        }
+
+        std::string annotationName = "typeOfVreg";
+        panda::pandasm::AnnotationElement typeOfVregElement(
+            annotationName, std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::U32, elements)));
+        funcAnnotation.AddElement(std::move(typeOfVregElement));
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(
+            std::move(funcAnnotation));
+    }
+}
+
+static void ParseFunctionExportedType(const Json::Value &function, panda::pandasm::Function &pandaFunc)
+{
+    std::string funcName = "";
+    if (function.isMember("name") && function["name"].isString()) {
+        funcName = function["name"].asString();
+        if (funcName != "func_main_0") {
+            return;
+        }
+    }
+
+    if (function.isMember("exportedSymbol2Types") && function["exportedSymbol2Types"].isArray()) {
+        auto exportedTypes = function["exportedSymbol2Types"];
+        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        std::vector<panda::pandasm::ScalarValue> symbolElements;
+        std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
+        for (Json::ArrayIndex i = 0; i < exportedTypes.size(); i++) {
+            auto exportedType = exportedTypes[i];
+            if (!exportedType.isObject()) {
+                continue;
+            }
+
+            std::string exportedSymbol = "";
+            if (exportedType.isMember("symbol") && exportedType["symbol"].isString()) {
+                exportedSymbol = exportedType["symbol"].asString();
+            }
+
+            uint32_t typeIndex = 0;
+            if (exportedType.isMember("type") && exportedType["type"].isInt()) {
+                typeIndex = exportedType["type"].asUInt();
+            }
+
+            panda::pandasm::ScalarValue symbol(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(exportedSymbol));
+            symbolElements.emplace_back(std::move(symbol));
+            panda::pandasm::ScalarValue tIndex(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            symbolTypeElements.emplace_back(std::move(tIndex));
+        }
+
+        std::string symbolAnnotationName = "exportedSymbols";
+        panda::pandasm::AnnotationElement exportedSymbolsElement(symbolAnnotationName,
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::STRING, symbolElements)));
+        funcAnnotation.AddElement(std::move(exportedSymbolsElement));
+
+        std::string symbolTypeAnnotationName = "exportedSymbolTypes";
+        panda::pandasm::AnnotationElement exportedSymbolTypesElement(symbolTypeAnnotationName,
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::U32, symbolTypeElements)));
+        funcAnnotation.AddElement(std::move(exportedSymbolTypesElement));
+
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(
+            pandaFunc.metadata->GetAnnotations()).push_back(std::move(funcAnnotation));
+    }
+}
+
+static void ParseFunctionDeclaredType(const Json::Value &function, panda::pandasm::Function &pandaFunc)
+{
+    std::string funcName = "";
+    if (function.isMember("name") && function["name"].isString()) {
+        funcName = function["name"].asString();
+        if (funcName != "func_main_0") {
+            return;
+        }
+    }
+
+    if (function.isMember("declaredSymbol2Types") && function["declaredSymbol2Types"].isArray()) {
+        auto declaredTypes = function["declaredSymbol2Types"];
+        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        std::vector<panda::pandasm::ScalarValue> symbolElements;
+        std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
+        for (Json::ArrayIndex i = 0; i < declaredTypes.size(); i++) {
+            auto declaredType = declaredTypes[i];
+            if (!declaredType.isObject()) {
+                continue;
+            }
+
+            std::string declaredSymbol = "";
+            if (declaredType.isMember("symbol") && declaredType["symbol"].isString()) {
+                declaredSymbol = declaredType["symbol"].asString();
+            }
+
+            uint32_t typeIndex = 0;
+            if (declaredType.isMember("type") && declaredType["type"].isInt()) {
+                typeIndex = declaredType["type"].asUInt();
+            }
+
+            panda::pandasm::ScalarValue symbol(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::STRING>(declaredSymbol));
+            symbolElements.emplace_back(std::move(symbol));
+            panda::pandasm::ScalarValue tIndex(
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
+            symbolTypeElements.emplace_back(std::move(tIndex));
+        }
+
+        std::string symbolAnnotationName = "declaredSymbols";
+        panda::pandasm::AnnotationElement declaredSymbolsElement(symbolAnnotationName,
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::STRING, symbolElements)));
+        funcAnnotation.AddElement(std::move(declaredSymbolsElement));
+
+        std::string symbolTypeAnnotationName = "declaredSymbolTypes";
+        panda::pandasm::AnnotationElement declaredSymbolTypesElement(symbolTypeAnnotationName,
+            std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
+            panda::pandasm::Value::Type::U32, symbolTypeElements)));
+        funcAnnotation.AddElement(std::move(declaredSymbolTypesElement));
+
+        const_cast<std::vector<panda::pandasm::AnnotationData>&>(pandaFunc.metadata->GetAnnotations()).push_back(
+            std::move(funcAnnotation));
+    }
 }
 
 static panda::pandasm::Function ParseFunction(const Json::Value &function)
@@ -623,16 +787,15 @@ static panda::pandasm::Function ParseFunction(const Json::Value &function)
     auto pandaFunc = GetFunctionDefintion(function);
     ParseFunctionMetadata(function, pandaFunc);
     ParseFunctionInstructions(function, pandaFunc);
-    // parsing variables debug info
     ParseVariablesDebugInfo(function, pandaFunc);
-    // parsing source file debug info
     ParseSourceFileDebugInfo(function, pandaFunc);
-    // parsing labels
     ParseFunctionLabels(function, pandaFunc);
-    // parsing catch blocks
     ParseFunctionCatchTables(function, pandaFunc);
     // parsing call opt type
     ParseFunctionCallType(function, pandaFunc);
+    ParseFunctionTypeInfo(function, pandaFunc);
+    ParseFunctionExportedType(function, pandaFunc);
+    ParseFunctionDeclaredType(function, pandaFunc);
 
     return pandaFunc;
 }
@@ -643,6 +806,13 @@ static void GenerateESCallTypeAnnotationRecord(panda::pandasm::Program &prog)
     callTypeAnnotationRecord.metadata->SetAttribute("external");
     callTypeAnnotationRecord.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
     prog.record_table.emplace(callTypeAnnotationRecord.name, std::move(callTypeAnnotationRecord));
+}
+static void GenerateESTypeAnnotationRecord(panda::pandasm::Program &prog)
+{
+    auto tsTypeAnnotationRecord = panda::pandasm::Record("_ESTypeAnnotation", LANG_EXT);
+    tsTypeAnnotationRecord.metadata->SetAttribute("external");
+    tsTypeAnnotationRecord.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
+    prog.record_table.emplace(tsTypeAnnotationRecord.name, std::move(tsTypeAnnotationRecord));
 }
 
 static void GenrateESModuleModeRecord(panda::pandasm::Program &prog, bool moduleMode)
@@ -661,7 +831,7 @@ static void GenrateESModuleModeRecord(panda::pandasm::Program &prog, bool module
     prog.record_table.emplace(ecmaModuleModeRecord.name, std::move(ecmaModuleModeRecord));
 }
 
-static int ParseJson(const std::string &data, Json::Value &rootValue)
+int ParseJson(const std::string &data, Json::Value &rootValue)
 {
     JSONCPP_STRING errs;
     Json::CharReaderBuilder readerBuilder;
@@ -692,18 +862,18 @@ static void ParseModuleMode(const Json::Value &rootValue, panda::pandasm::Progra
     GenrateESModuleModeRecord(prog, g_moduleModeEnabled);
 }
 
-static void ParseLogEnable(const Json::Value &rootValue)
+void ParseLogEnable(const Json::Value &rootValue)
 {
     if (rootValue.isMember("log_enabled") && rootValue["log_enabled"].isBool()) {
-        g_debugLogEnabled = rootValue["log_enabled"].asBool();
+        SetDebugLog(rootValue["log_enabled"].asBool());
     }
 }
 
-static void ParseDebugMode(const Json::Value &rootValue)
+void ParseDebugMode(const Json::Value &rootValue)
 {
     Logd("-----------------parse debug_mode-----------------");
     if (rootValue.isMember("debug_mode") && rootValue["debug_mode"].isBool()) {
-        g_debugModeEnabled = rootValue["debug_mode"].asBool();
+        SetDebugModeEnabled(rootValue["debug_mode"].asBool());
     }
 }
 
@@ -713,7 +883,7 @@ static void ParseOptLevel(const Json::Value &rootValue)
     if (rootValue.isMember("opt_level") && rootValue["opt_level"].isInt()) {
         g_optLevel = rootValue["opt_level"].asInt();
     }
-    if (g_debugModeEnabled) {
+    if (GetDebugModeEnabled()) {
         g_optLevel = 0;
     }
 }
@@ -740,6 +910,7 @@ static void ReplaceAllDistinct(std::string &str, const std::string &oldValue, co
 static void ParseOptions(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
     GenerateESCallTypeAnnotationRecord(prog);
+    GenerateESTypeAnnotationRecord(prog);
     ParseModuleMode(rootValue, prog);
     ParseLogEnable(rootValue);
     ParseDebugMode(rootValue);
@@ -789,31 +960,31 @@ static int ParseSmallPieceJson(const std::string &subJson, panda::pandasm::Progr
         type = rootValue["type"].asInt();
     }
     switch (type) {
-        case JsonType::FUNCTION: {
+        case static_cast<int>(JsonType::FUNCTION): {
             if (rootValue.isMember("func_body") && rootValue["func_body"].isObject()) {
                 ParseSingleFunc(rootValue, prog);
             }
             break;
         }
-        case JsonType::RECORD: {
+        case static_cast<int>(JsonType::RECORD): {
             if (rootValue.isMember("rec_body") && rootValue["rec_body"].isObject()) {
                 ParseSingleRec(rootValue, prog);
             }
             break;
         }
-        case JsonType::STRING: {
+        case static_cast<int>(JsonType::STRING): {
             if (rootValue.isMember("string") && rootValue["string"].isString()) {
                 ParseSingleStr(rootValue, prog);
             }
             break;
         }
-        case JsonType::LITERALBUFFER: {
+        case static_cast<int>(JsonType::LITERALBUFFER): {
             if (rootValue.isMember("literalArray") && rootValue["literalArray"].isObject()) {
                 ParseSingleLiteralBuf(rootValue, prog);
             }
             break;
         }
-        case JsonType::OPTIONS: {
+        case static_cast<int>(JsonType::OPTIONS): {
             ParseOptions(rootValue, prog);
             break;
         }
@@ -856,9 +1027,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-static bool GenerateProgram(const std::string &data, std::string output,
-                           panda::PandArg<int> optLevelArg,
-                           panda::PandArg<std::string> optLogLevelArg)
+bool GenerateProgram(const std::string &data, std::string output, int optLevel, std::string optLogLevel)
 {
     panda::pandasm::Program prog = panda::pandasm::Program();
     prog.lang = panda::pandasm::extensions::Language::ECMASCRIPT;
@@ -870,8 +1039,8 @@ static bool GenerateProgram(const std::string &data, std::string output,
     Logd("parsing done, calling pandasm\n");
 
 #ifdef ENABLE_BYTECODE_OPT
-    if (g_optLevel != O_LEVEL0 || optLevelArg.GetValue() != O_LEVEL0) {
-        std::string optLogLevel = (optLogLevelArg.GetValue() != "error") ? optLogLevelArg.GetValue() : g_optLogLevel;
+    if (g_optLevel != static_cast<int>(OptLevel::O_LEVEL0) || optLevel != static_cast<int>(OptLevel::O_LEVEL0)) {
+        optLogLevel = (optLogLevel != "error") ? optLogLevel : g_optLogLevel;
 
         const uint32_t componentMask = panda::Logger::Component::CLASS2PANDA | panda::Logger::Component::ASSEMBLER |
                                     panda::Logger::Component::BYTECODE_OPTIMIZER | panda::Logger::Component::COMPILER;
@@ -905,7 +1074,7 @@ static bool GenerateProgram(const std::string &data, std::string output,
     return true;
 }
 
-static bool HandleJsonFile(const std::string &input, std::string &data)
+bool HandleJsonFile(const std::string &input, std::string &data)
 {
     auto inputAbs = panda::os::file::File::GetAbsolutePath(input);
     if (!inputAbs) {
@@ -939,7 +1108,7 @@ static bool HandleJsonFile(const std::string &input, std::string &data)
     return true;
 }
 
-static bool ReadFromPipe(std::string &data)
+bool ReadFromPipe(std::string &data)
 {
     const size_t bufSize = 4096;
     const size_t fd = 3;
@@ -963,102 +1132,4 @@ static bool ReadFromPipe(std::string &data)
 
     Logd("finish reading from pipe");
     return true;
-}
-
-int main(int argc, const char *argv[])
-{
-    panda::PandArgParser argParser;
-    panda::Span<const char *> sp(argv, argc);
-    panda::ts2abc::Options options(sp[0]);
-    options.AddOptions(&argParser);
-
-    panda::PandArg<bool> sizeStatArg("size-stat", false, "Print panda file size statistic");
-    argParser.Add(&sizeStatArg);
-    panda::PandArg<bool> helpArg("help", false, "Print this message and exit");
-    argParser.Add(&helpArg);
-    panda::PandArg<int> optLevelArg("opt-level", 0,
-        "Optimization level. Possible values: [0, 1, 2]. Default: 0\n    0: no optimizations\n    "
-        "1: basic bytecode optimizations, including valueNumber, lowering, constantResolver, regAccAllocator\n    "
-        "2: (experimental optimizations): Sta/Lda Peephole, Movi/Lda Peephole, Register Coalescing");
-    argParser.Add(&optLevelArg);
-    panda::PandArg<std::string> optLogLevelArg("opt-log-level", "error",
-        "Optimization log level. Possible values: ['error', 'debug', 'info', 'fatal']. Default: 'error' ");
-    argParser.Add(&optLogLevelArg);
-    panda::PandArg<bool> bcVersionArg("bc-version", false, "Print ark bytecode version");
-    argParser.Add(&bcVersionArg);
-    panda::PandArg<bool> bcMinVersionArg("bc-min-version", false, "Print ark bytecode minimum supported version");
-    argParser.Add(&bcMinVersionArg);
-    panda::PandArg<bool> compileByPipeArg("compile-by-pipe", false, "Compile a json file that is passed by pipe");
-    argParser.Add(&compileByPipeArg);
-
-    argParser.EnableTail();
-
-    panda::PandArg<std::string> tailArg1("ARG_1", "", "Path to input(json file) or path to output(ark bytecode)" \
-        " when 'compile-by-pipe' enabled");
-    panda::PandArg<std::string> tailArg2("ARG_2", "", "Path to output(ark bytecode) or ignore when 'compile-by-pipe'" \
-        " enabled");
-    argParser.PushBackTail(&tailArg1);
-    argParser.PushBackTail(&tailArg2);
-
-    if (!argParser.Parse(argc, argv)) {
-        std::cerr << argParser.GetErrorString();
-        std::cerr << argParser.GetHelpString();
-        return RETURN_FAILED;
-    }
-
-    std::string usage = "Usage: ts2abc [OPTIONS]... [ARGS]...";
-    if (helpArg.GetValue()) {
-        std::cout << usage << std::endl;
-        std::cout << argParser.GetHelpString();
-        return RETURN_SUCCESS;
-    }
-
-    if (bcVersionArg.GetValue() || bcMinVersionArg.GetValue()) {
-        std::string version = bcVersionArg.GetValue() ? panda::panda_file::GetVersion(panda::panda_file::version) :
-            panda::panda_file::GetVersion(panda::panda_file::minVersion);
-        std::cout << version << std::endl;
-        return RETURN_SUCCESS;
-    }
-
-    if ((optLevelArg.GetValue() < O_LEVEL0) || (optLevelArg.GetValue() > O_LEVEL2)) {
-        std::cerr << "Incorrect optimization level value" << std::endl;
-        std::cerr << usage << std::endl;
-        std::cerr << argParser.GetHelpString();
-        return RETURN_FAILED;
-    }
-
-    std::string input, output;
-    std::string data = "";
-
-    if (!compileByPipeArg.GetValue()) {
-        input = tailArg1.GetValue();
-        output = tailArg2.GetValue();
-        if (input.empty() || output.empty()) {
-            std::cerr << "Incorrect args number" << std::endl;
-            std::cerr << "Usage example: ts2abc test.json test.abc\n" << std::endl;
-            std::cerr << usage << std::endl;
-            std::cerr << argParser.GetHelpString();
-            return RETURN_FAILED;
-        }
-        if (!HandleJsonFile(input, data)) {
-            return RETURN_FAILED;
-        }
-    } else {
-        output = tailArg1.GetValue();
-        if (output.empty()) {
-            std::cerr << usage << std::endl;
-            std::cerr << argParser.GetHelpString();
-            return RETURN_FAILED;
-        }
-        if (!ReadFromPipe(data)) {
-            return RETURN_FAILED;
-        }
-    }
-
-    if (!GenerateProgram(data, output, optLevelArg, optLogLevelArg)) {
-        std::cerr << "call GenerateProgram fail" << std::endl;
-        return RETURN_FAILED;
-    }
-
-    return RETURN_SUCCESS;
 }
