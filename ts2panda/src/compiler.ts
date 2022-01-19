@@ -553,12 +553,7 @@ export class Compiler {
         this.compileCondition(stmt.expression, stmt.elseStatement ? ifElseLabel : ifEndLabel);
         this.compileStatement(stmt.thenStatement);
         if (stmt.elseStatement) {
-            let flowNode = jshelpers.getFlowNode(stmt);
-            if (flowNode !== undefined) {
-                if (!(flowNode.flags & ts.FlowFlags.Unreachable)) { // if not unreachable
-                    this.pandaGen.branch(DebugInfo.getLastNode(), ifEndLabel);
-                }
-            }
+            this.pandaGen.branch(DebugInfo.getLastNode(), ifEndLabel);
             this.pandaGen.label(stmt, ifElseLabel);
             this.compileStatement(stmt.elseStatement);
         }
