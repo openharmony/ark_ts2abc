@@ -26,8 +26,8 @@ import { PrimitiveType } from '../../src/base/typeSystem';
 
 let shift = PrimitiveType._LENGTH;
 
-describe("primitives tests in primitives.test.ts", function () {
-    it("test primitives in block", function () {
+describe("primitives tests in primitives.test.ts", function() {
+    it("test primitives in block", function() {
         let fileNames = 'tests/types/primitives/primitives_in_block.ts';
         let result = compileTsWithType(fileNames);
         let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
@@ -57,7 +57,7 @@ describe("primitives tests in primitives.test.ts", function () {
         expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
     });
 
-    it("test number in function", function () {
+    it("test number in function", function() {
         let fileNames = 'tests/types/primitives/primitives_in_function.ts';
         let result = compileTsWithType(fileNames);
         let functionPg = result.snippetCompiler.getPandaGenByName("numberFunc");
@@ -97,7 +97,7 @@ describe("primitives tests in primitives.test.ts", function () {
         expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
     });
 
-    it("test primitives in for", function () {
+    it("test primitives in for", function() {
         let fileNames = 'tests/types/primitives/primitives_in_for.ts';
         let result = compileTsWithType(fileNames);
         let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
@@ -128,7 +128,7 @@ describe("primitives tests in primitives.test.ts", function () {
         expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
     });
 
-    it("test primitives in if", function () {
+    it("test primitives in if", function() {
         let fileNames = 'tests/types/primitives/primitives_in_if.ts';
         let result = compileTsWithType(fileNames);
         let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
@@ -158,7 +158,7 @@ describe("primitives tests in primitives.test.ts", function () {
         expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
     });
 
-    it("test primitives in class", function () {
+    it("test primitives in class", function() {
         let fileNames = 'tests/types/primitives/primitives_in_class.ts';
         let result = compileTsWithType(fileNames);
         let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
@@ -189,6 +189,62 @@ describe("primitives tests in primitives.test.ts", function () {
             ],
             [
                 [2, 2], [2, shift + 1]
+            ]
+        ]
+        let buff = createLiteralBufferArray(expectedBuffValues);
+        expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
+    });
+
+    it("test primitives with only type annotations", function() {
+        let fileNames = 'tests/types/primitives/primitives_only_type_annotation.ts';
+        let result = compileTsWithType(fileNames);
+        let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
+        let locals = functionPg!.getLocals();
+        // check vreg
+        let extectedVRegTypePair = [
+            ["#3#num", 1],
+            ["#4#bool", 2],
+            ["#5#str", 4],
+            ["#6#sym", 5],
+            ["#7#nu", 6],
+            ["#8#und", 7],
+            ["#9#vd", 3],
+        ]
+        let vreg2TypeMap = createVRegTypePair(extectedVRegTypePair);
+        expect(compareVReg2Type(vreg2TypeMap, locals), "check vreg typeInfo").to.be.true;
+
+        // check liberalBuffer
+        let expectedBuffValues = [
+            [
+                [2, 0], [2, 0], [2, 0]
+            ]
+        ]
+        let buff = createLiteralBufferArray(expectedBuffValues);
+        expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
+    });
+
+    it("test primitives without type annotations", function() {
+        let fileNames = 'tests/types/primitives/primitives_no_type_annotation.ts';
+        let result = compileTsWithType(fileNames);
+        let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
+        let locals = functionPg!.getLocals();
+        // check vreg
+        let extectedVRegTypePair = [
+            ["#3#num", 0],
+            ["#4#bool", 0],
+            ["#5#str", 0],
+            ["#6#sym", 0],
+            ["#7#nu", 0],
+            ["#8#und", 0],
+            ["#9#vd", 0],
+        ]
+        let vreg2TypeMap = createVRegTypePair(extectedVRegTypePair);
+        expect(compareVReg2Type(vreg2TypeMap, locals), "check vreg typeInfo").to.be.true;
+
+        // check liberalBuffer
+        let expectedBuffValues = [
+            [
+                [2, 0], [2, 0], [2, 0]
             ]
         ]
         let buff = createLiteralBufferArray(expectedBuffValues);

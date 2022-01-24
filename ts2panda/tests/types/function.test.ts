@@ -89,8 +89,8 @@ describe("function tests in function.test.ts", function () {
         expect(compareLiteralBuffer(buff, result.literalBufferArray), "check literal buffer").to.be.true;
     });
 
-    it("test function with muti parameter", function () {
-        let fileNames = 'tests/types/function/function_multi_para.ts';
+    it("test function with same type of paras and return", function () {
+        let fileNames = 'tests/types/function/function_same_para_and_return.ts';
         let result = compileTsWithType(fileNames);
         let functionPg = result.snippetCompiler.getPandaGenByName("func_main_0");
         let locals = functionPg!.getLocals();
@@ -98,7 +98,10 @@ describe("function tests in function.test.ts", function () {
         let extectedVRegTypePair = [
             ["#0#num", 1],
             ["#1#str", 4],
-            ["#0#emptyFunc", shift + 2],
+            ["#0#num", 1],
+            ["#1#str", 4],
+            ["#0#foo", shift + 2],
+            ["#1#bar", shift + 3],
         ]
         let vreg2TypeMap = createVRegTypePair(extectedVRegTypePair);
         expect(compareVReg2Type(vreg2TypeMap, locals), "check vreg typeInfo").to.be.true;
@@ -106,15 +109,19 @@ describe("function tests in function.test.ts", function () {
         // check liberalBuffer
         let expectedBuffValues = [
             [
-                [2, 0], [2, 2], [2, 0]
+                [2, 0], [2, 3], [2, 0]
             ],
             [
-                [2, 3], [2, 0], [2, 0], [5, 'local'],
-                [2, 0], [2, 0]
+                [2, 3],[2, 0],[2, 0],[5, 'twoFunctions'],
+                [2, 0],[2, 0]
             ],
             [
-                [2, 3], [2, 0], [2, 0], [5, 'emptyFunc'],
-                [2, 2], [2, 1], [2, 4], [2, 4]
+                [2, 3],[2, 0],[2, 0],[5, 'foo'],
+                [2, 2],[2, 1],[2, 4],[2, 3]
+            ],
+            [
+                [2, 3],[2, 0],[2, 0],[5, 'bar'],
+                [2, 2],[2, 1],[2, 4],[2, 3]
             ]
         ]
         let buff = createLiteralBufferArray(expectedBuffValues);
