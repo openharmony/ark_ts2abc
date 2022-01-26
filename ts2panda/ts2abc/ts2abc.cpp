@@ -195,7 +195,7 @@ static std::string ParseUnicodeEscapeString(const std::string &data)
             std::string tmpStr = data.substr(startIdx, index - startIdx);
             newData += ConvertUtf8ToMUtf8(tmpStr);
             std::string uStr = data.substr(index + UNICODE_ESCAPE_SYMBOL_LEN, UNICODE_CHARACTER_LEN);
-            uint16_t u16Data = std::stoi(uStr.c_str(), NULL, BASE);
+            uint16_t u16Data = static_cast<uint16_t>(std::stoi(uStr.c_str(), NULL, BASE));
             newData += ConvertUtf16ToMUtf8(&u16Data, 1);
             startIdx = index + UNICODE_ESCAPE_SYMBOL_LEN + UNICODE_CHARACTER_LEN;
         }
@@ -393,11 +393,11 @@ static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::In
         auto debugPosInfo = ins["debug_pos_info"];
         if (GetDebugModeEnabled()) {
             if (debugPosInfo.isMember("boundLeft") && debugPosInfo["boundLeft"].isInt()) {
-                insDebug.bound_left = debugPosInfo["boundLeft"].asInt();
+                insDebug.bound_left = debugPosInfo["boundLeft"].asUInt();
             }
 
             if (debugPosInfo.isMember("boundRight") && debugPosInfo["boundRight"].isInt()) {
-                insDebug.bound_right = debugPosInfo["boundRight"].asInt();
+                insDebug.bound_right = debugPosInfo["boundRight"].asUInt();
             }
 
             if (debugPosInfo.isMember("wholeLine") && debugPosInfo["wholeLine"].isString()) {
@@ -405,12 +405,12 @@ static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::In
             }
 
             if (debugPosInfo.isMember("columnNum") && debugPosInfo["columnNum"].isInt()) {
-                insDebug.column_number = debugPosInfo["columnNum"].asInt();
+                insDebug.column_number = debugPosInfo["columnNum"].asUInt();
             }
         }
 
         if (debugPosInfo.isMember("lineNum") && debugPosInfo["lineNum"].isInt()) {
-            insDebug.line_number = debugPosInfo["lineNum"].asInt();
+            insDebug.line_number = debugPosInfo["lineNum"].asUInt();
         }
     }
 
@@ -460,11 +460,11 @@ static int ParseVariablesDebugInfo(const Json::Value &function, panda::pandasm::
             }
 
             if (variable.isMember("start") && variable["start"].isInt()) {
-                variableDebug.start = variable["start"].asInt();
+                variableDebug.start = variable["start"].asUInt();
             }
 
             if (variable.isMember("length") && variable["length"].isInt()) {
-                variableDebug.length = variable["length"].asInt();
+                variableDebug.length = variable["length"].asUInt();
             }
 
             pandaFunc.local_variable_debug.push_back(variableDebug);
@@ -539,7 +539,7 @@ panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
         }
     }
 
-    int regsNum = 0;
+    uint32_t regsNum = 0;
     if (function.isMember("regs_num") && function["regs_num"].isInt()) {
         regsNum = function["regs_num"].asUInt();
     }
@@ -1011,7 +1011,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     bool isStartDollar = true;
 
     for (size_t idx = 0; idx < data.size(); idx++) {
-        if (data[idx] == '$' && data[idx - 1] != '#') {
+        if (data[idx] == '$' && (idx == 0 || data[idx - 1] != '#')) {
             if (isStartDollar) {
                 pos = idx + 1;
                 isStartDollar = false;
@@ -1099,7 +1099,11 @@ bool HandleJsonFile(const std::string &input, std::string &data)
     }
 
     file.seekg(0, std::ios::end);
-    size_t fileSize = file.tellg();
+    int64_t fileSize = file.tellg();
+    if (fileSize == -1) {
+        std::cerr << "failed to get position in input sequence: " << fpath << std::endl;
+        return false;
+    }
     file.seekg(0, std::ios::beg);
     auto buf = std::vector<char>(fileSize);
     file.read(reinterpret_cast<char *>(buf.data()), fileSize);
