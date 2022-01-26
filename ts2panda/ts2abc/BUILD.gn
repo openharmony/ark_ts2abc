@@ -31,7 +31,6 @@ config("ts2abc_config") {
   configs = [
     "$ark_root:ark_config",
     sdk_libc_secshared_config,
-    "$jsoncpp_root:jsoncpp_config",
     "$ark_root/libpandafile:arkfile_public_config",
     "$ark_root/libpandabase:arkbase_public_config",
     "$ark_root/runtime:arkruntime_public_config",
