@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-{
-    class A { };
-    let a: {
-        a: A;
-        b: string | number;
-    }
+function twoFunctions() {
+    function foo(num: number, str: string): void { }
+    function bar(num: number, str: string): void { }
 }

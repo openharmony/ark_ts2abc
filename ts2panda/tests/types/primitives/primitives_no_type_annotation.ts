@@ -14,9 +14,11 @@
  */
 
 {
-    class A { };
-    let a: {
-        a: A;
-        b: string | number;
-    }
+    let num = 3;
+    let bool = false;
+    let str = "myStr";
+    let sym = Symbol("mySym");
+    let nu = null;
+    let und = undefined;
+    let vd = undefined;
 }
