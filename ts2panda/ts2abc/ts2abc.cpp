@@ -1011,7 +1011,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     bool isStartDollar = true;
 
     for (size_t idx = 0; idx < data.size(); idx++) {
-        if (data[idx] == '$' && (idx == 0 || data[idx - 1] != '#')) {
+        if (data[idx] == '$' && data[idx - 1] != '#') {
             if (isStartDollar) {
                 pos = idx + 1;
                 isStartDollar = false;
