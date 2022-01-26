@@ -14,9 +14,11 @@
  */
 
 {
-    class A { };
-    let a: {
-        a: A;
-        b: string | number;
-    }
+    let num: number;
+    let bool: boolean;
+    let str: string;
+    let sym: symbol;
+    let nu: null;
+    let und: undefined;
+    let vd: void;
 }
