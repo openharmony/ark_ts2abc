@@ -41,7 +41,7 @@ const ts2pandaOptions = [
     { name: 'included-files', alias: 'i', type: String, lazyMultiple: true, defaultValue: [], description: "The list of dependent files." },
     { name: 'record-type', alias: 'p', type: Boolean, defaultValue: false, description: "Record type info. Default: true" },
     { name: 'dts-type-record', alias: 'q', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" },
-    { name: 'debug-type', alias: 'g', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" },
+    { name: 'debug-type', alias: 'g', type: Boolean, defaultValue: false, description: "Print type-related log. Default: false" },
     { name: 'output-type', type: Boolean, defaultValue: false, description: "set output type."}
 ]
 

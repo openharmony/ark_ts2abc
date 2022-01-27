@@ -18,12 +18,13 @@ For more infomation, see: [ARK Runtime Subsystem](https://gitee.com/openharmony/
 ```
 /ark/ts2abc/
 ├── test262            # scripts for configuration and running Test262
+├── testTs             # system test cases
 ├── ts2panda
-    ├── scripts        # Dependency scripts
-    ├── src            # Source code directory
-    ├── templates      # Ruby templates
-    ├── tests          # Unit test cases
-    ├── tools          # Tools provided by ts2abc
+    ├── scripts        # dependency scripts
+    ├── src            # source code directory
+    ├── templates      # ruby templates
+    ├── tests          # unit test cases
+    ├── tools          # tools provided by ts2abc
     └── ts2abc         # ts2abc source code
 
 ```
@@ -195,8 +196,64 @@ If no parameter is specified for  **\[options\]**, an ARK binary file is generat
 <td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014"></a>-</p>
 </td>
 </tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--included-files</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-i</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>The list of dependent files</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014"></a>-</p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--record-type</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-p</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>Record type info</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">true</a></p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--dts-type-record</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-q</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>Record type info for .d.ts files</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">false</a></p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--debug-type</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-g</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>Print type-related log</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">false</a></p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--output-type</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>Set output type</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">false</a></p>
+</td>
+</tr>
 </tbody>
 </table>
+
 
 For more infomation, please see: [ARK-Runtime-Usage-Guide](https://gitee.com/openharmony/ark_js_runtime/blob/master/docs/ARK-Runtime-Usage-Guide.md).
 
