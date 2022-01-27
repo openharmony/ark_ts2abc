@@ -24,7 +24,7 @@ import { execute } from "./base/util";
 const ts2pandaOptions = [
     { name: 'variant-bytecode', alias: 'r', type: Boolean, defaultValue: true, description: "emit 2nd bytecode to pandafile." },
     { name: 'modules', alias: 'm', type: Boolean, defaultValue: false, description: "compile as module." },
-    { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log." },
+    { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log and generate the json file."},
     { name: 'dump-assembly', alias: 'a', type: Boolean, defaultValue: false, description: "dump assembly to file." },
     { name: 'debug', alias: 'd', type: Boolean, defaultValue: false, description: "compile with debug info." },
     { name: 'show-statistics', alias: 's', type: String, lazyMultiple: true, defaultValue: "", description: "show compile statistics(ast, histogram, hoisting, all)." },

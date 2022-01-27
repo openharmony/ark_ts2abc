@@ -129,9 +129,6 @@ export class Ts2Panda {
 
     static dumpStringsArray(ts2abc: any) {
         let strings_arr = Array.from(Ts2Panda.strings);
-        if (CmdOptions.isEnableDebugLog()) {
-            Ts2Panda.jsonString += escapeUnicode(JSON.stringify(strings_arr, null, 2));
-        }
 
         strings_arr.forEach(function(str) {
             let strObject = {
@@ -139,8 +136,10 @@ export class Ts2Panda {
                 "string": str
             }
             let jsonStrUnicode = escapeUnicode(JSON.stringify(strObject, null, 2));
-            Ts2Panda.jsonString += jsonStrUnicode;
             jsonStrUnicode = "$" + jsonStrUnicode.replace(dollarSign, '#$') + "$";
+            if (CmdOptions.isEnableDebugLog()) {
+                Ts2Panda.jsonString += jsonStrUnicode;
+            }
             ts2abc.stdio[3].write(jsonStrUnicode + '\n');
         });
     }
@@ -167,10 +166,6 @@ export class Ts2Panda {
             }
         }
 
-        if (CmdOptions.isEnableDebugLog()) {
-            Ts2Panda.jsonString += escapeUnicode(JSON.stringify(literalArrays, null, 2));
-        }
-
         literalArrays.forEach(function(literalArray) {
             let literalArrayObject = {
                 "type": JsonType.literal_arr,
@@ -178,6 +173,9 @@ export class Ts2Panda {
             }
             let jsonLiteralArrUnicode = escapeUnicode(JSON.stringify(literalArrayObject, null, 2));
             jsonLiteralArrUnicode = "$" + jsonLiteralArrUnicode.replace(dollarSign, '#$') + "$";
+            if (CmdOptions.isEnableDebugLog()) {
+                Ts2Panda.jsonString += jsonLiteralArrUnicode;
+            }
             ts2abc.stdio[3].write(jsonLiteralArrUnicode + '\n');
         });
     }
@@ -192,10 +190,10 @@ export class Ts2Panda {
             "opt_log_level": CmdOptions.getOptLogLevel()
         };
         let jsonOpt = JSON.stringify(options, null, 2);
+        jsonOpt = "$" + jsonOpt.replace(dollarSign, '#$') + "$";
         if (CmdOptions.isEnableDebugLog()) {
             Ts2Panda.jsonString += jsonOpt;
         }
-        jsonOpt = "$" + jsonOpt.replace(dollarSign, '#$') + "$";
         ts2abc.stdio[3].write(jsonOpt + '\n');
     }
 
@@ -279,10 +277,10 @@ export class Ts2Panda {
             "func_body": func
         }
         let jsonFuncUnicode = escapeUnicode(JSON.stringify(funcObject, null, 2));
+        jsonFuncUnicode = "$" + jsonFuncUnicode.replace(dollarSign, '#$') + "$";
         if (CmdOptions.isEnableDebugLog()) {
             Ts2Panda.jsonString += jsonFuncUnicode;
         }
-        jsonFuncUnicode = "$" + jsonFuncUnicode.replace(dollarSign, '#$') + "$";
         ts2abc.stdio[3].write(jsonFuncUnicode + '\n');
     }
 
