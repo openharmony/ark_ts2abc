@@ -590,8 +590,8 @@ export class Compiler {
         let labelName: string = jshelpers.getTextOfIdentifierOrLiteral(stmt.label);
         let blockEndLabel = undefined;
 
-        // because there is no label in the block statement, we need to add the end label.
-        if (stmt.statement.kind == ts.SyntaxKind.Block) {
+        // because there is no label in the block/if statement, we need to add the end label.
+        if (stmt.statement.kind == ts.SyntaxKind.Block || stmt.statement.kind == ts.SyntaxKind.IfStatement) {
             blockEndLabel = new Label();
 
             let labelTarget = new LabelTarget(blockEndLabel, undefined);
