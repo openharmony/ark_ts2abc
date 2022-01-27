@@ -17,7 +17,8 @@ ts2abc组件是方舟运行时子系统的前端工具，支持将JavaScript文�
 
 ```
 /ark/ts2abc/
-├── test262            # Test262测试配置和运行脚本
+├── test262            # test262测试配置和运行脚本
+├── testTs             # 系统测试目录
 ├── ts2panda
     ├── doc            # 文档
     ├── scripts        # 依赖的脚本
@@ -51,6 +52,7 @@ $ node --expose-gc src/index.js [options] file.js
 当不输入任何option参数时，默认生成方舟二进制文件。
 
 <a name="table2035444615598"></a>
+
 <table><thead align="left"><tr id="row535415467591"><th class="cellrowborder" valign="top" width="12.898710128987101%" id="mcps1.1.6.1.1"><p id="p13354134619595"><a name="p13354134619595"></a><a name="p13354134619595"></a>选项</p>
 </th>
 <th class="cellrowborder" valign="top" width="6.869313068693131%" id="mcps1.1.6.1.2"><p id="p1584312189018"><a name="p1584312189018"></a><a name="p1584312189018"></a>缩写</p>
@@ -195,8 +197,64 @@ $ node --expose-gc src/index.js [options] file.js
 <td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014"></a>-</p>
 </td>
 </tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--included-files</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-i</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>编译依赖的文件列表</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014"></a>-</p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--record-type</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-p</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>是否记录类型信息</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">true</a></p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--dts-type-record</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-q</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>记录.d.ts文件的类型信息</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">false</a></p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--debug-type</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-g</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>打印记录的类型信息</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">false</a></p>
+</td>
+</tr>
+<tr id="row1335654635915"><td class="cellrowborder" valign="top" width="12.898710128987101%" headers="mcps1.1.6.1.1 "><p id="p175213504115"><a name="p175213504115"></a><a name="p175213504115"></a>--output-type</p>
+</td>
+<td class="cellrowborder" valign="top" width="6.869313068693131%" headers="mcps1.1.6.1.2 "><p id="p384481811016"><a name="p384481811016"></a><a name="p384481811016"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="19.33806619338066%" headers="mcps1.1.6.1.3 "><p id="p20729728003"><a name="p20729728003"></a><a name="p20729728003"></a>设置输出类型</p>
+</td>
+<td class="cellrowborder" valign="top" width="25.82741725827417%" headers="mcps1.1.6.1.4 "><p id="p4328533205"><a name="p4328533205"></a><a name="p4328533205"></a>-</p>
+</td>
+<td class="cellrowborder" valign="top" width="35.066493350664935%" headers="mcps1.1.6.1.5 "><p id="p175385118014"><a name="p175385118014"></a><a name="p175385118014">false</a></p>
+</td>
+</tr>
 </tbody>
 </table>
+
 
 更多使用说明请参考：[方舟运行时使用指南](https://gitee.com/openharmony/ark_js_runtime/blob/master/docs/ARK-Runtime-Usage-Guide-zh.md)
 
