@@ -405,12 +405,12 @@ static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::In
             }
 
             if (debugPosInfo.isMember("columnNum") && debugPosInfo["columnNum"].isInt()) {
-                insDebug.column_number = debugPosInfo["columnNum"].asUInt();
+                insDebug.column_number = debugPosInfo["columnNum"].asInt();
             }
         }
 
         if (debugPosInfo.isMember("lineNum") && debugPosInfo["lineNum"].isInt()) {
-            insDebug.line_number = debugPosInfo["lineNum"].asUInt();
+            insDebug.line_number = debugPosInfo["lineNum"].asInt();
         }
     }
 
