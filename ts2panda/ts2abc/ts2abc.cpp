@@ -41,10 +41,7 @@ namespace {
     int g_optLevel = 0;
     std::string g_optLogLevel = "error";
     bool g_moduleModeEnabled = false;
-    const int LOG_BUFFER_SIZE = 1024;
     const int BASE = 16;
-    const int UNICODE_ESCAPE_SYMBOL_LEN = 2;
-    const int UNICODE_CHARACTER_LEN = 4;
 
     int g_literalArrayCount = 0;
 
@@ -135,10 +132,11 @@ static void SetDebugModeEnabled(bool value)
 // Unified interface for debug log print
 static void Logd(const char *format, ...)
 {
+    const int logBufferSize = 1024;
     if (GetDebugLog()) {
         va_list valist;
         va_start(valist, format);
-        char logMsg[LOG_BUFFER_SIZE];
+        char logMsg[logBufferSize];
         int ret = vsnprintf_s(logMsg, sizeof(logMsg) - 1, sizeof(logMsg) - 1, format, valist);
         if (ret == -1) {
             va_end(valist);
@@ -177,6 +175,8 @@ static std::string ConvertUtf8ToMUtf8(const std::string &data)
 
 static std::string ParseUnicodeEscapeString(const std::string &data)
 {
+    const int unicodeEscapeSymbolLen = 2;
+    const int unicodeCharacterLen = 4;
     std::string::size_type startIdx = 0;
     std::string newData = "";
     std::string::size_type len = data.length();
@@ -188,16 +188,16 @@ static std::string ParseUnicodeEscapeString(const std::string &data)
         }
         if (index != 0 && data[index - 1] == '\\') {
             std::string tmpStr = data.substr(startIdx, index - 1 - startIdx) +
-                                data.substr(index, UNICODE_ESCAPE_SYMBOL_LEN); // delete a '\\'
+                                data.substr(index, unicodeEscapeSymbolLen); // delete a '\\'
             newData += ConvertUtf8ToMUtf8(tmpStr);
-            startIdx = index + UNICODE_ESCAPE_SYMBOL_LEN;
+            startIdx = index + unicodeEscapeSymbolLen;
         } else {
             std::string tmpStr = data.substr(startIdx, index - startIdx);
             newData += ConvertUtf8ToMUtf8(tmpStr);
-            std::string uStr = data.substr(index + UNICODE_ESCAPE_SYMBOL_LEN, UNICODE_CHARACTER_LEN);
-            uint16_t u16Data = std::stoi(uStr.c_str(), NULL, BASE);
+            std::string uStr = data.substr(index + unicodeEscapeSymbolLen, unicodeCharacterLen);
+            uint16_t u16Data = static_cast<uint16_t>(std::stoi(uStr.c_str(), NULL, BASE));
             newData += ConvertUtf16ToMUtf8(&u16Data, 1);
-            startIdx = index + UNICODE_ESCAPE_SYMBOL_LEN + UNICODE_CHARACTER_LEN;
+            startIdx = index + unicodeEscapeSymbolLen + unicodeCharacterLen;
         }
     }
     if (startIdx != len) {
@@ -294,12 +294,12 @@ static panda::pandasm::Record ParseRecord(const Json::Value &record)
 
     int boundLeft = -1;
     if (record.isMember("bound_left") && record["bound_left"].isInt()) {
-        boundLeft = record["bound_left"].asInt();
+        boundLeft = record["bound_left"].asUInt();
     }
 
     int boundRight = -1;
     if (record.isMember("bound_right") && record["bound_right"].isInt()) {
-        boundRight = record["bound_right"].asInt();
+        boundRight = record["bound_right"].asUInt();
     }
 
     int lineNumber = -1;
@@ -393,11 +393,11 @@ static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::In
         auto debugPosInfo = ins["debug_pos_info"];
         if (GetDebugModeEnabled()) {
             if (debugPosInfo.isMember("boundLeft") && debugPosInfo["boundLeft"].isInt()) {
-                insDebug.bound_left = debugPosInfo["boundLeft"].asInt();
+                insDebug.bound_left = debugPosInfo["boundLeft"].asUInt();
             }
 
             if (debugPosInfo.isMember("boundRight") && debugPosInfo["boundRight"].isInt()) {
-                insDebug.bound_right = debugPosInfo["boundRight"].asInt();
+                insDebug.bound_right = debugPosInfo["boundRight"].asUInt();
             }
 
             if (debugPosInfo.isMember("wholeLine") && debugPosInfo["wholeLine"].isString()) {
@@ -460,11 +460,11 @@ static int ParseVariablesDebugInfo(const Json::Value &function, panda::pandasm::
             }
 
             if (variable.isMember("start") && variable["start"].isInt()) {
-                variableDebug.start = variable["start"].asInt();
+                variableDebug.start = variable["start"].asUInt();
             }
 
             if (variable.isMember("length") && variable["length"].isInt()) {
-                variableDebug.length = variable["length"].asInt();
+                variableDebug.length = variable["length"].asUInt();
             }
 
             pandaFunc.local_variable_debug.push_back(variableDebug);
@@ -539,7 +539,7 @@ panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
         }
     }
 
-    int regsNum = 0;
+    uint32_t regsNum = 0;
     if (function.isMember("regs_num") && function["regs_num"].isInt()) {
         regsNum = function["regs_num"].asUInt();
     }
@@ -1011,7 +1011,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     bool isStartDollar = true;
 
     for (size_t idx = 0; idx < data.size(); idx++) {
-        if (data[idx] == '$' && data[idx - 1] != '#') {
+        if (data[idx] == '$' && (idx ==0 || data[idx - 1] != '#')) {
             if (isStartDollar) {
                 pos = idx + 1;
                 isStartDollar = false;
@@ -1099,7 +1099,11 @@ bool HandleJsonFile(const std::string &input, std::string &data)
     }
 
     file.seekg(0, std::ios::end);
-    size_t fileSize = file.tellg();
+    int64_t fileSize = file.tellg();
+    if (fileSize == -1) {
+        std::cerr << "failed to get position in input sequence: " << fpath << std::endl;
+        return false;
+    }
     file.seekg(0, std::ios::beg);
     auto buf = std::vector<char>(fileSize);
     file.read(reinterpret_cast<char *>(buf.data()), fileSize);
@@ -1115,6 +1119,7 @@ bool HandleJsonFile(const std::string &input, std::string &data)
 bool ReadFromPipe(std::string &data)
 {
     const size_t bufSize = 4096;
+    // the parent process open a pipe to this child process with fd of 3
     const size_t fd = 3;
 
     char buff[bufSize + 1];
