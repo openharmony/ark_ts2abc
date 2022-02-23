@@ -296,3 +296,11 @@ export function getRangeStartVregPos(ins: IRNode): number {
     }
     return ins instanceof EcmaCreateobjectwithexcludedkeys ? 2 : 1;
 }
+
+export function setPos(node: ts.Node) {
+    ts.setTextRange(node, {pos:-1, end:-1});
+    node.forEachChild(childNode => {
+        setPos(childNode);
+    });
+    return node;
+}
