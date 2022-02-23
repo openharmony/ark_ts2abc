@@ -27,6 +27,7 @@ import { TypeChecker } from "./typeChecker";
 import { TypeRecorder } from "./typeRecorder";
 import jshelpers = require("./jshelpers");
 import path = require("path");
+import { setPos } from "./base/util";
 
 function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
     for (let statement of sourceFile.statements) {
@@ -96,10 +97,18 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                 (ctx: ts.TransformationContext) => {
                     return (node: ts.SourceFile) => {
                         if (ts.getEmitHelpers(node)) {
-                            const printer: ts.Printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
-                            const text: string = printer.printNode(ts.EmitHint.Unspecified, node, node);
-                            let newNode = ts.createSourceFile(node.fileName, text, options.target!);
-                            node = newNode;
+                            let newStatements = [];
+                            ts.getEmitHelpers(node)?.forEach(
+                                item => {
+                                    let emitHelperSourceFile = ts.createSourceFile(node.fileName, <string>item.text, options.target!, true, ts.ScriptKind.JS);
+                                    emitHelperSourceFile.statements.forEach(emitStatement => {
+                                        let emitNode = setPos(emitStatement);
+                                        newStatements.push(emitNode);
+                                    });
+                                }
+                            )
+                            newStatements.push(...node.statements);
+                            node = ts.factory.updateSourceFile(node, newStatements);
                         }
                         let outputBinName = getOutputBinName(node);
                         let compilerDriver = new CompilerDriver(outputBinName);

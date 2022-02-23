@@ -174,23 +174,19 @@ export class DebugInfo {
         }
 
         let pos : number = 0;
-        let tempWholeLineText : string = ""
         if (node.pos === -1 || node.end === -1) {
-            let parent = node.parent;
-            while (parent) {
-                if (parent.pos !== -1 && parent.end !== -1) {
-                    pos = parent.pos;
-                    tempWholeLineText = parent.getText();
-                    break;
-                }
-                parent = parent.parent;
+            return {
+                loc: {
+                    line : -1,
+                    character : -1
+                },
+                wholeLineText: ""
             }
-        } else {
-            pos = node.getStart();
         }
 
+        pos = node.getStart();
         let loc = file.getLineAndCharacterOfPosition(pos); 
-        let wholeLineText = tempWholeLineText || node.getText();
+        let wholeLineText = node.getText();
         return {
             loc: loc,
             wholeLineText: wholeLineText
