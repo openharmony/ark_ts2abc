@@ -84,7 +84,6 @@ import {
 import {
     checkValidUseSuperBeforeSuper,
     compileClassDeclaration,
-    compileConstructor,
     compileDefaultConstructor,
     compileDefaultInitClassMembers,
     compileReturnThis4Ctor,
@@ -204,6 +203,7 @@ export class Compiler {
                 tempLocals.push(this.pandaGen.getLocals()[i]);
             }
             let name2variable = scope.getName2variable();
+            // @ts-ignore
             name2variable.forEach((value, key) => {
                 if (tempNames.has(key)) {
                     name2variable.delete(key)

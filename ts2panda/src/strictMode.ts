@@ -14,7 +14,7 @@
  */
 
 import * as ts from "typescript";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 
 let globalStrict = true;
 let globalDeclare = false;

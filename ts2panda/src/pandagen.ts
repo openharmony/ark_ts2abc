@@ -187,6 +187,7 @@ import { BaseType } from "./base/typeSystem";
 import { TypeRecorder } from "./typeRecorder";
 
 export class PandaGen {
+    // @ts-ignore
     private debugTag: string = "PandaGen";
     readonly internalName: string;
     private parametersCount: number;
@@ -654,6 +655,7 @@ export class PandaGen {
         this.add(node, moveVreg(vd, vs));
     }
 
+    // @ts-ignore
     label(node: ts.Node, label: Label) {
         this.add(NodeKind.FirstNodeOfFunction, label);
     }

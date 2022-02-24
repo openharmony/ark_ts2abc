@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { getInstructionSize, Imm, IRNode, IRNodeKind } from "./irnodes";
+import { getInstructionSize, IRNode, IRNodeKind } from "./irnodes";
 import { LOGD } from "./log";
 import { PandaGen } from "./pandagen";
 
@@ -175,6 +175,7 @@ class HistogramStatistics {
     getTotal() {
         let totalInsnsNum: number = 0;
         let totalSize: number = 0;
+        // @ts-ignore
         this.insHistogram.forEach((value, key) => {
             totalInsnsNum += value.getCount();
             totalSize += value.getTotalSize();
@@ -252,7 +253,8 @@ export class CompilerStatistics {
 
     printHistogram(verbose: boolean) {
         let totalHistogram = new HistogramStatistics("Total");
-
+        
+        // @ts-ignore
         this.histogramMap.forEach((histogram, funcName) => {
             totalHistogram.unionStatistics(histogram);
 

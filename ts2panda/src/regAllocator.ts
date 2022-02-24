@@ -13,27 +13,20 @@
  * limitations under the License.
  */
 
+import {
+    getRangeStartVregPos, isRangeInst
+} from "./base/util";
 import { CacheList } from "./base/vregisterCache";
 import { DebugInfo } from "./debuginfo";
 import {
-    EcmaCallithisrangedyn,
-    EcmaCallirangedyn,
-    EcmaNewobjdynrange,
-    EcmaCreateobjectwithexcludedkeys,
     Format,
     IRNode,
     MovDyn,
     OperandKind,
     OperandType,
-    VReg,
-    Imm
+    VReg
 } from "./irnodes";
 import { PandaGen } from "./pandagen";
-import {
-    isRangeInst,
-    getRangeStartVregPos,
-    getRangeExplicitVregNums,
-} from "./base/util";
 
 const MAX_VREGA = 16;
 const MAX_VREGB = 256;
@@ -202,7 +195,6 @@ class RegAllocator {
         /* the first operand is an imm */
         let startNum = (<VReg>operands[rangeRegOffset]).num;
         let i = rangeRegOffset + 1;
-        let implicitRegNums = (irNodes[index]).operands.length - i;
         for (; i < (irNodes[index]).operands.length; ++i) {
             if ((startNum + 1) != (<VReg>operands[i]).num) {
                 throw Error("Warning: VReg sequence of DynRange is not continuous. Please adjust it now.");
