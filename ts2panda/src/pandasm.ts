@@ -179,7 +179,9 @@ export class CatchTable {
 }
 
 export class TypeOfVreg {
+    // @ts-ignore
     private vregNum: number;
+    // @ts-ignore
     private typeIndex: number;
 
     constructor(vregNum: number, typeIndex: number) {
@@ -189,7 +191,9 @@ export class TypeOfVreg {
 }
 
 export class ExportedSymbol2Type {
+    // @ts-ignore
     private symbol: string;
+    // @ts-ignore
     private type: number;
 
     constructor(symbol: string, type: number) {
@@ -199,7 +203,9 @@ export class ExportedSymbol2Type {
 }
 
 export class DeclaredSymbol2Type {
+    // @ts-ignore
     private symbol: string;
+    // @ts-ignore
     private type: number;
 
     constructor(symbol: string, type: number) {

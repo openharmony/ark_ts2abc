@@ -29,7 +29,7 @@ import {
     Label,
     VReg
 } from "./irnodes";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 import {
     CatchTable,
     LabelPair

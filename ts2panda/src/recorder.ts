@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ts from "typescript";
+import * as ts from "typescript";
 import * as astutils from "./astutils";
 import { isAnonymousFunctionDefinition } from "./base/util";
 import { CmdOptions } from "./cmdOptions";
@@ -473,15 +473,19 @@ export class Recorder {
                 let outerNode = findOuterNodeOfParenthesis(node);
 
                 if (ts.isVariableDeclaration(outerNode)) {
+                    // @ts-ignore
                     let id = outerNode.name;
                     if (ts.isIdentifier(id)) {
                         name = jshelpers.getTextOfIdentifierOrLiteral(id);
                     }
                 } else if (ts.isBinaryExpression(outerNode)) {
+                    // @ts-ignore
                     if (outerNode.operatorToken.kind == ts.SyntaxKind.EqualsToken && ts.isIdentifier(outerNode.left)) {
+                        // @ts-ignore
                         name = jshelpers.getTextOfIdentifierOrLiteral(outerNode.left);
                     }
                 } else if (ts.isPropertyAssignment(outerNode)) {
+                    // @ts-ignore
                     let propName = outerNode.name;
                     if (ts.isIdentifier(propName) || ts.isStringLiteral(propName) || ts.isNumericLiteral(propName)) {
                         name = jshelpers.getTextOfIdentifierOrLiteral(propName);

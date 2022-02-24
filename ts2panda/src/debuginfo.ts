@@ -105,12 +105,18 @@ export class DebugPosInfo {
 }
 
 export class VariableDebugInfo {
+    // @ts-ignore
     private name = "";
+    // @ts-ignore
     private variable: Variable | undefined;
+    // @ts-ignore
     private signature = "";
+    // @ts-ignore
     private signatureType = "";
+    // @ts-ignore
     private reg: number = -1;
     private start: number = -1;
+    // @ts-ignore
     private length: number = -1;
 
     constructor(name: string, signature: string, signatureType: string,

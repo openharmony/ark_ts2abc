@@ -197,6 +197,7 @@ export class Ts2Panda {
         ts2abc.stdio[3].write(jsonOpt + '\n');
     }
 
+    // @ts-ignore
     static dumpPandaGen(pg: PandaGen, ts2abc: any, recordType?: boolean): void {
         let funcName = pg.internalName;
         let funcSignature = Ts2Panda.getFuncSignature(pg);
