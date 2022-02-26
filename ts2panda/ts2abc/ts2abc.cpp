@@ -294,12 +294,12 @@ static panda::pandasm::Record ParseRecord(const Json::Value &record)
 
     int boundLeft = -1;
     if (record.isMember("bound_left") && record["bound_left"].isInt()) {
-        boundLeft = record["bound_left"].asUInt();
+        boundLeft = record["bound_left"].asInt();
     }
 
     int boundRight = -1;
     if (record.isMember("bound_right") && record["bound_right"].isInt()) {
-        boundRight = record["bound_right"].asUInt();
+        boundRight = record["bound_right"].asInt();
     }
 
     int lineNumber = -1;
