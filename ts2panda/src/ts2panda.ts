@@ -40,6 +40,7 @@ import {
     getRangeStartVregPos
 } from "./base/util";
 import { LiteralBuffer } from "./base/literal";
+import { CompilerDriver } from "./compilerDriver";
 
 const dollarSign: RegExp = /\$/g;
 
@@ -204,33 +205,39 @@ export class Ts2Panda {
         let sourceFile = pg.getSourceFileDebugInfo();
         let callType = pg.getCallType();
         let typeRecord = pg.getLocals();
-        let typeInfo = new Array<number>();
-        typeRecord.forEach((vreg) => {
-            typeInfo.push(vreg.getTypeIndex());
-            if (CmdOptions.enableTypeLog()) {
-                console.log("---------------------------------------");
-                console.log("- vreg name:", vreg.getVariableName());
-                console.log("- vreg local num:", vreg.num);
-                console.log("- vreg type:", vreg.getTypeIndex());
+        let typeInfo = undefined;
+        let exportedSymbol2Types: undefined | Array<ExportedSymbol2Type> = undefined;
+        let declaredSymbol2Types: undefined | Array<DeclaredSymbol2Type> = undefined;
+        if (CmdOptions.needRecordType() && CompilerDriver.isTsFile) {
+            typeInfo = new Array<number>();
+            typeRecord.forEach((vreg) => {
+                typeInfo.push(vreg.getTypeIndex());
+                if (CmdOptions.enableTypeLog()) {
+                    console.log("---------------------------------------");
+                    console.log("- vreg name:", vreg.getVariableName());
+                    console.log("- vreg local num:", vreg.num);
+                    console.log("- vreg type:", vreg.getTypeIndex());
+                }
+            });
+
+            if (funcName == "func_main_0") {
+                let exportedTypes = PandaGen.getExportedTypes();
+                let declareddTypes = PandaGen.getDeclaredTypes();
+                if (exportedTypes.size != 0) {
+                    exportedSymbol2Types = new Array<ExportedSymbol2Type>();
+                    exportedTypes.forEach((type: number, symbol: string) => {
+                        let exportedSymbol2Type = new ExportedSymbol2Type(symbol, type);
+                        exportedSymbol2Types.push(exportedSymbol2Type);
+                    });
+                }
+                if (declareddTypes.size != 0) {
+                    declaredSymbol2Types = new Array<DeclaredSymbol2Type>();
+                    declareddTypes.forEach((type: number, symbol: string) => {
+                        let declaredSymbol2Type = new DeclaredSymbol2Type(symbol, type);
+                        declaredSymbol2Types.push(declaredSymbol2Type);
+                    });
+                }
             }
-        });
-
-        let exportedTypes = PandaGen.getExportedTypes();
-        let exportedSymbol2Types = exportedTypes.size == 0 ? undefined : new Array<ExportedSymbol2Type>();
-        if (funcName == "func_main_0") {
-            exportedTypes.forEach((type: number, symbol: string) => {
-                let exportedSymbol2Type = new ExportedSymbol2Type(symbol, type);
-                exportedSymbol2Types!.push(exportedSymbol2Type);
-            })
-        }
-
-        let declareddTypes = PandaGen.getDeclaredTypes();
-        let declaredSymbol2Types = declareddTypes.size == 0 ? undefined : new Array<DeclaredSymbol2Type>();
-        if (funcName == "func_main_0") {
-            declareddTypes.forEach((type: number, symbol: string) => {
-                let declaredSymbol2Type = new DeclaredSymbol2Type(symbol, type);
-                declaredSymbol2Types!.push(declaredSymbol2Type);
-            })
         }
 
         let variables, sourceCode;

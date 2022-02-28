@@ -254,10 +254,12 @@ export class DebugInfo {
 
     private static matchFormat(irnode: IRNode): number {
         let formatIndex = 0;
-        for (let i = 0; i < irnode.formats[0].length; i++) {
+        let formats = irnode.getFormats();
+        for (let i = 0; i < formats[0].length; i++) {
             if (irnode.operands[i] instanceof VReg) {
-                for (let j = 0; j < irnode.formats.length; j++) {
-                    if ((<VReg>irnode.operands[i]).num < (1 << irnode.formats[j][i].bitwidth)) {
+                for (let j = 0; j < formats.length; j++) {
+                    // formats[j][i][1] is vreg’s bitwidth
+                    if ((<VReg>irnode.operands[i]).num < (1 << formats[j][i][1])) {
                         formatIndex = j > formatIndex ? j : formatIndex;
                         continue;
                     }
@@ -272,20 +274,20 @@ export class DebugInfo {
             return 0;
         }
         let length = 1;
-        if (!irnode.formats[0]) {
+        if (!irnode.getFormats()[0]) {
             return 0;
         }
         let formatIndex = this.matchFormat(irnode);
-        let formats = irnode.formats[formatIndex];
+        let formats = irnode.getFormats()[formatIndex];
         // count operands length
         for (let i = 0; i < formats.length; i++) {
             if ((irnode instanceof CalliDynRange) || (irnode instanceof CallRange)) {
-                length += formats[0].bitwidth / 8; // 8 indicates that one byte is composed of 8 bits
-                length += formats[1].bitwidth / 8;
+                length += formats[0][1] / 8; // 8 indicates that one byte is composed of 8 bits
+                length += formats[1][1] / 8;
                 break;
             }
 
-            length += (formats[i].bitwidth / 8);
+            length += (formats[i][1] / 8);
         }
 
         return length;
