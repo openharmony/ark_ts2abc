@@ -107,7 +107,7 @@ class RegAllocator {
         let num = 0;
         for (let j = 0; j < operands.length; ++j) {
             if (operands[j] instanceof VReg) {
-                if ((<VReg>operands[j]).num >= (1 << format[j].bitwidth)) {
+                if ((<VReg>operands[j]).num >= (1 << format[j][1])) {
                     num++;
                 }
             }
@@ -135,22 +135,22 @@ class RegAllocator {
         for (let j = 0; j < operands.length; ++j) {
             if (operands[j] instanceof VReg) {
                 let vOrigin = <VReg>operands[j];
-                if (vOrigin.num >= (1 << format[j].bitwidth)) {
+                if (vOrigin.num >= (1 << format[j][1])) {
                     let spill = this.allocSpill();
                     spills.push(spill);
                     let vTmp;
                     try {
-                        vTmp = this.findTmpVreg(1 << format[j].bitwidth);
+                        vTmp = this.findTmpVreg(1 << format[j][1]);
                     } catch {
                         throw Error("no available tmp vReg");
                     }
                     head.push(new MovDyn(spill, vTmp));
                     operands[j] = vTmp;
-                    if (format[j].kind == OperandKind.SrcVReg) {
+                    if (format[j][0] == OperandKind.SrcVReg) {
                         head.push(new MovDyn(vTmp, vOrigin));
-                    } else if (format[j].kind == OperandKind.DstVReg) {
+                    } else if (format[j][0] == OperandKind.DstVReg) {
                         tail.push(new MovDyn(vOrigin, vTmp))
-                    } else if (format[j].kind == OperandKind.SrcDstVReg) {
+                    } else if (format[j][0] == OperandKind.SrcDstVReg) {
                         head.push(new MovDyn(vTmp, vOrigin));
                         tail.push(new MovDyn(vOrigin, vTmp))
                     } else {
@@ -178,7 +178,7 @@ class RegAllocator {
     checkDynRangeInstruction(irNodes: IRNode[], index: number): boolean {
         let operands = irNodes[index].operands;
         let rangeRegOffset = getRangeStartVregPos(irNodes[index]);
-        let level = 1 << irNodes[index].formats[0][rangeRegOffset].bitwidth;
+        let level = 1 << (irNodes[index].getFormats())[0][rangeRegOffset][1];
 
         /*
           1. "CalliDynRange 4, v255" is a valid insn, there is no need for all 4 registers numbers to be less than 255,
@@ -221,7 +221,7 @@ class RegAllocator {
         let rangeRegOffset = getRangeStartVregPos(irNodes[index]);
         let regNums = operands.length - getRangeStartVregPos(irNodes[index]);
 
-        let level = 1 << irNodes[index].formats[0][rangeRegOffset].bitwidth;
+        let level = 1 << (irNodes[index].getFormats())[0][rangeRegOffset][1];
         let tmp = this.findTmpVreg(level);
 
         for (let i = 0; i < regNums; i++) {
@@ -252,7 +252,7 @@ class RegAllocator {
     adjustInstructionsIfNeeded(irNodes: IRNode[]): void {
         for (let i = 0; i < irNodes.length; ++i) {
             let operands = irNodes[i].operands;
-            let formats = irNodes[i].formats;
+            let formats = irNodes[i].getFormats();
             if (isRangeInst(irNodes[i])) {
                 if (this.checkDynRangeInstruction(irNodes, i)) {
                     continue;

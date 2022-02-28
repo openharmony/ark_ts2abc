@@ -129,7 +129,7 @@ class HistogramStatistics {
             let part = mnemonic.split('.');
             return part[2];
         }
-        return ins.mnemonic;
+        return ins.getMnemonic();
     }
 
     unionStatistics(histogram: HistogramStatistics): void {

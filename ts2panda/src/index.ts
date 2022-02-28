@@ -20,11 +20,7 @@ import { CmdOptions } from "./cmdOptions";
 import { CompilerDriver } from "./compilerDriver";
 import * as diag from "./diagnostic";
 import * as jshelpers from "./jshelpers";
-import { LOGD, LOGE } from "./log";
-import { Pass } from "./pass";
-import { CacheExpander } from "./pass/cacheExpander";
-import { ICPass } from "./pass/ICPass";
-import { RegAlloc } from "./regAllocator";
+import { LOGE } from "./log";
 import { setGlobalDeclare, setGlobalStrict } from "./strictMode";
 import { TypeChecker } from "./typeChecker";
 import { setPos } from "./base/util";
@@ -50,15 +46,6 @@ function generateDTs(node: ts.SourceFile, options: ts.CompilerOptions) {
     let outputBinName = getOutputBinName(node);
     let compilerDriver = new CompilerDriver(outputBinName);
     setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
-    if (CmdOptions.isVariantBytecode()) {
-        LOGD("variant bytecode dump");
-        let passes: Pass[] = [
-            new CacheExpander(),
-            new ICPass(),
-            new RegAlloc()
-        ];
-        compilerDriver.setCustomPasses(passes);
-    }
     compilerDriver.compile(node);
     compilerDriver.showStatistics();
 }
@@ -115,15 +102,6 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                         let outputBinName = getOutputBinName(node);
                         let compilerDriver = new CompilerDriver(outputBinName);
                         setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
-                        if (CmdOptions.isVariantBytecode()) {
-                            LOGD("variant bytecode dump");
-                            let passes: Pass[] = [
-                                new CacheExpander(),
-                                new ICPass(),
-                                new RegAlloc()
-                            ];
-                            compilerDriver.setCustomPasses(passes);
-                        }
                         compilerDriver.compile(node);
                         compilerDriver.showStatistics();
                         return node;
