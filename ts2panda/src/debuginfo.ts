@@ -31,11 +31,11 @@ import {
 } from "./variable";
 
 export class DebugPosInfo {
-    private boundLeft: number | undefined = 0;
-    private boundRight: number | undefined = 0;
-    private lineNum: number = -1;
-    private columnNum: number = -1;
-    private wholeLine: string | undefined = "";
+    private bl: number | undefined = 0;  // bound left
+    private br: number | undefined = 0;  // bound right
+    private l: number = -1;  // line number
+    private c: number = -1;  // column number
+    private w: string | undefined = "";  // whole line
     private nodeKind: NodeKind | undefined = NodeKind.FirstNodeOfFunction;
 
     constructor() { }
@@ -53,80 +53,80 @@ export class DebugPosInfo {
     }
 
     public setBoundLeft(boundLeft: number): void {
-        this.boundLeft = boundLeft;
+        this.bl = boundLeft;
     }
 
     public getBoundLeft(): number | undefined {
-        return this.boundLeft;
+        return this.bl;
     }
 
     public setBoundRight(boundRight: number): void {
-        this.boundRight = boundRight;
+        this.br = boundRight;
     }
 
     public getBoundRight(): number | undefined {
-        return this.boundRight;
+        return this.br;
     }
 
     public setSourecLineNum(lineNum: number): void {
-        this.lineNum = lineNum;
+        this.l = lineNum;
     }
 
     public getSourceLineNum(): number {
-        return this.lineNum;
+        return this.l;
     }
 
     public setSourecColumnNum(columnNum: number): void {
-        this.columnNum = columnNum;
+        this.c = columnNum;
     }
 
     public getSourceColumnNum(): number {
-        return this.columnNum;
+        return this.c;
     }
 
     public setWholeLine(wholeLine: string): void {
-        this.wholeLine = wholeLine;
+        this.w = wholeLine;
     }
 
     public getWholeLine(): string | undefined {
-        return this.wholeLine;
+        return this.w;
     }
 
     public ClearMembersForReleaseBuild(): void {
         this.ClearMembersForDebugBuild();
-        this.boundLeft = undefined;
-        this.boundRight = undefined;
+        this.bl = undefined;
+        this.br = undefined;
     }
 
     public ClearMembersForDebugBuild(): void {
-        this.wholeLine = undefined;
+        this.w = undefined;
         this.nodeKind = undefined;
     }
 }
 
 export class VariableDebugInfo {
     // @ts-ignore
-    private name = "";
+    private n = "";  // name
     // @ts-ignore
-    private variable: Variable | undefined;
+    private v: Variable | undefined;  // variables
     // @ts-ignore
-    private signature = "";
+    private s = "";  // signature
     // @ts-ignore
-    private signatureType = "";
+    private st = "";  // signature type
     // @ts-ignore
-    private reg: number = -1;
+    private r: number = -1;
     private start: number = -1;
     // @ts-ignore
-    private length: number = -1;
+    private len: number = -1;
 
     constructor(name: string, signature: string, signatureType: string,
         reg: number, start: number = 0, length: number = 0) {
-        this.name = name;
-        this.signature = signature;
-        this.signatureType = signatureType;
-        this.reg = reg;
+        this.n = name;
+        this.s = signature;
+        this.st = signatureType;
+        this.r = reg;
         this.start = start;
-        this.length = length;
+        this.len = length;
     }
 
     public setStart(start: number): void {
@@ -138,7 +138,7 @@ export class VariableDebugInfo {
     }
 
     public setLength(length: number): void {
-        this.length = length;
+        this.len = length;
     }
 }
 
