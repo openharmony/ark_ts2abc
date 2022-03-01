@@ -18,6 +18,7 @@ import { DebugPosInfo } from "./debuginfo";
 import {
     Imm,
     IRNode,
+    IRNodeKind,
     Label,
     OperandType,
     VReg
@@ -38,7 +39,6 @@ import {
     isRangeInst,
     getRangeStartVregPos
 } from "./base/util";
-import { TypeOfVreg } from "./pandasm";
 import { LiteralBuffer } from "./base/literal";
 
 const dollarSign: RegExp = /\$/g;
@@ -53,7 +53,7 @@ const JsonType = {
 };
 export class Ts2Panda {
     static strings: Set<string> = new Set();
-    static labelPrefix = "LABEL_";
+    static labelPrefix = "L_";
     static jsonString: string = "";
 
     constructor() {
@@ -68,7 +68,7 @@ export class Ts2Panda {
         let labels: Array<string> = [];
 
         pg.getInsns().forEach((insn: IRNode) => {
-            let insOpcode = insn.mnemonic;
+            let insOpcode = insn.kind >= IRNodeKind.VREG ? undefined : insn.kind;
             let insRegs: Array<number> = [];
             let insIds: Array<string> = [];
             let insImms: Array<number> = [];
@@ -123,25 +123,24 @@ export class Ts2Panda {
         return {
             insns: insns,
             regsNum: (pg.getTotalRegsNum() - pg.getParametersCount()),
-            labels: labels
+            labels: labels.length == 0 ? undefined : labels
         };
     }
 
     static dumpStringsArray(ts2abc: any) {
         let strings_arr = Array.from(Ts2Panda.strings);
 
-        strings_arr.forEach(function(str) {
-            let strObject = {
-                "type": JsonType.string,
-                "string": str
-            }
-            let jsonStrUnicode = escapeUnicode(JSON.stringify(strObject, null, 2));
-            jsonStrUnicode = "$" + jsonStrUnicode.replace(dollarSign, '#$') + "$";
-            if (CmdOptions.isEnableDebugLog()) {
-                Ts2Panda.jsonString += jsonStrUnicode;
-            }
-            ts2abc.stdio[3].write(jsonStrUnicode + '\n');
-        });
+        let strObject = {
+            "t": JsonType.string,
+            "s": strings_arr
+        }
+
+        let jsonStrUnicode = escapeUnicode(JSON.stringify(strObject, null, 2));
+        jsonStrUnicode = "$" + jsonStrUnicode.replace(dollarSign, '#$') + "$";
+        if (CmdOptions.isEnableDebugLog()) {
+            Ts2Panda.jsonString += jsonStrUnicode;
+        }
+        ts2abc.stdio[3].write(jsonStrUnicode + '\n');
     }
 
     static dumpTypeLiteralArrayBuffer() {
@@ -168,8 +167,8 @@ export class Ts2Panda {
 
         literalArrays.forEach(function(literalArray) {
             let literalArrayObject = {
-                "type": JsonType.literal_arr,
-                "literalArray": literalArray
+                "t": JsonType.literal_arr,
+                "lit_arr": literalArray
             }
             let jsonLiteralArrUnicode = escapeUnicode(JSON.stringify(literalArrayObject, null, 2));
             jsonLiteralArrUnicode = "$" + jsonLiteralArrUnicode.replace(dollarSign, '#$') + "$";
@@ -182,7 +181,7 @@ export class Ts2Panda {
 
     static dumpCmdOptions(ts2abc: any): void {
         let options = {
-            "type": JsonType.options,
+            "t": JsonType.options,
             "module_mode": CmdOptions.isModules(),
             "debug_mode": CmdOptions.isDebugMode(),
             "log_enabled": CmdOptions.isEnableDebugLog(),
@@ -205,10 +204,9 @@ export class Ts2Panda {
         let sourceFile = pg.getSourceFileDebugInfo();
         let callType = pg.getCallType();
         let typeRecord = pg.getLocals();
-        let typeInfo = new Array<TypeOfVreg>();
+        let typeInfo = new Array<number>();
         typeRecord.forEach((vreg) => {
-            let typeOfVreg = new TypeOfVreg(vreg.num, vreg.getTypeIndex());
-            typeInfo.push(typeOfVreg);
+            typeInfo.push(vreg.getTypeIndex());
             if (CmdOptions.enableTypeLog()) {
                 console.log("---------------------------------------");
                 console.log("- vreg name:", vreg.getVariableName());
@@ -244,6 +242,25 @@ export class Ts2Panda {
             sourceCode = undefined;
         }
 
+        let catchTableArr;
+        let catchTables = generateCatchTables(pg.getCatchMap());
+        if (!catchTables) {
+            catchTableArr = undefined;
+        } else {
+            catchTableArr = [];
+            catchTables.forEach((catchTable) => {
+                let catchBeginLabel = catchTable.getCatchBeginLabel();
+                let labelPairs = catchTable.getLabelPairs();
+                labelPairs.forEach((labelPair) => {
+                    catchTableArr.push(new CatchTable(
+                        Ts2Panda.labelPrefix + labelPair.getBeginLabel().id,
+                        Ts2Panda.labelPrefix + labelPair.getEndLabel().id,
+                        Ts2Panda.labelPrefix + catchBeginLabel.id
+                    ));
+                });
+            });
+        }
+
         let func = new Function(
             funcName,
             funcSignature,
@@ -251,6 +268,7 @@ export class Ts2Panda {
             funcInsnsAndRegsNum.insns,
             funcInsnsAndRegsNum.labels,
             variables,
+            catchTableArr,
             sourceFile,
             sourceCode,
             callType,
@@ -258,24 +276,12 @@ export class Ts2Panda {
             exportedSymbol2Types,
             declaredSymbol2Types
         );
-        let catchTables = generateCatchTables(pg.getCatchMap());
-        catchTables.forEach((catchTable) => {
-            let catchBeginLabel = catchTable.getCatchBeginLabel();
-            let labelPairs = catchTable.getLabelPairs();
-            labelPairs.forEach((labelPair) => {
-                func.catchTables.push(new CatchTable(
-                    Ts2Panda.labelPrefix + labelPair.getBeginLabel().id,
-                    Ts2Panda.labelPrefix + labelPair.getEndLabel().id,
-                    Ts2Panda.labelPrefix + catchBeginLabel.id
-                ));
-            });
-        });
 
         LOGD(func);
 
         let funcObject = {
-            "type": JsonType.function,
-            "func_body": func
+            "t": JsonType.function,
+            "fb": func
         }
         let jsonFuncUnicode = escapeUnicode(JSON.stringify(funcObject, null, 2));
         jsonFuncUnicode = "$" + jsonFuncUnicode.replace(dollarSign, '#$') + "$";

@@ -23,14 +23,14 @@ import {
 } from "./debuginfo";
 
 export enum IRNodeKind {
+% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
+  <%= get_node_kind(mnemonic) %>,
+% end
   VREG,
   IMM,
   LABEL,
   VIRTUALINS_DYN,
   DEFINE_GLOBAL_VAR,
-% Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
-  <%= get_node_kind(mnemonic) %>,
-% end
 }
 
 export function getInstructionSize(opcode: IRNodeKind) {

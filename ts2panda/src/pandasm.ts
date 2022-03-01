@@ -27,84 +27,83 @@ export class Metadata {
 }
 
 export class Signature {
-    public params: number;
-    public retType: string | undefined; // return type is always 'any', so we ignore it in json
+    public p: number;  // parameters
+    public rt: string | undefined; // return type is always 'any', so we ignore it in json
 
     constructor(params: number = 0, retType?: string | undefined) {
-        this.params = params;
-        this.retType = retType;
+        this.p = params;
+        this.rt = retType;
     }
 }
 
 export class Ins {
-    public op: string;
-    public regs: Array<number> | undefined;
-    public ids: Array<string> | undefined;
-    public imms: Array<number> | undefined;
-    public label: string | undefined;
+    public o: number | undefined;  // op
+    public r: Array<number> | undefined;  // resgs
+    public id: Array<string> | undefined;  // ids
+    public im: Array<number> | undefined;  // imms
+    public l: string | undefined;  // label
 
-    public debug_pos_info: DebugPosInfo | undefined;
+    public d: DebugPosInfo | undefined;  // debug position info
     constructor(
-        op: string,
+        op: number | undefined = undefined,
         regs: Array<number> | undefined = undefined,
         ids: Array<string> | undefined = undefined,
         imms: Array<number> | undefined = undefined,
         label: string | undefined = undefined,
-        debug_pos_info: DebugPosInfo | undefined = undefined,
+        dbg_pos: DebugPosInfo | undefined = undefined,
     ) {
-        this.op = op;
-        this.regs = regs;
-        this.ids = ids;
-        this.imms = imms;
-        this.label = label;
-        this.debug_pos_info = debug_pos_info;
+        this.o = op;
+        this.r = regs;
+        this.id = ids;
+        this.im = imms;
+        this.l = label;
+        this.d = dbg_pos;
     }
 }
 
 export class Function {
-    public name: string;
-    public signature: Signature;
-    public regs_num: number;
-    public ins: Array<Ins>;
-    public labels: Array<string>;
-    public metadata: Metadata;
-    public catchTables: Array<CatchTable>;
-    public variables: Array<VariableDebugInfo> | undefined;
-    public sourceFile: string;
-    public sourceCode: string | undefined;
-    public callType: number;
-    public typeInfo: Array<TypeOfVreg>;
-    public exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined;
-    public declaredSymbol2Types: Array<DeclaredSymbol2Type> | undefined;
+    public n: string;  // name
+    public s: Signature;  // signature
+    public r: number;  // regs number
+    public i: Array<Ins>;  // ins
+    public l: Array<string> | undefined;  // labels
+    public ca_tab: Array<CatchTable> | undefined;  // catch tabels
+    public v: Array<VariableDebugInfo> | undefined;  // variables
+    public sf: string;  // source file
+    public sc: string | undefined;  // source code
+    public ct: number | undefined;  // call type
+    public ti: Array<number> | undefined;  // typeinfo: record type index array, starts from reg_0
+    public es2t: Array<ExportedSymbol2Type> | undefined;  // exportedSymbol2Types
+    public ds2t: Array<DeclaredSymbol2Type> | undefined;  // declaredSymbol2Types
 
     constructor(
         name: string,
         signature: Signature,
         regs_num: number = 0,
         ins: Array<Ins> = [],
-        labels: Array<string> = [],
-        variables: Array<VariableDebugInfo> | undefined = undefined,
-        sourceFile: string = "",
-        sourceCode: string | undefined = undefined,
-        callType: number = 0,
-        typeInfo: Array<TypeOfVreg>,
+        labs: Array<string> | undefined = undefined,
+        vars: Array<VariableDebugInfo> | undefined = undefined,
+        catchTables: Array<CatchTable> | undefined = undefined,
+        sourceFiles: string = "",
+        sourceCodes: string | undefined = undefined,
+        callType: number | undefined = undefined,
+        typeInfo: Array<number> | undefined = undefined,
         exportedSymbol2Types: Array<ExportedSymbol2Type> | undefined = undefined,
         declaredSymbol2Types: Array<DeclaredSymbol2Type> | undefined = undefined
     ) {
-        this.name = name;
-        this.signature = signature;
-        this.ins = ins;
-        this.labels = labels;
-        this.regs_num = regs_num;
-        this.metadata = new Metadata();
-        this.catchTables = [];
-        this.variables = variables;
-        this.sourceFile = sourceFile;
-        this.sourceCode = sourceCode;
-        this.callType = callType;
-        this.typeInfo = typeInfo;
-        this.exportedSymbol2Types = exportedSymbol2Types;
-        this.declaredSymbol2Types = declaredSymbol2Types;
+        this.n = name;
+        this.s = signature;
+        this.i = ins;
+        this.l = labs;
+        this.r = regs_num;
+        this.ca_tab = catchTables;
+        this.v = vars;
+        this.sf = sourceFiles;
+        this.sc = sourceCodes;
+        this.ct = callType;
+        this.ti = typeInfo;
+        this.es2t = exportedSymbol2Types;
+        this.ds2t = declaredSymbol2Types;
     }
 }
 
@@ -163,18 +162,18 @@ export class Program {
 }
 
 export class CatchTable {
-    public tryBeginLabel: string;
-    public tryEndLabel: string;
-    public catchBeginLabel: string;
+    public tb_lab: string;  // try begine label
+    public te_lab: string;  // try end label
+    public cb_lab: string;  // catch begin label
 
     constructor(
         tryBeginLabel: string,
         tryEndLabel: string,
         catchBeginLabel: string
     ) {
-        this.tryBeginLabel = tryBeginLabel;
-        this.tryEndLabel = tryEndLabel;
-        this.catchBeginLabel = catchBeginLabel;
+        this.tb_lab = tryBeginLabel;
+        this.te_lab = tryEndLabel;
+        this.cb_lab = catchBeginLabel;
     }
 }
 
