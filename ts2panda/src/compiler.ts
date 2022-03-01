@@ -33,6 +33,7 @@ import {
     setVariableExported
 } from "./base/util";
 import { CacheList, getVregisterCache } from "./base/vregisterCache";
+import { CmdOptions } from "./cmdOptions";
 import { CompilerDriver } from "./compilerDriver";
 import { DebugInfo, NodeKind } from "./debuginfo";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
@@ -175,6 +176,9 @@ export class Compiler {
     }
 
     private callOpt() {
+        if (CmdOptions.isDebugMode()) {
+            return;
+        }
         let CallMap: Map<String, number> = new Map([
             ["this", 1],
             ["4newTarget", 2],
