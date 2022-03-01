@@ -37,6 +37,7 @@ import { CompilerDriver } from "./compilerDriver";
 import { DebugInfo, NodeKind } from "./debuginfo";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
 import { compileArrayLiteralExpression } from "./expression/arrayLiteralExpression";
+import { compileBigIntLiteral } from "./expression/bigIntLiteral";
 import {
     compileCallExpression,
     getHiddenParameters
@@ -778,6 +779,7 @@ export class Compiler {
                 compileNumericLiteral(this.pandaGen, <ts.NumericLiteral>expr);
                 break;
             case ts.SyntaxKind.BigIntLiteral: // line 35
+                compileBigIntLiteral(this.pandaGen, <ts.BigIntLiteral>expr);
                 break;
             case ts.SyntaxKind.StringLiteral: // line 36
                 compileStringLiteral(this.pandaGen, <ts.StringLiteral>expr);
