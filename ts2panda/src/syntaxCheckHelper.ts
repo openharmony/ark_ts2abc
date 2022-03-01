@@ -14,7 +14,7 @@
  */
 
 import * as ts from "typescript";
-import jshelpers = require("./jshelpers");
+import * as jshelpers from "./jshelpers";
 
 export function isOctalNumber(num: string): boolean {
     if (!num || num.length < 2) {

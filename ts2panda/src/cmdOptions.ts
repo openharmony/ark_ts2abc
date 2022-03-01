@@ -18,7 +18,7 @@ import commandLineArgs from "command-line-args";
 import commandLineUsage from "command-line-usage";
 import * as ts from "typescript";
 import { LOGE } from "./log";
-import path = require("path");
+import * as path from "path";
 import { execute } from "./base/util";
 
 const ts2pandaOptions = [
@@ -210,6 +210,7 @@ export class CmdOptions {
         return this.options["debug-type"];
     }
 
+    // @ts-ignore
     static parseUserCmd(args: string[]): ts.ParsedCommandLine | undefined {
         this.options = commandLineArgs(ts2pandaOptions, { partial: true });
         if (this.options.help) {

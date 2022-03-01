@@ -25,10 +25,10 @@ import {
     CacheList,
     getVregisterCache
 } from "../base/vregisterCache";
-import { IteratorType, IteratorRecord } from "./forOfStatement";
+import { IteratorRecord } from "./forOfStatement";
 import * as astutils from "../astutils";
 import { VarDeclarationKind } from "../variable";
-import jshelpers from "../jshelpers";
+import * as jshelpers from "../jshelpers";
 
 // adjust the try...catch...finally into nested try(try...catch) finally
 export function transformTryCatchFinally(tryStmt: ts.TryStatement, recorder: Recorder): ts.TryStatement {
@@ -219,6 +219,7 @@ export class TryBuilder extends TryBuilderBase {
         }
     }
 
+    // @ts-ignore
     compileFinalizer(cfc: ControlFlowChange, continueTargetLabel: Label) {
         this.compiler.compileStatement((<ts.TryStatement>this.stmt).finallyBlock!);
     }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import path = require("path");
+import * as path from "path";
 import { extractCtorOfClass } from "../statement/classStatement";
 import { LocalVariable, Variable } from "../variable";
 import * as ts from "typescript";
@@ -192,8 +192,9 @@ export function escapeUnicode(data: string) {
 }
 
 export function initiateTs2abc(args: Array<string>) {
-    let js2abc = path.join(path.resolve(__dirname, '../../bin'), "js2abc");
+    let js2abc = path.join(path.resolve(__dirname, '../bin'), "js2abc");
     args.unshift("--compile-by-pipe");
+    // @ts-ignore
     var spawn = require('child_process').spawn;
     let child = spawn(js2abc, [...args], {
         stdio: ['pipe', 'inherit', 'inherit', 'pipe']
