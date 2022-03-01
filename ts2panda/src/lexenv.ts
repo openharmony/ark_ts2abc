@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ts from "typescript";
+import * as ts from "typescript";
 import {
     loadAccumulator,
     loadAccumulatorString,
@@ -37,7 +37,7 @@ import {
     LocalVariable,
     Variable
 } from "./variable";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 
 abstract class VariableAccessBase {
     variable: Variable;

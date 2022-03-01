@@ -30,13 +30,11 @@ import {
     VariableScope
 } from "./scope";
 import { isGlobalIdentifier } from "./syntaxCheckHelper";
+import { TypeRecorder } from "./typeRecorder";
 import {
     VarDeclarationKind,
     Variable
 } from "./variable";
-import { TypeRecorder } from "./typeRecorder";
-import { CmdOptions } from "./cmdOptions";
-import { PrimitiveType } from "./base/typeSystem";
 
 function setVariableOrParameterType(node: ts.Node, v: Variable | undefined) {
     if (v) {
@@ -127,6 +125,7 @@ export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean
         hoistDecls = <Decl[]>hoistMap.get(nearestVariableScope);
         for (let j = 0; j < decls.length; j++) {
             let decl = decls[j];
+            // @ts-ignore
             if (hoistDecls && hoistDecls.includes(decl)) {
                 continue;
             }

@@ -15,7 +15,7 @@
 
 import * as ts from "typescript";
 import { PandaGen } from "./pandagen";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 import { LocalVariable } from "./variable";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
 import { ModuleScope } from "./scope";

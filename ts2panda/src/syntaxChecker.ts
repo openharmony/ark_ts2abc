@@ -21,7 +21,8 @@ import {
 } from "./diagnostic";
 import { hasExportKeywordModifier } from "./base/util";
 import { findInnerExprOfParenthesis } from "./expression/parenthesizedExpression";
-import jshelpers, { getContainingFunction, getContainingFunctionDeclaration, getSourceFileOfNode } from "./jshelpers";
+import * as jshelpers from "./jshelpers";
+import { getContainingFunction, getContainingFunctionDeclaration, getSourceFileOfNode } from "./jshelpers";
 import { LOGE } from "./log";
 import { Recorder } from "./recorder";
 import {
@@ -215,6 +216,7 @@ function checkDuplicateParameter(node: ts.FunctionLikeDeclaration, recorder: Rec
         return;
     }
     parameters.forEach(param => {
+        // @ts-ignore
         if (tempNames.includes(param.name)) {
             throwDupIdError(param);
         } else {
@@ -233,6 +235,7 @@ function checkDuplicateParameterVar(parameterNames: string[] | undefined, scope:
             continue;
         }
         let name = decls[i].name;
+        // @ts-ignore
         if (parameterNames.includes(name)) {
             throwDupIdError(decls[i]);
         }
@@ -1028,6 +1031,7 @@ function checkInvalidQuestionMark(questionToken: ts.QuestionToken | undefined) {
     }
 }
 
+// @ts-ignore
 function getPropertieDeclaration(node: ts.Node, name: ts.Node) {
     let decl = undefined;
     if (ts.isShorthandPropertyAssignment(node)) {
@@ -1424,6 +1428,7 @@ export function checkExportEntries(recorder: Recorder) {
     let exportNames: Set<string> = new Set<string>();
     exportStmts.forEach(exportStmt => {
         let bindingNameMap = exportStmt.getBindingNameMap();
+        // @ts-ignore
         bindingNameMap.forEach((value: string, key: string) => {
             if (!exportNames.has(key)) {
                 exportNames.add(key);
