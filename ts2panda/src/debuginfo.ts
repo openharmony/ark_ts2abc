@@ -18,7 +18,8 @@ import { CmdOptions } from "./cmdOptions";
 import {
     CalliDynRange,
     CallRange,
-    DebugInsPlaceHolder,
+    DebugInsStartPlaceHolder,
+    DebugInsEndPlaceHolder,
     IRNode,
     Label,
     VReg
@@ -31,11 +32,10 @@ import {
 } from "./variable";
 
 export class DebugPosInfo {
-    private bl: number | undefined = 0;  // bound left
-    private br: number | undefined = 0;  // bound right
+    private bl: number | undefined;  // bound left
+    private br: number | undefined;  // bound right
     private l: number = -1;  // line number
     private c: number = -1;  // column number
-    private w: string | undefined = "";  // whole line
     private nodeKind: NodeKind | undefined = NodeKind.FirstNodeOfFunction;
 
     constructor() { }
@@ -84,22 +84,7 @@ export class DebugPosInfo {
         return this.c;
     }
 
-    public setWholeLine(wholeLine: string): void {
-        this.w = wholeLine;
-    }
-
-    public getWholeLine(): string | undefined {
-        return this.w;
-    }
-
-    public ClearMembersForReleaseBuild(): void {
-        this.ClearMembersForDebugBuild();
-        this.bl = undefined;
-        this.br = undefined;
-    }
-
-    public ClearMembersForDebugBuild(): void {
-        this.w = undefined;
+    public ClearNodeKind(): void {
         this.nodeKind = undefined;
     }
 }
@@ -185,17 +170,14 @@ export class DebugInfo {
                 loc: {
                     line : -1,
                     character : -1
-                },
-                wholeLineText: ""
+                }
             }
         }
 
         pos = node.getStart();
         let loc = file.getLineAndCharacterOfPosition(pos); 
-        let wholeLineText = node.getText();
         return {
-            loc: loc,
-            wholeLineText: wholeLineText
+            loc: loc
         }
     }
 
@@ -208,7 +190,6 @@ export class DebugInfo {
             }
             posInfo.setSourecLineNum(res.loc.line);
             posInfo.setSourecColumnNum(res.loc.character);
-            posInfo.setWholeLine(res.wholeLineText);
         }
     }
 
@@ -229,27 +210,21 @@ export class DebugInfo {
 
         let lineNumber = -1;
         let columnNumber = -1;
-        let wholeLineText = "";
         if (DebugInfo.isNode(node)) {
             let tsNode = <ts.Node>(node);
             let res = this.searchForPos(tsNode);
             if (!res) {
                 return;
             }
-            wholeLineText = res.wholeLineText;
             lineNumber = res.loc.line;
             columnNumber = res.loc.character;
         }
 
-        for (let i = 0; i < insns.length; i++) {
-            let pos = new DebugPosInfo();
-            pos.setSourecLineNum(lineNumber);
-            pos.setSourecColumnNum(columnNumber);
-            pos.setWholeLine(wholeLineText);
-            pos.setDebugPosInfoNodeState(node);
-
-            insns[i].debugPosInfo = pos;
-        }
+        insns.forEach(insn => {
+            insn.debugPosInfo.setSourecLineNum(lineNumber);
+            insn.debugPosInfo.setSourecColumnNum(columnNumber);
+            insn.debugPosInfo.setDebugPosInfoNodeState(node);
+        })
     }
 
     private static matchFormat(irnode: IRNode): number {
@@ -270,7 +245,9 @@ export class DebugInfo {
     }
 
     private static getIRNodeWholeLength(irnode: IRNode): number {
-        if (irnode instanceof Label || irnode instanceof DebugInsPlaceHolder) {
+        if (irnode instanceof Label ||
+            irnode instanceof DebugInsStartPlaceHolder ||
+            irnode instanceof DebugInsEndPlaceHolder) {
             return 0;
         }
         let length = 1;
@@ -293,49 +270,20 @@ export class DebugInfo {
         return length;
     }
 
-    private static setVariablesDebugInfoInternal(pandaGen: PandaGen, scope: Scope) {
-        let insns = pandaGen.getInsns();
-        // count variables offset
-        let startIdx = 0;
-        let startIns = scope.getScopeStartIns();
-        let endIns = scope.getScopeEndIns();
-
-        for (let i = 0; i < insns.length; i++) {
-            if (startIns == insns[i]) {
-                startIdx = i;
-            }
-
-            if (endIns == insns[i]) {
-                let name2variable = scope.getName2variable();
-                name2variable.forEach((value, key) => {
-                    if (!value.hasAlreadyBinded()) {
-                        return;
-                    }
-                    let variableInfo = new VariableDebugInfo(key, "any", "any", (value.getVreg().num));
-                    variableInfo.setStart(startIdx);
-                    variableInfo.setLength(i - startIdx + 1);
-                    pandaGen.addDebugVariableInfo(variableInfo);
-                });
-            }
-        }
-    }
-
     private static setPosDebugInfo(pandaGen: PandaGen) {
-        let insns = pandaGen.getInsns();
+        let insns: IRNode[] = pandaGen.getInsns();
         let offset = 0;
 
+        // count pos offset
         for (let i = 0; i < insns.length; i++) {
             if (insns[i].debugPosInfo.getDebugPosInfoNodeState() == NodeKind.FirstNodeOfFunction) {
                 DebugInfo.setPosInfoForUninitializeIns(insns[i].debugPosInfo, pandaGen);
             }
-        }
 
-        // count pos offset
-        for (let i = 0; i < insns.length; i++) {
             let insLength = DebugInfo.getIRNodeWholeLength(insns[i]);
             let insnsDebugPosInfo = insns[i].debugPosInfo;
 
-            if (insnsDebugPosInfo) {
+            if (insnsDebugPosInfo && CmdOptions.isDebugMode()) {
                 insnsDebugPosInfo.setBoundLeft(offset);
                 insnsDebugPosInfo.setBoundRight(offset + insLength);
             }
@@ -348,20 +296,36 @@ export class DebugInfo {
         }
     }
 
-    private static removeDebugIns(pandaGen: PandaGen) {
+    private static setVariablesDebugInfo(pandaGen: PandaGen) {
         let insns = pandaGen.getInsns();
+
         for (let i = 0; i < insns.length; i++) {
-            if (insns[i] instanceof DebugInsPlaceHolder) {
+            if (insns[i] instanceof DebugInsStartPlaceHolder) {
+                (<DebugInsStartPlaceHolder> insns[i]).getScope().setScopeStartInsIdx(i);
+                // delete ins placeholder
+                insns.splice(i, 1);
+                i--;
+            }
+            if (insns[i] instanceof DebugInsEndPlaceHolder) {
+                (<DebugInsEndPlaceHolder> insns[i]).getScope().setScopeEndInsIdx(i);
+                // delete ins placeholder
                 insns.splice(i, 1);
                 i--;
             }
         }
-    }
 
-    private static setVariablesDebugInfo(pandaGen: PandaGen) {
         let recordArray = DebugInfo.getScopeArray();
         recordArray.forEach(scope => {
-            DebugInfo.setVariablesDebugInfoInternal(pandaGen, scope);
+            let name2variable = scope.getName2variable();
+            name2variable.forEach((value, key) => {
+                if (!value.hasAlreadyBinded()) {
+                    return;
+                }
+                let variableInfo = new VariableDebugInfo(key, "any", "any", (value.getVreg().num));
+                variableInfo.setStart(scope.getScopeStartInsIdx());
+                variableInfo.setLength(scope.getScopeEndInsIdx() - scope.getScopeStartInsIdx());
+                pandaGen.addDebugVariableInfo(variableInfo);
+            });
         });
     }
 
@@ -371,9 +335,6 @@ export class DebugInfo {
         if (CmdOptions.isDebugMode()) {
             // set variable debug info
             DebugInfo.setVariablesDebugInfo(pandaGen);
-
-            // delete ins placeholder
-            DebugInfo.removeDebugIns(pandaGen)
 
             // clear scope array
             DebugInfo.clearScopeArray();
@@ -405,14 +366,15 @@ export class DebugInfo {
         if (!CmdOptions.isDebugMode()) {
             return;
         }
+
         let insns = pandaGen.getInsns();
-        let placeHolder = new DebugInsPlaceHolder();
-        insns.push(placeHolder);
+        let placeHolder: IRNode;
         if (isStart) {
-            scope.setScopeStartIns(placeHolder);
+            placeHolder = new DebugInsStartPlaceHolder(scope);
             DebugInfo.addScope(scope);
         } else {
-            scope.setScopeEndIns(placeHolder);
+            placeHolder = new DebugInsEndPlaceHolder(scope);
         }
+        insns.push(placeHolder);
     }
 }
