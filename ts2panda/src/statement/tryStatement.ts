@@ -206,7 +206,9 @@ export class TryBuilder extends TryBuilderBase {
             this.compiler.pushScope(catchClause);
             compileCatchClauseVariableDeclaration(this.compiler, catchClause.variableDeclaration);
             let catchBlock = catchClause.block;
+            this.compiler.pushScope(catchBlock);
             catchBlock.statements.forEach((stmt) => this.compiler.compileStatement(stmt));
+            this.compiler.popScope();
             this.compiler.popScope();
         } else {
             // finallyBlock rethrow exception when it catch the exception
