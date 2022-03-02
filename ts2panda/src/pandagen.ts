@@ -101,7 +101,8 @@ import {
     throwThrowNotExists,
     throwUndefinedIfHole,
     tryLoadGlobalByName,
-    tryStoreGlobalByName
+    tryStoreGlobalByName,
+    loadAccumulatorBigInt
 } from "./base/bcGenUtil";
 import { LiteralBuffer } from "./base/literal";
 import { getParamLengthOfFunc } from "./base/util";
@@ -1252,6 +1253,12 @@ export class PandaGen {
         this.add(
             node,
             stClassToGlobalRecord(string_id));
+    }
+
+    loadAccumulatorBigInt(node: ts.Node | NodeKind, str: string) {
+        this.add(
+            node,
+            loadAccumulatorBigInt(str));
     }
 
     private binaryRelation(node: ts.Node, op: BinaryOperator, lhs: VReg) {
