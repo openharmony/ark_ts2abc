@@ -22,7 +22,6 @@ import * as path from "path";
 import { execute } from "./base/util";
 
 const ts2pandaOptions = [
-    { name: 'variant-bytecode', alias: 'r', type: Boolean, defaultValue: true, description: "emit 2nd bytecode to pandafile." },
     { name: 'modules', alias: 'm', type: Boolean, defaultValue: false, description: "compile as module." },
     { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log and generate the json file."},
     { name: 'dump-assembly', alias: 'a', type: Boolean, defaultValue: false, description: "dump assembly to file." },
@@ -77,13 +76,6 @@ export class CmdOptions {
             return false;
         }
         return this.options["modules"];
-    }
-
-    static isVariantBytecode(): boolean {
-        if (!this.options) {
-            return true;
-        }
-        return this.options["variant-bytecode"];
     }
 
     static getOptLevel(): number {

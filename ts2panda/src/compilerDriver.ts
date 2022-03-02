@@ -25,7 +25,6 @@ import {
 import { CompilerStatistics } from "./compilerStatistics";
 import { DebugInfo } from "./debuginfo";
 import { hoisting } from "./hoisting";
-import { IntrinsicExpander } from "./intrinsicExpander";
 import { LOGD } from "./log";
 import { setExportBinding, setImport } from "./modules";
 import { PandaGen } from "./pandagen";
@@ -59,13 +58,14 @@ export class PendingCompilationUnit {
  * It handles all dependencies and run passes.
  */
 export class CompilerDriver {
+    static isTsFile: boolean = false;
     private fileName: string;
-    private passes: Pass[];
+    private passes: Pass[] = [];
     private compilationUnits: PandaGen[];
     pendingCompilationUnits: PendingCompilationUnit[];
     private functionId: number = 1; // 0 reserved for main
     private funcIdMap: Map<ts.Node, number> = new Map<ts.Node, number>();
-    private statistics: CompilerStatistics;
+    private statistics: CompilerStatistics | undefined;
     private needDumpHeader: boolean = true;
     private ts2abcProcess: any = undefined;
 
@@ -74,12 +74,13 @@ export class CompilerDriver {
         // register passes here
         this.passes = [
             new CacheExpander(),
-            new IntrinsicExpander(),
             new RegAlloc()
         ];
         this.compilationUnits = [];
         this.pendingCompilationUnits = [];
-        this.statistics = new CompilerStatistics();
+        if (CmdOptions.showHistogramStatistics() || CmdOptions.showHoistingStatistics()) {
+            this.statistics = new CompilerStatistics();
+        }
     }
 
     initiateTs2abcChildProcess() {
@@ -152,6 +153,7 @@ export class CompilerDriver {
     }
 
     compile(node: ts.SourceFile): void {
+        CompilerDriver.isTsFile = CompilerDriver.isTypeScriptSourceFile(node);
         if (CmdOptions.showASTStatistics()) {
             let statics: number[] = new Array(ts.SyntaxKind.Count).fill(0);
 
@@ -240,7 +242,7 @@ export class CompilerDriver {
         }
 
         if (CmdOptions.showHistogramStatistics()) {
-            this.statistics.getInsHistogramStatistics(pandaGen);
+            this.statistics!.getInsHistogramStatistics(pandaGen);
         }
     }
 
@@ -276,7 +278,7 @@ export class CompilerDriver {
         this.compilationUnits.push(pandaGen);
     }
 
-    private isTypeScriptSourceFile(node: ts.SourceFile) {
+    static isTypeScriptSourceFile(node: ts.SourceFile) {
         let fileName = node.fileName;
         if (fileName && fileName.endsWith(".ts")) {
             return true;
@@ -293,12 +295,11 @@ export class CompilerDriver {
             topLevelScope = new GlobalScope(node);
         }
 
-        let isTsFile = this.isTypeScriptSourceFile(node);
-        let enableTypeRecord = recordType && CmdOptions.needRecordType() && isTsFile;
+        let enableTypeRecord = recordType && CmdOptions.needRecordType() && CompilerDriver.isTsFile;
         if (enableTypeRecord) {
             TypeRecorder.createInstance();
         }
-        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, isTsFile);
+        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, CompilerDriver.isTsFile);
         recorder.record();
   
         addVariableToScope(recorder, enableTypeRecord);
@@ -313,11 +314,11 @@ export class CompilerDriver {
 
     showStatistics(): void {
         if (CmdOptions.showHistogramStatistics()) {
-            this.statistics.printHistogram(false);
+            this.statistics!.printHistogram(false);
         }
 
         if (CmdOptions.showHoistingStatistics()) {
-            this.statistics.printHoistStatistics();
+            this.statistics!.printHoistStatistics();
         }
     }
 
