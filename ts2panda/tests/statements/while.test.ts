@@ -95,12 +95,12 @@ describe("WhileLoopTest", function () {
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
             // compute rhs
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaLessdyn(lhs),
             new Jeqz(loopEnd),
 
             // body
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(loopBegin),
 
@@ -120,17 +120,17 @@ describe("WhileLoopTest", function () {
         let labelPre = new Label();
         let labelPost = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             labelPre,
             // condition
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
             //body
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(labelPre), // continue
             new Jmp(labelPre),
@@ -152,17 +152,17 @@ describe("WhileLoopTest", function () {
         let labelPre = new Label();
         let labelPost = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             labelPre,
             // condition
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
             //body
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(labelPost), //break
             new Jmp(labelPre),

@@ -62,7 +62,7 @@ describe("PropertyAccess", function () {
             new EcmaTryldglobalbyname('obj'),
             new StaDyn(tempObj),
             new MovDyn(objReg, tempObj),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStobjbyname("property", objReg),
         ];
 
@@ -83,10 +83,10 @@ describe("PropertyAccess", function () {
         let propReg = new VReg();
 
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
             new LdaDyn(new VReg()),
-            new EcmaDefinemethod("myMethod", new Imm(ResultType.Int, 1), new VReg()),
+            new EcmaDefinemethod("myMethod", new Imm(1), new VReg()),
             new StaDyn(funcReg),
             new LdaStr("myMethod"),
             new StaDyn(propReg),
@@ -120,10 +120,10 @@ describe("PropertyAccess", function () {
         let propReg = new VReg();
 
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
             new LdaDyn(new VReg()),
-            new EcmaDefinemethod("a", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinemethod("a", new Imm(0), new VReg()),
             new StaDyn(funcReg),
             new LdaStr("a"),
             new StaDyn(propReg),
@@ -153,13 +153,13 @@ describe("PropertyAccess", function () {
         let propReg = new VReg();
 
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
             new LdaDyn(new VReg()),
-            new EcmaDefinemethod("#1#a", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinemethod("#1#a", new Imm(0), new VReg()),
             new StaDyn(getterReg),
             new LdaDyn(new VReg()),
-            new EcmaDefinemethod("#2#a", new Imm(ResultType.Int, 1), new VReg()),
+            new EcmaDefinemethod("#2#a", new Imm(1), new VReg()),
             new StaDyn(setterReg),
             new LdaStr("a"),
             new StaDyn(propReg),
