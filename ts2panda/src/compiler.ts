@@ -118,6 +118,9 @@ import {
     VarDeclarationKind,
     Variable
 } from "./variable";
+import {
+    compileCommaListExpression
+} from "./expression/compileCommaListExpression"
 
 export enum ControlFlowChange { Continue, Break }
 export class Compiler {
@@ -889,6 +892,9 @@ export class Compiler {
                 break;
             case ts.SyntaxKind.PartiallyEmittedExpression:
                 break;
+            case ts.SyntaxKind.CommaListExpression:
+	        compileCommaListExpression(this, <ts.CommaListExpression>expr);
+		break;
             default:
                 throw new Error("Expression of type " + this.getNodeName(expr) + " is unimplemented");
         }
