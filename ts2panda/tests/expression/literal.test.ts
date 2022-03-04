@@ -46,7 +46,7 @@ describe("LiteralTest", function () {
     it("5", function () {
         let insns = compileMainSnippet("5");
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaReturnundefined()
         ];
         expect(checkInstructions(insns, expected)).to.be.true;
@@ -93,7 +93,7 @@ describe("LiteralTest", function () {
         let arrayInstance = new VReg();
 
         let expected = [
-            new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreatearraywithbuffer(new Imm(0)),
             new StaDyn(arrayInstance),
             new LdaDyn(arrayInstance),
             new EcmaStlettoglobalrecord('arr'),
@@ -120,7 +120,7 @@ describe("LiteralTest", function () {
         let arrayInstance = new VReg();
 
         let expected = [
-            new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreatearraywithbuffer(new Imm(0)),
             new StaDyn(arrayInstance),
             new LdaDyn(arrayInstance),
             new EcmaStlettoglobalrecord('arr'),
@@ -137,8 +137,8 @@ describe("LiteralTest", function () {
         let expected = [
             new EcmaCreateemptyarray(),
             new StaDyn(arrayInstance),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
-            new EcmaStownbyindex(arrayInstance, new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
+            new EcmaStownbyindex(arrayInstance, new Imm(1)),
             new LdaDyn(arrayInstance),
             new EcmaStlettoglobalrecord('arr'),
             new EcmaReturnundefined()
@@ -152,10 +152,10 @@ describe("LiteralTest", function () {
         let arrayInstance = new VReg();
 
         let expected = [
-            new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreatearraywithbuffer(new Imm(0)),
             new StaDyn(arrayInstance),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
-            new EcmaStownbyindex(arrayInstance, new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(3)),
+            new EcmaStownbyindex(arrayInstance, new Imm(2)),
             new LdaDyn(arrayInstance),
             new EcmaStlettoglobalrecord('arr'),
             new EcmaReturnundefined()
@@ -172,19 +172,19 @@ describe("LiteralTest", function () {
         let arrayInstance = new VReg();
 
         let expected = [
-            new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreatearraywithbuffer(new Imm(0)),
             new StaDyn(arrayInstance),
             new LdaDyn(arrayInstance),
             new EcmaStlettoglobalrecord('arr1'),
 
-            new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, 1)),
+            new EcmaCreatearraywithbuffer(new Imm(1)),
             new StaDyn(arrayInstance),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(elemIdxReg),
             new EcmaTryldglobalbyname('arr1'),
             new EcmaStarrayspread(arrayInstance, elemIdxReg),
             new StaDyn(elemIdxReg),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaStownbyvalue(arrayInstance, elemIdxReg),
             new EcmaIncdyn(elemIdxReg),
             new StaDyn(elemIdxReg),
@@ -213,7 +213,7 @@ describe("LiteralTest", function () {
         let insns = compileMainSnippet("let obj = {a: 1}");
         let objInstance = new VReg();
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
             new LdaDyn(objInstance),
             new EcmaStlettoglobalrecord('obj'),
@@ -228,13 +228,13 @@ describe("LiteralTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaAdd2dyn(lhs),
-            new EcmaStownbyindex(objInstance, new Imm(ResultType.Int, 0)),
+            new EcmaStownbyindex(objInstance, new Imm(0)),
             new LdaDyn(objInstance),
             new EcmaStlettoglobalrecord('obj'),
             new EcmaReturnundefined()
@@ -247,7 +247,7 @@ describe("LiteralTest", function () {
         let objInstance = new VReg();
 
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
             new LdaDyn(objInstance),
             new EcmaStlettoglobalrecord('obj'),
@@ -261,7 +261,7 @@ describe("LiteralTest", function () {
         let objInstance = new VReg();
 
         let expected = [
-            new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreateobjectwithbuffer(new Imm(0)),
             new StaDyn(objInstance),
             new EcmaTryldglobalbyname('a'),
             new EcmaStownbyname("a", objInstance),

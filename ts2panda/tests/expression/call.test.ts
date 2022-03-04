@@ -64,7 +64,7 @@ describe("CallTest", function () {
         let arg0 = new VReg();
         let arg2 = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('i'),
             new EcmaTryldglobalbyname("foo"),
             new StaDyn(arg0),
@@ -88,7 +88,7 @@ describe("CallTest", function () {
             new StaDyn(arg0),
             new EcmaLdobjbyname("method", arg0),
             new StaDyn(arg1),
-            new EcmaCallithisrangedyn(new Imm(ResultType.Int, 1), [arg1, obj]),
+            new EcmaCallithisrangedyn(new Imm(1), [arg1, obj]),
 
             new EcmaReturnundefined()
         ];
@@ -106,7 +106,7 @@ describe("CallTest", function () {
         let arrayInstance = new VReg();
 
         let expected = [
-            new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, 0)),
+            new EcmaCreatearraywithbuffer(new Imm(0)),
             new StaDyn(arrayInstance),
             new LdaDyn(arrayInstance),
             new EcmaStconsttoglobalrecord('args'),
@@ -116,7 +116,7 @@ describe("CallTest", function () {
 
             new EcmaCreateemptyarray(),
             new StaDyn(arrayInstance),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(lengthReg),
             new EcmaTryldglobalbyname('args'),
             new EcmaStarrayspread(arrayInstance, lengthReg),
@@ -144,7 +144,7 @@ describe("CallTest", function () {
             new StaDyn(prop),
             new EcmaLdobjbyvalue(arg0, prop),
             new StaDyn(arg1),
-            new EcmaCallithisrangedyn(new Imm(ResultType.Int, 1), [arg1, obj]),
+            new EcmaCallithisrangedyn(new Imm(1), [arg1, obj]),
 
             new EcmaReturnundefined()
         ];

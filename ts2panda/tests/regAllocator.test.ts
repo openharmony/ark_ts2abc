@@ -67,13 +67,13 @@ describe("RegAllocator", function () {
         let insns = pgs[0].getInsns();
 
         let expected: IRNode[] = [
-            new LdaiDyn(new Imm(ResultType.Int, 252)),
+            new LdaiDyn(new Imm(252)),
             new EcmaStlettoglobalrecord('a252'),
-            new LdaiDyn(new Imm(ResultType.Int, 253)),
+            new LdaiDyn(new Imm(253)),
             new EcmaStlettoglobalrecord('a253'),
-            new LdaiDyn(new Imm(ResultType.Int, 254)),
+            new LdaiDyn(new Imm(254)),
             new EcmaStlettoglobalrecord('a254'),
-            new LdaiDyn(new Imm(ResultType.Int, 255)),
+            new LdaiDyn(new Imm(255)),
             new EcmaStlettoglobalrecord('a255'),
             new EcmaTryldglobalbyname('a255'),
             new EcmaReturnundefined()
@@ -107,13 +107,13 @@ describe("RegAllocator", function () {
             v[i].num = i;
         }
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 252)),
+            new LdaiDyn(new Imm(252)),
             new EcmaStlettoglobalrecord('a252'),
-            new LdaiDyn(new Imm(ResultType.Int, 253)),
+            new LdaiDyn(new Imm(253)),
             new EcmaStlettoglobalrecord('a253'),
-            new LdaiDyn(new Imm(ResultType.Int, 254)),
+            new LdaiDyn(new Imm(254)),
             new EcmaStlettoglobalrecord('a254'),
-            new LdaiDyn(new Imm(ResultType.Int, 255)),
+            new LdaiDyn(new Imm(255)),
             new EcmaStlettoglobalrecord('a255'),
             new EcmaTryldglobalbyname('call'),
             new StaDyn(v[3]),
@@ -125,7 +125,7 @@ describe("RegAllocator", function () {
             new StaDyn(v[6]),
             new EcmaTryldglobalbyname('a255'),
             new StaDyn(v[7]),
-            new EcmaCallirangedyn(new Imm(ResultType.Int, 4), [v[3],v[4],v[5],v[6],v[7]]),
+            new EcmaCallirangedyn(new Imm(4), [v[3],v[4],v[5],v[6],v[7]]),
             new EcmaReturnundefined(),
         ];
         expect(checkInstructions(insns.slice(insns.length - 20), expected, checkRegisterNumber)).to.be.true;
