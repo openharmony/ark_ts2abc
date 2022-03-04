@@ -45,7 +45,7 @@ describe("FunctionDeclarationTest", function () {
         snippetCompiler.compile("function foo() {}");
         let funcName = "foo";
         let expected = [
-            new EcmaDefinefuncdyn(funcName, new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn(funcName, new Imm(0), new VReg()),
             new EcmaStglobalvar(funcName),
             new EcmaReturnundefined()
         ];
@@ -64,7 +64,7 @@ describe("FunctionDeclarationTest", function () {
       function foo() {}
       `);
         let expected = [
-            new EcmaDefinefuncdyn("#2#foo", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("#2#foo", new Imm(0), new VReg()),
             new EcmaStglobalvar("foo"),
             new EcmaReturnundefined()
         ];
@@ -81,7 +81,7 @@ describe("FunctionDeclarationTest", function () {
         snippetCompiler.compile(`function out() {function foo() {}}`);
         let funcReg = new VReg();
         let expected = [
-            new EcmaDefinefuncdyn("foo", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("foo", new Imm(0), new VReg()),
             new StaDyn(funcReg),
 
             new EcmaReturnundefined()
@@ -103,7 +103,7 @@ describe("FunctionDeclarationTest", function () {
         snippetCompiler.compile("let foo = function() {}");
         let insns = snippetCompiler.getGlobalInsns();
         let expected = [
-            new EcmaDefinefuncdyn("foo", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("foo", new Imm(0), new VReg()),
             new EcmaStlettoglobalrecord("foo"),
             new EcmaReturnundefined()
         ];
@@ -117,7 +117,7 @@ describe("FunctionDeclarationTest", function () {
         let endLabel = new Label();
 
         let expected_main = [
-            new EcmaDefinefuncdyn("test", new Imm(ResultType.Int, 1), new VReg()),
+            new EcmaDefinefuncdyn("test", new Imm(1), new VReg()),
             new EcmaStglobalvar("test"),
             new EcmaReturnundefined()
         ];
@@ -126,7 +126,7 @@ describe("FunctionDeclarationTest", function () {
             new LdaDyn(new VReg()),
             new EcmaStricteqdyn(undefinedVReg),
             new Jeqz(endLabel),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(value),
             endLabel,
             new EcmaReturnundefined(),
@@ -149,7 +149,7 @@ describe("FunctionDeclarationTest", function () {
         let snippetCompiler = new SnippetCompiler();
         snippetCompiler.compile(`function test(a, ...b) {}`);
 
-        let idx = new Imm(ResultType.Int, 1);
+        let idx = new Imm(1);
         let lastParam = new VReg();
         let expected_func = [
             // func_test_0
