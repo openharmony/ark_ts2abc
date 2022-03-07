@@ -57,9 +57,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("2 + 3");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaAdd2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -70,9 +70,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("5 - 1");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaSub2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -95,7 +95,7 @@ describe("BinaryOperationsTest", function () {
             new LdaDyn(new VReg()),
             new Jmp(endLabel),
             leftNullishLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             endLabel,
             new EcmaReturnundefined()
         ];
@@ -125,7 +125,7 @@ describe("BinaryOperationsTest", function () {
             new Jmp(endLabel),
 
             leftNullishLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             endLabel,
             new EcmaReturnundefined()
         ];
@@ -143,7 +143,7 @@ describe("BinaryOperationsTest", function () {
         let leftNullishLabel = new Label();
         let endLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(new VReg()),
             new EcmaStrictnoteqdyn(new VReg()),
             new Jeqz(leftNullishLabel),
@@ -155,7 +155,7 @@ describe("BinaryOperationsTest", function () {
             new Jmp(endLabel),
 
             leftNullishLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             endLabel,
             new EcmaReturnundefined()
         ];
@@ -170,9 +170,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("3 * 4");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 4)),
+            new LdaiDyn(new Imm(4)),
             new EcmaMul2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -183,9 +183,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("2 ** 3");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaExpdyn(lhs),
             new EcmaReturnundefined(),
         ];
@@ -196,9 +196,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("7 / 1");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 7)),
+            new LdaiDyn(new Imm(7)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaDiv2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -209,9 +209,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("8 % 2");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 8)),
+            new LdaiDyn(new Imm(8)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaMod2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -222,9 +222,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("2 << 3");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaShl2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -235,9 +235,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("4 >> 1");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 4)),
+            new LdaiDyn(new Imm(4)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaShr2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -248,9 +248,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("12 >>> 2");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 12)),
+            new LdaiDyn(new Imm(12)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaAshr2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -261,9 +261,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("3 & 4");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 4)),
+            new LdaiDyn(new Imm(4)),
             new EcmaAnd2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -274,9 +274,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("2 | 5");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaOr2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -287,9 +287,9 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("7 ^ 3");
         let lhs = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 7)),
+            new LdaiDyn(new Imm(7)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaXor2dyn(lhs),
             new EcmaReturnundefined()
         ];
@@ -301,7 +301,7 @@ describe("BinaryOperationsTest", function () {
         let expected = [
             new LdaDyn(new VReg()),
             new EcmaStlettoglobalrecord('i'),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaTrystglobalbyname('i'),
             new EcmaReturnundefined()
         ];
@@ -315,7 +315,7 @@ describe("BinaryOperationsTest", function () {
                                         `);
         let expected = [
             new LdaStr("use strict"),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname("a"),
             new EcmaReturnundefined()
         ];
@@ -327,7 +327,7 @@ describe("BinaryOperationsTest", function () {
         let insns = compileMainSnippet("((x)) = 1;");
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStglobalvar("x"),
             new EcmaReturnundefined()
         ];
@@ -349,7 +349,7 @@ describe("BinaryOperationsTest", function () {
             new EcmaTryldglobalbyname('a'),
             new StaDyn(tempObj),
             new MovDyn(objReg, tempObj),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
 
             new EcmaStobjbyname("b", objReg),
             new EcmaReturnundefined()

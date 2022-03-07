@@ -57,12 +57,16 @@ import {
     EcmaLdsuperbyname,
     EcmaLdsuperbyvalue,
     EcmaNewlexenvdyn,
+    EcmaNewlexenvwithnamedyn,
     EcmaNewobjdynrange,
     EcmaPoplexenvdyn,
     EcmaReturnundefined,
     EcmaSetobjectwithproto,
     EcmaStarrayspread,
+    EcmaStclasstoglobalrecord,
+    EcmaStconsttoglobalrecord,
     EcmaStglobalvar,
+    EcmaStlettoglobalrecord,
     EcmaStlexvardyn,
     EcmaStmodulevar,
     EcmaStobjbyindex,
@@ -70,8 +74,8 @@ import {
     EcmaStobjbyvalue,
     EcmaStownbyindex,
     EcmaStownbyname,
-    EcmaStownbyvalue,
     EcmaStownbynamewithnameset,
+    EcmaStownbyvalue,
     EcmaStownbyvaluewithnameset,
     EcmaStsuperbyname,
     EcmaStsuperbyvalue,
@@ -160,8 +164,11 @@ export function throwDeleteSuperProperty() {
     return new EcmaThrowdeletesuperproperty();
 }
 
-export function newLexicalEnv(numVars: number) {
-    return new EcmaNewlexenvdyn(new Imm(numVars));
+export function newLexicalEnv(numVars: number, scopeInfoIdx: number | undefined) {
+    if (scopeInfoIdx == undefined) {
+        return new EcmaNewlexenvdyn(new Imm(numVars));
+    }
+    return new EcmaNewlexenvwithnamedyn(new Imm(numVars), new Imm(scopeInfoIdx));
 }
 
 export function loadLexicalEnv() {
@@ -419,15 +426,15 @@ export function createRegExpWithLiteral(pattern: string, flags: number) {
     return new EcmaCreateregexpwithliteral(pattern, new Imm(flags));
 }
 
-export function stLetToGlobalRecord (name: string) {
+export function stLetToGlobalRecord(name: string) {
     return new EcmaStlettoglobalrecord(name);
 }
 
-export function stConstToGlobalRecord (name: string) {
+export function stConstToGlobalRecord(name: string) {
     return new EcmaStconsttoglobalrecord(name);
 }
 
-export function stClassToGlobalRecord (name: string) {
+export function stClassToGlobalRecord(name: string) {
     return new EcmaStclasstoglobalrecord(name);
 }
 
