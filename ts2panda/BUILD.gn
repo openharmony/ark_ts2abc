@@ -81,8 +81,11 @@ action("npm_run_build") {
     "$ts2abc_root:ts2abc_diagnostic_ts",
     "$ts2abc_root:ts2abc_irnodes_ts",
     "$ts2abc_root:ts2abc_src",
-    "$ts2abc_root/ts2abc:ts2abc",
   ]
+
+  if (is_linux || is_mingw || is_mac) {
+    deps += [ "$ts2abc_root/ts2abc:ts2abc" ]
+  }
 
   script = "${ts2abc_root}/scripts/run.py"
   args = [
