@@ -183,7 +183,8 @@ export class Compiler {
             ["this", 1],
             ["4newTarget", 2],
             ["0newTarget", 2],
-            ["argumentsOrRestargs", 4]
+            ["argumentsOrRestargs", 4],
+            ["4funcObj", 8]
         ]);
         let callType = 0;
         let scope = this.pandaGen.getScope();
