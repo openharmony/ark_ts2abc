@@ -40,7 +40,7 @@ describe("arguments Keyword", function () {
             new StaDyn(argumentsReg),
             new LdaDyn(argumentsReg),
             new StaDyn(temp1),
-            new EcmaLdobjbyindex(temp1, new Imm(ResultType.Int, 0)),
+            new EcmaLdobjbyindex(temp1, new Imm(0)),
             new EcmaReturnundefined()
         ];
         let functionPg = snippetCompiler.getPandaGenByName("foo");
@@ -59,7 +59,7 @@ describe("arguments Keyword", function () {
             new StaDyn(new VReg()),
             new LdaDyn(parameterArguments),
             new StaDyn(temp1),
-            new EcmaLdobjbyindex(temp1, new Imm(ResultType.Int, 0)),
+            new EcmaLdobjbyindex(temp1, new Imm(0)),
             new EcmaReturnundefined()
         ];
         let functionPg = snippetCompiler.getPandaGenByName("foo");

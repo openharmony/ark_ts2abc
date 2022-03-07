@@ -46,11 +46,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaAdd2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -64,11 +64,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 7)),
+            new LdaiDyn(new Imm(7)),
             new EcmaSub2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -82,11 +82,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 4)),
+            new LdaiDyn(new Imm(4)),
             new EcmaMul2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -100,11 +100,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaExpdyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -118,11 +118,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaDiv2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -136,11 +136,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 15)),
+            new LdaiDyn(new Imm(15)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 7)),
+            new LdaiDyn(new Imm(7)),
             new EcmaMod2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -154,11 +154,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 8)),
+            new LdaiDyn(new Imm(8)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaShl2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -172,11 +172,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 4)),
+            new LdaiDyn(new Imm(4)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaShr2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -190,11 +190,11 @@ describe("OperationEqualTest", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 8)),
+            new LdaiDyn(new Imm(8)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaAshr2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()

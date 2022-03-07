@@ -46,7 +46,7 @@ describe("deleteExpressionTest", function () {
             new EcmaStlettoglobalrecord('arr'),
             new EcmaTryldglobalbyname('arr'),
             new StaDyn(objReg),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(propReg),
             new EcmaDelobjprop(objReg, propReg),
             new EcmaReturnundefined()
