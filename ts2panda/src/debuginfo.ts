@@ -395,10 +395,7 @@ export class DebugInfo {
 
 
     public static copyDebugInfo(insn: IRNode, expansion: IRNode[]) {
-        let debugPosInfo = insn.debugPosInfo;
-        for (let j = 0; j < expansion.length; j++) {
-            expansion[j].debugPosInfo = debugPosInfo;
-        }
+        expansion.forEach(irNode => irNode.debugPosInfo = insn.debugPosInfo);
     }
 
     public static addDebugIns(scope: Scope, pandaGen: PandaGen, isStart: boolean) {

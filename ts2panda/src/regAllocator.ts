@@ -32,16 +32,13 @@ const MAX_VREGA = 16;
 const MAX_VREGB = 256;
 const MAX_VREGC = 65536;
 
-class VRegWithFlag {
-    constructor(vreg: VReg) {
-        this.flag = false;
-        this.vreg = vreg;
-    }
+interface VRegWithFlag {
     vreg: VReg;
     flag: boolean; // indicate whether it is used as a temporary register for spill
 }
 
 class RegAllocator {
+    private newInsns: IRNode[] = [];
     private spills: VReg[] = [];
     private vRegsId: number = 0;
     private usedVreg: VRegWithFlag[] = [];
@@ -54,7 +51,7 @@ class RegAllocator {
     allocIndexForVreg(vreg: VReg) {
         let num = this.getFreeVreg();
         vreg.num = num;
-        this.usedVreg[num] = new VRegWithFlag(vreg);
+        this.usedVreg[num] = {vreg: vreg, flag: false};
     }
 
     findTmpVreg(level: number): VReg {
@@ -121,7 +118,7 @@ class RegAllocator {
         this.tmpVreg.push(this.usedVreg[num]);
     }
 
-    doRealAdjustment(operands: OperandType[], format: Format, index: number, irNodes: IRNode[]): number {
+    doRealAdjustment(operands: OperandType[], format: Format, index: number, irNodes: IRNode[]) {
         let head: IRNode[] = [];
         let tail: IRNode[] = [];
         let spills: VReg[] = [];
@@ -165,14 +162,12 @@ class RegAllocator {
         DebugInfo.copyDebugInfo(irNodes[index], head);
         DebugInfo.copyDebugInfo(irNodes[index], tail);
 
-        irNodes.splice(index, 0, ...head);
-        irNodes.splice(index + head.length + 1, 0, ...tail);
+        this.newInsns.push(...head, irNodes[index], ...tail);
+
         for (let j = spills.length - 1; j >= 0; --j) {
             this.freeSpill(spills[j]);
         }
         this.clearVregFlags();
-
-        return (head.length + tail.length);
     }
 
     checkDynRangeInstruction(irNodes: IRNode[], index: number): boolean {
@@ -211,7 +206,7 @@ class RegAllocator {
         return false;
     }
 
-    adjustDynRangeInstruction(irNodes: IRNode[], index: number): number {
+    adjustDynRangeInstruction(irNodes: IRNode[], index: number) {
         let head: IRNode[] = [];
         let tail: IRNode[] = [];
         let spills: VReg[] = [];
@@ -239,14 +234,11 @@ class RegAllocator {
         DebugInfo.copyDebugInfo(irNodes[index], head);
         DebugInfo.copyDebugInfo(irNodes[index], tail);
 
-        irNodes.splice(index, 0, ...head);
-        irNodes.splice(index + head.length + 1, 0, ...tail);
+        this.newInsns.push(...head, irNodes[index], ...tail);
         for (let i = spills.length - 1; i >= 0; --i) {
             this.freeSpill(spills[i]);
         }
         this.clearVregFlags();
-
-        return (head.length + tail.length);
     }
 
     adjustInstructionsIfNeeded(irNodes: IRNode[]): void {
@@ -255,10 +247,10 @@ class RegAllocator {
             let formats = irNodes[i].getFormats();
             if (isRangeInst(irNodes[i])) {
                 if (this.checkDynRangeInstruction(irNodes, i)) {
+                    this.newInsns.push(irNodes[i]);
                     continue;
                 }
-
-                i += this.adjustDynRangeInstruction(irNodes, i);
+                this.adjustDynRangeInstruction(irNodes, i);
                 continue;
             }
 
@@ -272,8 +264,10 @@ class RegAllocator {
                 }
             }
             if (min > 0) {
-                i += this.doRealAdjustment(operands, minFormat, i, irNodes);
+                this.doRealAdjustment(operands, minFormat, i, irNodes);
+                continue;
             }
+            this.newInsns.push(irNodes[i]);
         }
     }
 
@@ -304,8 +298,10 @@ class RegAllocator {
         for (let i = 0; i < parametersCount; ++i) {
             let v = new VReg();
             this.allocIndexForVreg(v);
-            irNodes.splice(0, 0, new MovDyn(locals[i], v));
+            this.newInsns.unshift(new MovDyn(locals[i], v));
         }
+
+        pandaGen.setInsns(this.newInsns);
     }
 }
 
