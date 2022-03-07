@@ -259,6 +259,11 @@ export abstract class VariableScope extends Scope {
     protected node: ts.Node | undefined = undefined;
     protected parentVariableScope: VariableScope | null = null;
     protected childVariableScope: VariableScope[] = [];
+    protected lexVarInfo: Map<string, number> = new Map<string, number>();
+
+    getLexVarInfo() {
+        return this.lexVarInfo;
+    }
 
     getBindingNode() {
         return this.node;
@@ -322,7 +327,8 @@ export abstract class VariableScope extends Scope {
 
     setLexVar(v: Variable, refScope: Scope) {
         if (!v.isLexVar) {
-            v.setLexVar(this);
+            let slot = v.setLexVar(this);
+            this.lexVarInfo.set(v.getName(), slot);
         }
 
         LOGD(this.debugTag, "VariableScope.setLexVar(" + v.idxLex + ")");
@@ -472,8 +478,8 @@ export class LocalScope extends Scope {
     }
 
     setLexVar(v: Variable, srcScope: Scope) {
-        let variableScope = <VariableScope>this.getNearestLexicalScope();
-        variableScope.setLexVar(v, srcScope);
+        let lexicalScope = <VariableScope | LoopScope>this.getNearestLexicalScope();
+        lexicalScope.setLexVar(v, srcScope);
     }
 
 
@@ -511,13 +517,15 @@ export class LocalScope extends Scope {
 export class LoopScope extends LocalScope {
     protected startLexIdx: number = 0;
     protected needCreateLexEnv: boolean = false;
+    protected lexVarInfo: Map<string, number> = new Map<string, number>();
     constructor(parent: Scope) {
         super(parent);
     }
 
     setLexVar(v: Variable, refScope: Scope) {
         if (!v.isLexVar) {
-            v.setLexVar(this);
+            let idxLex = v.setLexVar(this);
+            this.lexVarInfo.set(v.getName(), idxLex);
         }
 
         LOGD(this.debugTag, "LoopScope.setLexVar(" + v.idxLex + ")");
@@ -529,6 +537,10 @@ export class LoopScope extends LocalScope {
 
             scope = scope.getParent();
         }
+    }
+
+    getLexVarInfo() {
+        return this.lexVarInfo;
     }
 
     need2CreateLexEnv(): boolean {

@@ -74,18 +74,18 @@ describe("DoWhileLoopTest", function () {
         let labelCond = new Label();
         let labelPost = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             // body
             labelPre,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(labelCond), // continue
             // condition
             labelCond,
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
             new Jmp(labelPre),
@@ -110,18 +110,18 @@ describe("DoWhileLoopTest", function () {
         let labelPost = new Label();
         let labelCond = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             //body
             labelPre,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(labelPost), // break
             // condition
             labelCond,
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
             new Jmp(labelPre),

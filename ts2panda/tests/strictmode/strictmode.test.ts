@@ -19,7 +19,7 @@ import * as ts from "typescript";
 import { isStrictMode, setGlobalStrict } from '../../src/strictMode';
 import { isFunctionLikeDeclaration } from '../../src/syntaxCheckHelper';
 import { getCompileOptions } from '../utils/base';
-import jshelpers = require('../../src/jshelpers');
+import * as jshelpers from '../../src/jshelpers';
 
 function createSourceFile(filename: string): ts.SourceFile {
     let sourceFile = ts.createSourceFile(
