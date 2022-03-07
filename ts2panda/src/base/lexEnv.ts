@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { CmdOptions } from "../cmdOptions";
 import {
     IRNode
 } from "../irnodes";
@@ -28,9 +29,14 @@ import { CacheList, getVregisterCache } from "./vregisterCache";
 function createLexEnv(pandaGen: PandaGen, scope: VariableScope): IRNode[] {
     let lexEnvVars = scope.getNumLexEnv();
     let insns: IRNode[] = [];
+    let scopeInfoIdx: number | undefined = undefined;
+    let lexVarInfo = scope.getLexVarInfo();
+    if (CmdOptions.isDebugMode()) {
+        scopeInfoIdx = pandaGen.appendScopeInfo(lexVarInfo);
+    }
 
     insns.push(
-        newLexicalEnv(lexEnvVars),
+        newLexicalEnv(lexEnvVars, scopeInfoIdx),
         storeAccumulator(getVregisterCache(pandaGen, CacheList.LexEnv))
     );
 

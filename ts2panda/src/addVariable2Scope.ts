@@ -15,6 +15,7 @@
 
 import * as ts from "typescript";
 import { isBindingPattern } from "./base/util";
+import { CmdOptions } from "./cmdOptions";
 import * as jshelpers from "./jshelpers";
 import { Recorder } from "./recorder";
 import {
@@ -76,14 +77,13 @@ function addInnerArgs(node: ts.Node, scope: VariableScope, enableTypeRecord: boo
         addParameters(funcNode, scope, enableTypeRecord);
     }
 
-    if (scope.getUseArgs()) {
+    if (scope.getUseArgs() || CmdOptions.isDebugMode()) {
         if (ts.isArrowFunction(node)) {
             let parentVariableScope = <VariableScope>scope.getParentVariableScope();
             parentVariableScope.add("arguments", VarDeclarationKind.CONST, InitStatus.INITIALIZED);
             parentVariableScope.setUseArgs(true);
-
             scope.setUseArgs(false);
-        } else {
+        } else if (scope.getUseArgs()){
             if (!scope.findLocal("arguments")) {
                 scope.add("arguments", VarDeclarationKind.CONST, InitStatus.INITIALIZED);
             }

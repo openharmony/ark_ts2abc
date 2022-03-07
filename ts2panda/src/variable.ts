@@ -78,6 +78,7 @@ export abstract class Variable {
         this.idxLex = scope.getLexVarIdx()
         scope.pendingCreateEnv();
         this.isLexVar = true;
+        return this.idxLex;
     }
 
     clearLexVar() {
