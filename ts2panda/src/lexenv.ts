@@ -92,10 +92,9 @@ export class VariableAccessLoad extends VariableAccessBase {
             return insns;
         }
         if (v.getName() === "4funcObj") {
-            insns.push(loadAccumulator(getVregisterCache(pandaGen, CacheList.FUNC)));
-        } else {
-            insns.push(loadAccumulator(bindVreg));
+            this.scope.setCallOpt("4funcObj")
         }
+        insns.push(loadAccumulator(bindVreg));
 
         return insns;
     }
@@ -159,6 +158,10 @@ export class VariableAcessStore extends VariableAccessBase {
 
             // check const assignment
             checkConstAssignment(pandaGen, v, insns, this.node);
+        }
+
+        if (v.getName() === "4funcObj") {
+            this.scope.setCallOpt("4funcObj")
         }
         insns.push(storeAccumulator(bindVreg));
 

@@ -121,7 +121,7 @@ export function compileForStatement(stmt: ts.ForStatement, compiler: Compiler) {
 
     // determine if loopenv need to be created
     let loopScope = <LoopScope>compiler.getRecorder().getScopeOfNode(stmt);
-    let needCreateLoopEnv: boolean = loopScope.need2CreateLexEnv() ? true : false;
+    let needCreateLoopEnv: boolean = loopScope.need2CreateLexEnv();
     let loopEnv = pandaGen.getTemp();
     let createEnvAtBegining: boolean = false;
     if (needCreateLoopEnv) {

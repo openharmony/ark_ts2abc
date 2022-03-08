@@ -129,12 +129,18 @@ class Ts2abcTests():
             tests_args = "tests/**/*.test.js"
 
         if plat_form == "linux":
+            cmd = ['cp', f'{self.src_dir}/src/jshelpers.js', f'build/src/' ]
+            run_command(cmd, self.dist_dir)
             cmd = [mocha, f'build/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         elif plat_form == "win":
+            cmd = ['cp', f'{self.src_dir}/src/jshelpers.js', f'build-win/src/' ]
+            run_command(cmd, self.dist_dir)
             cmd = [mocha, f'build-win/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         elif plat_form == 'mac':
+            cmd = ['cp', f'{self.src_dir}/src/jshelpers.js', f'build-mac/src/' ]
+            run_command(cmd, self.dist_dir)
             cmd = [mocha, f'build-mac/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         if ret:
