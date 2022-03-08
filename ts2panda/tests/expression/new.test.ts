@@ -46,7 +46,7 @@ describe("NewTest", function () {
             new StaDyn(arg0),
             new MovDyn(targetReg, arg0),
 
-            new EcmaNewobjdynrange(new Imm(ResultType.Int, 2), [arg0, targetReg]),
+            new EcmaNewobjdynrange(new Imm(2), [arg0, targetReg]),
 
             new EcmaReturnundefined()
         ];
@@ -64,7 +64,7 @@ describe("NewTest", function () {
             new StaDyn(arg0),
             new MovDyn(targetReg, arg0),
 
-            new EcmaNewobjdynrange(new Imm(ResultType.Int, 2), [arg0, targetReg]),
+            new EcmaNewobjdynrange(new Imm(2), [arg0, targetReg]),
 
             new EcmaReturnundefined()
         ];
@@ -83,10 +83,10 @@ describe("NewTest", function () {
             new StaDyn(arg0),
             new MovDyn(targetReg, arg0),
 
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(arg1),
 
-            new EcmaNewobjdynrange(new Imm(ResultType.Int, 3), [arg0, targetReg, arg1]),
+            new EcmaNewobjdynrange(new Imm(3), [arg0, targetReg, arg1]),
 
             new EcmaReturnundefined()
         ];
@@ -109,7 +109,7 @@ describe("NewTest", function () {
             new StaDyn(arg0),
             new MovDyn(targetReg, arg0),
 
-            new EcmaNewobjdynrange(new Imm(ResultType.Int, 2), [arg0, targetReg]),
+            new EcmaNewobjdynrange(new Imm(2), [arg0, targetReg]),
         ];
 
         insns = insns.slice(2, insns.length - 1);
@@ -131,7 +131,7 @@ describe("NewTest", function () {
 
             new EcmaCreateemptyarray(),
             new StaDyn(arrayInstance),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(elemIdxReg),
 
             new EcmaTryldglobalbyname("args"),

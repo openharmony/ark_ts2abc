@@ -111,13 +111,13 @@ describe("ForLoopTest", function () {
         let labelIncr = new Label();
         let expected = [
             // initializer
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(i),
             labelPre,
             // condition
             new LdaDyn(i),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
             // body
@@ -151,13 +151,13 @@ describe("ForLoopTest", function () {
         let labelIncr = new Label();
         let expected = [
             // initializer
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(i),
             labelPre,
             // condition
             new LdaDyn(i),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
             // body
@@ -201,24 +201,24 @@ describe("LoopWithLabelTests", function () {
         let labelIncr1 = new Label();
         let expected = [
             // initializer
-            new LdaiDyn(new Imm(ResultType.Int, 0.0)),
+            new LdaiDyn(new Imm(0.0)),
             new StaDyn(i),
             labelPre,
             // condition
             new LdaDyn(i),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 5.0)),
+            new LdaiDyn(new Imm(5.0)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
 
             // second for
-            new LdaiDyn(new Imm(ResultType.Int, 0.0)),
+            new LdaiDyn(new Imm(0.0)),
             new StaDyn(j),
             labelPre1,
             // condition
             new LdaDyn(j),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 6.0)),
+            new LdaiDyn(new Imm(6.0)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost1),
             new Jmp(labelPost),
@@ -272,24 +272,24 @@ describe("LoopWithLabelTests", function () {
         let labelIncr1 = new Label();
         let expected = [
             // initializer
-            new LdaiDyn(new Imm(ResultType.Int, 0.0)),
+            new LdaiDyn(new Imm(0.0)),
             new StaDyn(i),
             labelPre,
             // condition
             new LdaDyn(i),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 5.0)),
+            new LdaiDyn(new Imm(5.0)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost),
 
             // second for
-            new LdaiDyn(new Imm(ResultType.Int, 0.0)),
+            new LdaiDyn(new Imm(0.0)),
             new StaDyn(j),
             labelPre1,
             // condition
             new LdaDyn(j),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 6.0)),
+            new LdaiDyn(new Imm(6.0)),
             new EcmaLessdyn(lhs),
             new Jeqz(labelPost1),
             new Jmp(labelIncr),
