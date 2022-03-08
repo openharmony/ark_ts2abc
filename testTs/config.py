@@ -34,11 +34,9 @@ IMPORT_FILE_PATH = os.path.join("testTs", "import_tests.json")
 CUR_FILE_DIR = os.path.dirname(__file__)
 CODE_ROOT = os.path.abspath(os.path.join(CUR_FILE_DIR, "../../.."))
 ARK_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark"
-# ARK_DIR = f"{CODE_ROOT}/out/ohos-arm-release/clang_x64/obj/ark"
 WORK_PATH = f'{CODE_ROOT}/ark/ts2abc'
 
 DEFAULT_ARK_FRONTEND_TOOL = os.path.join(ARK_DIR, "build", "src", "index.js")
-# DEFAULT_ARK_FRONTEND_TOOL = os.path.join(ARK_DIR, "ts2abc", "ts2panda", "build", "src", "index.js")
 
 TEST_PATH = os.sep.join([".", "testTs", "test"])
 OUT_PATH = os.sep.join([".", "out", "testTs"])
