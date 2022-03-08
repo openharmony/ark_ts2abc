@@ -31,7 +31,7 @@ describe("Regular Expression", function () {
         insns = insns.slice(0, insns.length - 1);
 
         let expected = [
-            new EcmaCreateregexpwithliteral("abc", new Imm(ResultType.Int, 0)),
+            new EcmaCreateregexpwithliteral("abc", new Imm(0)),
             new EcmaStlettoglobalrecord('a')
         ];
         expect(checkInstructions(insns, expected)).to.be.true;
@@ -42,7 +42,7 @@ describe("Regular Expression", function () {
         insns = insns.slice(0, insns.length - 1);
 
         let expected = [
-            new EcmaCreateregexpwithliteral("abc", new Imm(ResultType.Int, 2)),
+            new EcmaCreateregexpwithliteral("abc", new Imm(2)),
             new EcmaStlettoglobalrecord('a')
         ];
         expect(checkInstructions(insns, expected)).to.be.true;

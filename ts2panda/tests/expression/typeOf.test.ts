@@ -36,7 +36,7 @@ describe("TypeOfTest", function () {
     it("typeof 12", function () {
         let insns = compileMainSnippet("typeof 5");
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaTypeofdyn(),
             new EcmaReturnundefined()
         ];

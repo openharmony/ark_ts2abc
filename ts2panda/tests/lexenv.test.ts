@@ -68,7 +68,7 @@ function MicroCreateLexEnv(numVars: number, hasLexEnv: boolean): IRNode[] {
     let insns = [];
 
     if (hasLexEnv) {
-        insns.push(new EcmaNewlexenvdyn(new Imm(ResultType.Int, numVars)));
+        insns.push(new EcmaNewlexenvdyn(new Imm(numVars)));
     } else {
         insns.push(new EcmaLdlexenvdyn());
     }
@@ -81,7 +81,7 @@ function MicroStoreLexVar(level: number, slot: number, kind?: VarDeclarationKind
     let insns = [];
 
     if (kind && name) {
-        insns.push(new EcmaLdlexvardyn(new Imm(ResultType.Int, level), new Imm(ResultType.Int, slot)));
+        insns.push(new EcmaLdlexvardyn(new Imm(level), new Imm(slot)));
         insns.push(new StaDyn(new VReg()));
         insns.push(new LdaStr(name));
         insns.push(new StaDyn(new VReg()));
@@ -90,7 +90,7 @@ function MicroStoreLexVar(level: number, slot: number, kind?: VarDeclarationKind
             insns.push(new EcmaThrowconstassignment(new VReg()));
         }
     }
-    insns.push(new EcmaStlexvardyn(new Imm(ResultType.Int, level), new Imm(ResultType.Int, slot), new VReg()));
+    insns.push(new EcmaStlexvardyn(new Imm(level), new Imm(slot), new VReg()));
     insns.push(new LdaDyn(new VReg()));
 
     return insns;
@@ -99,7 +99,7 @@ function MicroStoreLexVar(level: number, slot: number, kind?: VarDeclarationKind
 function MicroLoadLexVar(level: number, slot: number, kind?: VarDeclarationKind, name?: string): IRNode[] {
     let insns = [];
 
-    insns.push(new EcmaLdlexvardyn(new Imm(ResultType.Int, level), new Imm(ResultType.Int, slot)));
+    insns.push(new EcmaLdlexvardyn(new Imm(level), new Imm(slot)));
     if (kind && name) {
         insns.push(new StaDyn(new VReg()));
         insns.push(new LdaStr(name));
@@ -325,7 +325,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let tempReg = new VReg();
         let nameReg = new VReg();
         let expected = [
-            new EcmaLdlexvardyn(new Imm(ResultType.Int, 0), new Imm(ResultType.Int, 0)),
+            new EcmaLdlexvardyn(new Imm(0), new Imm(0)),
             new StaDyn(tempReg),
             new LdaStr("var1"),
             new StaDyn(nameReg),
@@ -371,7 +371,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let valueReg = new VReg();
         let expected = [
             new StaDyn(valueReg),
-            new EcmaStlexvardyn(new Imm(ResultType.Int, 0), new Imm(ResultType.Int, 0), valueReg),
+            new EcmaStlexvardyn(new Imm(0), new Imm(0), valueReg),
             new LdaDyn(new VReg())
         ];
         expect(checkInstructions(outInsns, expected)).to.be.true;
@@ -393,7 +393,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let valueReg = new VReg();
         let expected = [
             new StaDyn(valueReg),
-            new EcmaStlexvardyn(new Imm(ResultType.Int, 0), new Imm(ResultType.Int, 0), valueReg),
+            new EcmaStlexvardyn(new Imm(0), new Imm(0), valueReg),
             new LdaDyn(valueReg)
         ];
         expect(checkInstructions(outInsns, expected)).to.be.true;
@@ -412,14 +412,14 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let expected_main = [
             new LdaDyn(new VReg()),
             new EcmaStglobalvar("outer"),
-            new EcmaDefinefuncdyn("func", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("func", new Imm(0), new VReg()),
             new EcmaStglobalvar("func"),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStglobalvar("outer"),
             new EcmaReturnundefined()
         ];
         let expected_func = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaStglobalvar("outer"),
             new EcmaReturnundefined()
         ];
@@ -447,9 +447,9 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let pandaGens = compileAllSnippet(source, passes);
         let expected_main = [
             ...insnsCreateLexEnv_main,
-            new EcmaDefinefuncdyn("func", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("func", new Imm(0), new VReg()),
             new EcmaStglobalvar("func"), // global.func = func_func_1
-            new LdaiDyn(new Imm(ResultType.Int, 1)), // value = 1
+            new LdaiDyn(new Imm(1)), // value = 1
             // ...insnsStoreLexVar_main,
             new EcmaStlettoglobalrecord("outer"),
             new EcmaReturnundefined()
@@ -457,7 +457,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let insnsCreateLexEnv_func = MicroCreateLexEnv(0, false);
         let expected_func = [
             ...insnsCreateLexEnv_func,
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             // ...insnsStoreLexVar_func,
             new EcmaTrystglobalbyname("outer"),
             new EcmaReturnundefined()
@@ -505,7 +505,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
             new LdaDyn(new VReg()),
             new StaDyn(new VReg()),
             ...insnsStoreLexVar_outer_2,
-            new EcmaDefinefuncdyn("#1#", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("#1#", new Imm(0), new VReg()),
             // returnStatement
             new StaDyn(new VReg()),
             new LdaDyn(new VReg()),

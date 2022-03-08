@@ -145,7 +145,7 @@ function getDtsFiles(libDir: string): string[] {
             if(stat.isDirectory() === true) {
                 finDtsFile(fPath);
             }
-            if (stat.isFile() === true && item.endsWith(".d.ts") === true) { 
+            if (stat.isFile() === true && item.endsWith(".d.ts") === true) {
                 dtsFiles.push(fPath);
             }
         });

@@ -41,12 +41,12 @@ describe("switchTest", function () {
         let caseLabel = new Label();
         let switchEndLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             // switch body
             new EcmaTryldglobalbyname('a'),
             new StaDyn(rhs),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel),
             new Jmp(switchEndLabel),
@@ -73,15 +73,15 @@ describe("switchTest", function () {
         let defaultLabel = new Label();
         let switchEndLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             // switch body
             new EcmaTryldglobalbyname('a'),
             new StaDyn(rhs),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_0),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_1),
             new Jmp(defaultLabel),
@@ -109,15 +109,15 @@ describe("switchTest", function () {
         let defaultLabel = new Label();
         let switchEndLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             // switch body
             new EcmaTryldglobalbyname('a'),
             new StaDyn(rhs),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_0),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_1),
             new Jmp(defaultLabel),
@@ -144,15 +144,15 @@ describe("switchTest", function () {
         let caseLabel_1 = new Label();
         let switchEndLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             // switch body
             new EcmaTryldglobalbyname('a'),
             new StaDyn(rhs),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_0),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_1),
             new Jmp(switchEndLabel),
@@ -180,15 +180,15 @@ describe("switchTest", function () {
         let defaultLabel = new Label();
         let switchEndLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             // switch body
             new EcmaTryldglobalbyname('a'),
             new StaDyn(rhs),
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_0),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStrictnoteqdyn(rhs),
             new Jeqz(caseLabel_1),
             new Jmp(defaultLabel),

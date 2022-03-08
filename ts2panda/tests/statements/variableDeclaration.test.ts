@@ -80,7 +80,7 @@ describe("VariableDeclarationTest", function () {
         let globalScope = <GlobalScope>snippetCompiler.getGlobalScope();
         let insns = snippetCompiler.getGlobalInsns();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStconsttoglobalrecord('i'),
             new EcmaReturnundefined()
         ];
@@ -97,7 +97,7 @@ describe("VariableDeclarationTest", function () {
         let expected = [
             new LdaDyn(new VReg()),
             new EcmaStglobalvar("i"),
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStglobalvar("i"),
             new EcmaReturnundefined()
         ];
@@ -112,7 +112,7 @@ describe("VariableDeclarationTest", function () {
         let globalScope = <GlobalScope>snippetCompiler.getGlobalScope();
         let insns = snippetCompiler.getGlobalInsns();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('i'),
             new EcmaReturnundefined()
         ];
@@ -192,7 +192,7 @@ describe("VariableDeclarationTest", function () {
         let functionScope = <FunctionScope>funcPg!.getScope();
         let insns = funcPg!.getInsns();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new StaDyn(new VReg()),
             new EcmaReturnundefined()
         ];
@@ -237,7 +237,7 @@ describe("VariableDeclarationTest", function () {
         let insns = snippetCompiler.getGlobalInsns();
         let scope = snippetCompiler.getGlobalScope();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new StaDyn(new VReg()),
             new EcmaReturnundefined()
         ];
