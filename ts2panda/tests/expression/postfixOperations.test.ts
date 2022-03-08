@@ -39,7 +39,7 @@ describe("PostfixOperationsTest", function () {
         let i = new VReg();
         let temp = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('i'),
             new EcmaTryldglobalbyname('i'),
             new StaDyn(temp),
@@ -56,7 +56,7 @@ describe("PostfixOperationsTest", function () {
         let i = new VReg();
         let temp = new VReg();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('i'),
             new EcmaTryldglobalbyname('i'),
             new StaDyn(temp),

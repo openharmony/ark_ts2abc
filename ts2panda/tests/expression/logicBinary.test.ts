@@ -41,7 +41,7 @@ describe("LogicBinaryOperators", function () {
         let postLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 8)),
+            new LdaiDyn(new Imm(8)),
             new StaDyn(lhs),
             new EcmaIstrue(),
             new Jeqz(preLabel),
@@ -62,7 +62,7 @@ describe("LogicBinaryOperators", function () {
         let preLabel = new Label();
         let postLabel = new Label();
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 8)),
+            new LdaiDyn(new Imm(8)),
             new StaDyn(lhs),
             new EcmaIsfalse(),
             new Jeqz(preLabel),
