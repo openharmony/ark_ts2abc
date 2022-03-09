@@ -1,11 +1,11 @@
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f1'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f2'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f4'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f5'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f6'}, {'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 6}, {'tag': 2, 'value': 2}, {'tag': 5, 'value': 'x'}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'y'}, {'tag': 2, 'value': 1}]}
-{'literalBuffer': [{'tag': 2, 'value': 6}, {'tag': 2, 'value': 2}, {'tag': 5, 'value': 'x'}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'z'}, {'tag': 2, 'value': 1}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f9'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f10'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f11'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'f12'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f1'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f2'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f4'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f5'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f6'}, {'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 6}, {'t': 2, 'v': 2}, {'t': 5, 'v': 'x'}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'y'}, {'t': 2, 'v': 1}]}
+{'lb': [{'t': 2, 'v': 6}, {'t': 2, 'v': 2}, {'t': 5, 'v': 'x'}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'z'}, {'t': 2, 'v': 1}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f9'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f10'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f11'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'f12'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
