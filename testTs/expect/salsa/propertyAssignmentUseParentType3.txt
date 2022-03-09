@@ -1,5 +1,5 @@
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'foo1'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'foo2'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 53}]}
-{'literalBuffer': [{'tag': 2, 'value': 5}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'foo3'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 4}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'foo4'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'foo1'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'foo2'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 53}]}
+{'lb': [{'t': 2, 'v': 5}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'foo3'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 4}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'foo4'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
