@@ -78,7 +78,7 @@ def run_test(file, tool,flag = False):
     if not os.path.exists(out_dir_path):  
         os.makedirs(out_dir_path)
     try:
-        command_os(f'node --expose-gc {tool} -m {file}  --output-type')
+        command_os(f'node --expose-gc {tool} -m {file} --output-type')
     except:
         e = str(e)
     if flag:
@@ -252,7 +252,7 @@ def prepare_ts_code():
             remove_dir(TS_CASES_DIR)
             raise MyException("Pull TypeScript Code Fail, Please Check The Network Request")
         command_os(f'git apply ../test-case.patch')
-        command_os(f'cp -r tests/cases/conformance/*   ./')
+        command_os(f'cp -r tests/cases/conformance/* ./')
         command_os(f'rm -rf ./tests')
         command_os('rm -rf .git')
         os.chdir('../../')
