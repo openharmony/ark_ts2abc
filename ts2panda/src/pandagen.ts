@@ -370,6 +370,10 @@ export class PandaGen {
         return this.insns;
     }
 
+    setInsns(insns: IRNode[]) {
+        this.insns = insns;
+    }
+
     printInsns() {
         LOGE("function " + this.internalName + "() {");
         this.getInsns().forEach(ins => {
