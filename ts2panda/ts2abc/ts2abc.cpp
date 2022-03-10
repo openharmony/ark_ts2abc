@@ -1145,13 +1145,99 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-bool GenerateProgram(const std::string &data, std::string output, int optLevel, std::string optLogLevel)
+static bool IsStartOrEndPosition(int idx, char *buff, std::string &data)
+{
+    if (buff[idx] != '$') {
+        return false;
+    }
+
+    if (idx == 0 && (data.empty() || data.back() != '#')) {
+        return true;
+    }
+
+    if (idx != 0 && buff[idx - 1] != '#') {
+        return true;
+    }
+
+    return false;
+}
+
+static bool HandleBuffer(int &ret, bool &isStartDollar, char *buff, std::string &data, panda::pandasm::Program &prog)
+{
+    uint32_t startPos = 0;
+    for (int idx = 0; idx < ret; idx++) {
+        if (IsStartOrEndPosition(idx, buff, data)) {
+            if (isStartDollar) {
+                startPos = idx + 1;
+                isStartDollar = false;
+                continue;
+            }
+
+            std::string substr(buff + startPos, buff + idx);
+            data += substr;
+            ReplaceAllDistinct(data, "#$", "$");
+            if (ParseSmallPieceJson(data, prog)) {
+                std::cerr << "fail to parse stringify json" << std::endl;
+                return false;
+            }
+            isStartDollar = true;
+            // clear data after parsing
+            data.clear();
+        }
+    }
+
+    if (!isStartDollar) {
+        std::string substr(buff + startPos, buff + ret);
+        data += substr;
+    }
+
+    return true;
+}
+
+static bool ReadFromPipe(panda::pandasm::Program &prog)
+{
+    std::string data;
+    bool isStartDollar = true;
+    const size_t bufSize = 4096;
+    // the parent process open a pipe to this child process with fd of 3
+    const size_t fd = 3;
+
+    char buff[bufSize + 1];
+    int ret = 0;
+
+    while ((ret = read(fd, buff, bufSize)) != 0) {
+        if (ret < 0) {
+            std::cerr << "Read pipe error" << std::endl;
+            return false;
+        }
+        buff[ret] = '\0';
+
+        if (!HandleBuffer(ret, isStartDollar, buff, data, prog)) {
+            std::cerr << "fail to handle buffer" << std::endl;
+            return false;
+        }
+    }
+
+    Logd("finish parsing from pipe");
+    return true;
+}
+
+bool GenerateProgram([[maybe_unused]] const std::string &data, std::string output, bool isParsingFromPipe,
+                     int optLevel, std::string optLogLevel)
 {
     panda::pandasm::Program prog = panda::pandasm::Program();
     prog.lang = panda::pandasm::extensions::Language::ECMASCRIPT;
-    if (!ParseData(data, prog)) {
-        std::cerr << "fail to parse Data!" << std::endl;
-        return false;
+
+    if (isParsingFromPipe) {
+        if (!ReadFromPipe(prog)) {
+            std::cerr << "fail to parse Pipe!" << std::endl;
+            return false;
+        }
+    } else {
+        if (!ParseData(data, prog)) {
+            std::cerr << "fail to parse Data!" << std::endl;
+            return false;
+        }
     }
 
     Logd("parsing done, calling pandasm\n");
@@ -1227,32 +1313,5 @@ bool HandleJsonFile(const std::string &input, std::string &data)
     Logd(data.c_str());
     Logd("----------------------------------");
 
-    return true;
-}
-
-bool ReadFromPipe(std::string &data)
-{
-    const size_t bufSize = 4096;
-    // the parent process open a pipe to this child process with fd of 3
-    const size_t fd = 3;
-
-    char buff[bufSize + 1];
-    int ret = 0;
-
-    while ((ret = read(fd, buff, bufSize)) != 0) {
-        if (ret < 0) {
-            std::cerr << "Read pipe error" << std::endl;
-            return false;
-        }
-        buff[ret] = '\0';
-        data += buff;
-    }
-
-    if (data.empty()) {
-        std::cerr << "Nothing has been read from pipe" << std::endl;
-        return false;
-    }
-
-    Logd("finish reading from pipe");
     return true;
 }
