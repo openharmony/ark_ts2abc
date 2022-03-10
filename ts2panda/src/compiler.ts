@@ -27,10 +27,8 @@ import { AssignmentOperator } from "typescript";
 import * as astutils from "./astutils";
 import { LReference } from "./base/lreference";
 import {
-    hasDefaultKeywordModifier,
     hasExportKeywordModifier,
     isBindingPattern,
-    setVariableExported
 } from "./base/util";
 import { CacheList, getVregisterCache } from "./base/vregisterCache";
 import { CmdOptions } from "./cmdOptions";
@@ -114,6 +112,7 @@ import { isAssignmentOperator } from "./syntaxCheckHelper";
 import {
     GlobalVariable,
     LocalVariable,
+    ModuleVariable,
     VarDeclarationKind,
     Variable
 } from "./variable";
@@ -216,7 +215,7 @@ export class Compiler {
             })
 
             this.pandaGen.setLocals(tempLocals);
-            this.pandaGen.setParametersCount(this.pandaGen.getParametersCount()-count);
+            this.pandaGen.setParametersCount(this.pandaGen.getParametersCount() - count);
 
             if (scope.getArgumentsOrRestargs()) {
                 callType += CallMap.get("argumentsOrRestargs") ?? 0;
@@ -527,18 +526,12 @@ export class Compiler {
 
     private compileVariableStatement(stmt: ts.VariableStatement) {
         let declList = stmt.declarationList;
-        let isExported: boolean = hasExportKeywordModifier(stmt);
         declList.declarations.forEach((decl) => {
-            this.compileVariableDeclaration(decl, isExported)
+            this.compileVariableDeclaration(decl)
         });
     }
 
-    compileVariableDeclaration(decl: ts.VariableDeclaration, isExported: boolean = false) {
-        if (isExported) {
-            let name = jshelpers.getTextOfIdentifierOrLiteral(decl.name);
-            setVariableExported(name, this.getCurrentScope());
-        }
-
+    compileVariableDeclaration(decl: ts.VariableDeclaration) {
         let lref = LReference.generateLReference(this, decl.name, true);
         if (decl.initializer) {
             this.compileExpression(decl.initializer);
@@ -552,7 +545,6 @@ export class Compiler {
                 && decl.parent.kind != ts.SyntaxKind.CatchClause) {
                 this.pandaGen.loadAccumulator(decl, getVregisterCache(this.pandaGen, CacheList.undefined));
             }
-
         }
         lref.setValue();
     }
@@ -707,26 +699,16 @@ export class Compiler {
 
     private compileFunctionDeclaration(decl: ts.FunctionDeclaration) {
         if (!decl.name) {
-            let hasExport: boolean = hasExportKeywordModifier(decl);
-            let hasDefault: boolean = hasDefaultKeywordModifier(decl);
-            if (hasExport && hasDefault) {
-                if (this.scope instanceof ModuleScope) {
-                    let internalName = this.compilerDriver.getFuncInternalName(decl, this.recorder);
-                    let env = this.getCurrentEnv();
-                    this.pandaGen.defineFunction(NodeKind.FirstNodeOfFunction, <ts.FunctionDeclaration>decl, internalName, env);
-                    this.pandaGen.storeModuleVar(decl, "default");
-                } else {
-                    throw new Error("SyntaxError: export function declaration cannot in other scope except ModuleScope");
-                }
-            } else {
-                throw new Error("Function declaration without name is unimplemented");
+            if (hasExportKeywordModifier(decl) && this.scope instanceof ModuleScope) {
+                return;
             }
+            throw new Error("Function declaration without name is unimplemented");
         }
     }
 
     private compileExportAssignment(stmt: ts.ExportAssignment) {
         this.compileExpression(stmt.expression);
-        this.pandaGen.storeModuleVar(stmt, "default");
+        this.pandaGen.storeModuleVariable(stmt, "*default*");
     }
 
     compileCondition(expr: ts.Expression, ifFalseLabel: Label) {
@@ -1493,13 +1475,43 @@ export class Compiler {
             } else {
                 this.pandaGen.storeGlobalVar(node, variable.v.getName());
             }
+        } else if (variable.v instanceof ModuleVariable) {
+            // import module variable is const, throw `const assignment error`
+            if (!isDeclaration && variable.v.isConst()) {
+                let nameReg = this.pandaGen.getTemp();
+                this.pandaGen.loadAccumulatorString(node, variable.v.getName());
+                this.pandaGen.storeAccumulator(node, nameReg);
+                this.pandaGen.throwConstAssignment(node, nameReg);
+                this.pandaGen.freeTemps(nameReg);
+                return;
+            }
+
+            if (isDeclaration) {
+                variable.v.initialize();
+            }
+
+            if ((variable.v.isLet() || variable.v.isClass()) && !variable.v.isInitialized()) {
+                let valueReg = this.pandaGen.getTemp();
+                let holeReg = this.pandaGen.getTemp();
+                let nameReg = this.pandaGen.getTemp();
+                this.pandaGen.storeAccumulator(node, valueReg);
+                this.pandaGen.loadModuleVariable(node, variable.v.getName(), true);
+                this.pandaGen.storeAccumulator(node, holeReg);
+                this.pandaGen.loadAccumulatorString(node, variable.v.getName());
+                this.pandaGen.storeAccumulator(node, nameReg);
+                this.pandaGen.throwUndefinedIfHole(node, holeReg, nameReg);
+                this.pandaGen.loadAccumulator(node, valueReg);
+                this.pandaGen.freeTemps(valueReg, holeReg, nameReg);
+            }
+
+            this.pandaGen.storeModuleVariable(node, variable.v.getName());
         } else {
             throw new Error("invalid lhsRef to store");
         }
     }
 
     loadTarget(node: ts.Node, variable: { scope: Scope | undefined, level: number, v: Variable | undefined }) {
-         if (variable.v instanceof LocalVariable) {
+        if (variable.v instanceof LocalVariable) {
             if (variable.v.isLetOrConst() || variable.v.isClass()) {
                 if (variable.scope instanceof GlobalScope) {
                     this.pandaGen.tryLoadGlobalByName(node, variable.v.getName());
@@ -1535,6 +1547,19 @@ export class Compiler {
                 }
             } else {
                 this.pandaGen.loadGlobalVar(node, variable.v.getName());
+            }
+        } else if (variable.v instanceof ModuleVariable) {
+            let isLocal: boolean = variable.v.isExportVar() ? true : false;
+            this.pandaGen.loadModuleVariable(node, variable.v.getName(), isLocal);
+            if ((variable.v.isLetOrConst() || variable.v.isClass()) && !variable.v.isInitialized()) {
+                let valueReg = this.pandaGen.getTemp();
+                let nameReg = this.pandaGen.getTemp();
+                this.pandaGen.storeAccumulator(node, valueReg);
+                this.pandaGen.loadAccumulatorString(node, variable.v.getName());
+                this.pandaGen.storeAccumulator(node, nameReg);
+                this.pandaGen.throwUndefinedIfHole(node, valueReg, nameReg);
+                this.pandaGen.loadAccumulator(node, valueReg);
+                this.pandaGen.freeTemps(valueReg, nameReg);
             }
         } else {
             // Handle the variables from lexical scope

@@ -17,7 +17,7 @@ import { writeFileSync } from "fs";
 import * as ts from "typescript";
 import { addVariableToScope } from "./addVariable2Scope";
 import { AssemblyDumper } from "./assemblyDumper";
-import { initiateTs2abc, listenChildExit, listenErrorEvent, terminateWritePipe } from "./base/util";
+import { hasDefaultKeywordModifier, hasExportKeywordModifier, initiateTs2abc, listenChildExit, listenErrorEvent, terminateWritePipe } from "./base/util";
 import { CmdOptions } from "./cmdOptions";
 import {
     Compiler
@@ -26,7 +26,7 @@ import { CompilerStatistics } from "./compilerStatistics";
 import { DebugInfo } from "./debuginfo";
 import { hoisting } from "./hoisting";
 import { LOGD } from "./log";
-import { setExportBinding, setImport } from "./modules";
+import { setModuleNamespaceImports } from "./ecmaModule";
 import { PandaGen } from "./pandagen";
 import { Pass } from "./pass";
 import { CacheExpander } from "./pass/cacheExpander";
@@ -40,10 +40,11 @@ import {
     VariableScope
 } from "./scope";
 import { getClassNameForConstructor } from "./statement/classStatement";
-import { checkDuplicateDeclaration, checkExportEntries } from "./syntaxChecker";
+import { checkDuplicateDeclaration } from "./syntaxChecker";
 import { Ts2Panda } from "./ts2panda";
 import { TypeRecorder } from "./typeRecorder";
 import { LiteralBuffer } from "./base/literal";
+import { findOuterNodeOfParenthesis } from "./expression/parenthesizedExpression";
 
 export class PendingCompilationUnit {
     constructor(
@@ -149,7 +150,6 @@ export class CompilerDriver {
     compileForSyntaxCheck(node: ts.SourceFile): void {
        let recorder = this.compilePrologue(node, false);
        checkDuplicateDeclaration(recorder);
-       checkExportEntries(recorder);
     }
 
     compile(node: ts.SourceFile): void {
@@ -184,6 +184,7 @@ export class CompilerDriver {
 
                 Ts2Panda.dumpStringsArray(ts2abcProc);
                 Ts2Panda.dumpConstantPool(ts2abcProc);
+                Ts2Panda.dumpModuleRecords(ts2abcProc);
 
                 terminateWritePipe(ts2abcProc);
                 if (CmdOptions.isEnableDebugLog()) {
@@ -219,13 +220,9 @@ export class CompilerDriver {
 
         let compiler = new Compiler(node, pandaGen, this, recorder);
 
-        if (CmdOptions.isModules() && ts.isSourceFile(node) && scope instanceof ModuleScope) {
-            setImport(recorder.getImportStmts(), scope, pandaGen);
-            setExportBinding(recorder.getExportStmts(), scope, pandaGen);
-        }
-
         // because of para vreg, don't change hosting's position
         hoisting(node, pandaGen, recorder, compiler);
+        setModuleNamespaceImports(compiler, scope, pandaGen);
         compiler.compile();
 
         this.passes.forEach((pass) => pass.run(pandaGen));
@@ -265,12 +262,8 @@ export class CompilerDriver {
         let pandaGen = new PandaGen(internalName, this.getParametersCount(node), scope);
         let compiler = new Compiler(node, pandaGen, this, recorder);
 
-        if (CmdOptions.isModules() && ts.isSourceFile(node) && scope instanceof ModuleScope) {
-            setImport(recorder.getImportStmts(), scope, pandaGen);
-            setExportBinding(recorder.getExportStmts(), scope, pandaGen);
-        }
-
         hoisting(node, pandaGen, recorder, compiler);
+        setModuleNamespaceImports(compiler, scope, pandaGen);
         compiler.compile();
 
         this.passes.forEach((pass) => pass.run(pandaGen));
@@ -301,8 +294,11 @@ export class CompilerDriver {
         }
         let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, CompilerDriver.isTsFile);
         recorder.record();
-  
+        if (topLevelScope instanceof ModuleScope) {
+            topLevelScope.module().setModuleEnvironment(topLevelScope);
+        }
         addVariableToScope(recorder, enableTypeRecord);
+
         let postOrderVariableScopes = this.postOrderAnalysis(topLevelScope);
 
         for (let variableScope of postOrderVariableScopes) {
@@ -353,6 +349,10 @@ export class CompilerDriver {
             let funcNode = <ts.FunctionLikeDeclaration>node;
             name = (<FunctionScope>recorder.getScopeOfNode(funcNode)).getFuncName();
             if (name == '') {
+                if ((ts.isFunctionDeclaration(node) && hasExportKeywordModifier(node) && hasDefaultKeywordModifier(node))
+                    || ts.isExportAssignment(findOuterNodeOfParenthesis(node))) {
+                    return 'default';
+                }
                 return `#${this.getFuncId(funcNode)}#`;
             }
 

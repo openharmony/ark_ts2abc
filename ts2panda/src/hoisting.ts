@@ -14,7 +14,6 @@
  */
 
 import * as ts from "typescript";
-import { hasExportKeywordModifier, hasDefaultKeywordModifier } from "./base/util";
 import { CacheList, getVregisterCache } from "./base/vregisterCache";
 import { Compiler } from "./compiler";
 import { CompilerDriver } from "./compilerDriver";
@@ -27,14 +26,14 @@ import {
     GlobalScope,
     LocalScope,
     ModuleScope,
+    ModuleVarKind,
     Scope,
     VarDecl,
     VariableScope
 } from "./scope";
-import { LocalVariable } from "./variable";
 
 export function hoisting(rootNode: ts.SourceFile | ts.FunctionLikeDeclaration, pandaGen: PandaGen,
-                         recorder: Recorder, compiler: Compiler) {
+    recorder: Recorder, compiler: Compiler) {
     let variableScope = <VariableScope>recorder.getScopeOfNode(rootNode);
     let hoistDecls = recorder.getHoistDeclsOfScope(variableScope);
 
@@ -59,7 +58,11 @@ export function hoistVar(decl: VarDecl, scope: Scope, pandaGen: PandaGen) {
     } else if (scope instanceof FunctionScope || scope instanceof ModuleScope) {
         let v = scope.findLocal(name)!;
         pandaGen.loadAccumulator(NodeKind.FirstNodeOfFunction, getVregisterCache(pandaGen, CacheList.undefined));
-        pandaGen.storeAccToLexEnv(NodeKind.FirstNodeOfFunction, scope, 0, v, true);
+        if (decl.isModule !== ModuleVarKind.NOT) {
+            pandaGen.storeModuleVariable(NodeKind.FirstNodeOfFunction, name);
+        } else {
+            pandaGen.storeAccToLexEnv(NodeKind.FirstNodeOfFunction, scope, 0, v, true);
+        }
     } else {
         throw new Error("Wrong scope to hoist");
     }
@@ -74,19 +77,13 @@ export function hoistFunction(decl: FuncDecl, scope: Scope, pandaGen: PandaGen, 
         pandaGen.defineFunction(NodeKind.FirstNodeOfFunction, <ts.FunctionDeclaration>decl.node, internalName, env);
         pandaGen.storeGlobalVar(NodeKind.FirstNodeOfFunction, funcName);
     } else if ((scope instanceof FunctionScope) || (scope instanceof LocalScope) || (scope instanceof ModuleScope)) {
-        let hasExport: boolean = hasExportKeywordModifier(decl.node);
-        let hasDefault: boolean = hasDefaultKeywordModifier(decl.node);
         let v = scope.findLocal(funcName)!;
-        if (hasExport && scope instanceof ModuleScope) {
-            (<LocalVariable>v).setExport();
-            if (hasDefault) {
-                (<LocalVariable>v).setExportedName("default");
-            } else {
-                (<LocalVariable>v).setExportedName(v.getName());
-            }
-        }
         pandaGen.defineFunction(NodeKind.FirstNodeOfFunction, <ts.FunctionDeclaration>decl.node, internalName, env);
-        pandaGen.storeAccToLexEnv(NodeKind.FirstNodeOfFunction, scope, 0, v, true);
+        if (decl.isModule !== ModuleVarKind.NOT) {
+            pandaGen.storeModuleVariable(NodeKind.FirstNodeOfFunction, funcName);
+        } else {
+            pandaGen.storeAccToLexEnv(NodeKind.FirstNodeOfFunction, scope, 0, v, true);
+        }
     } else {
         throw new Error("Wrong scope to hoist");
     }

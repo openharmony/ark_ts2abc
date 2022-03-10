@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
+// [delete it when type system adapts for ESM]
 import * as ts from "typescript";
-import { PandaGen } from "./pandagen";
 import * as jshelpers from "./jshelpers";
-import { LocalVariable } from "./variable";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
-import { ModuleScope } from "./scope";
 
 export class ModuleStmt {
     private node: ts.Node
@@ -75,64 +73,4 @@ export class ModuleStmt {
     getCopyFlag() {
         return this.isCopy;
     }
-}
-
-export function setImport(importStmts: Array<ModuleStmt>, moduleScope: ModuleScope, pandagen: PandaGen) {
-    importStmts.forEach((importStmt) => {
-        pandagen.importModule(importStmt.getNode(), importStmt.getModuleRequest());
-        // import * as xxx from "a.js"
-        if (importStmt.getNameSpace()) {
-            let v = moduleScope.findLocal(importStmt.getNameSpace())!;
-            pandagen.storeAccToLexEnv(importStmt.getNode(), moduleScope, 0, v, true);
-            (<LocalVariable>v).initialize();
-        }
-
-        // import { ... } from "a.js"
-        // import defaultExport, * as a from "a.js"
-        let moduleReg = pandagen.allocLocalVreg();
-        pandagen.storeAccumulator(importStmt.getNode(), moduleReg);
-
-        let bindingNameMap = importStmt.getBindingNameMap();
-        bindingNameMap.forEach((value: string, key: string) => {
-            let v = <LocalVariable>moduleScope.findLocal(key)!;
-            pandagen.loadModuleVariable(importStmt.getNode(), moduleReg, value);
-            pandagen.storeAccToLexEnv(importStmt.getNode(), moduleScope, 0, v, true);
-            (<LocalVariable>v).initialize();
-        });
-    })
-}
-
-export function setExportBinding(exportStmts: Array<ModuleStmt>, moduleScope: ModuleScope, pandagen: PandaGen) {
-    exportStmts.forEach((exportStmt) => {
-        if (exportStmt.getModuleRequest()) {
-            pandagen.importModule(exportStmt.getNode(), exportStmt.getModuleRequest());
-            let moduleReg = pandagen.allocLocalVreg();
-            pandagen.storeAccumulator(exportStmt.getNode(), moduleReg);
-
-            if (!exportStmt.getCopyFlag()) {
-                if (exportStmt.getNameSpace()) {
-                    pandagen.storeModuleVar(exportStmt.getNode(), exportStmt.getNameSpace());
-                }
-
-                let bindingNameMap = exportStmt.getBindingNameMap();
-                bindingNameMap.forEach((value: string, key: string) => {
-                    pandagen.loadModuleVariable(exportStmt.getNode(), moduleReg, value);
-                    pandagen.storeModuleVar(exportStmt.getNode(), key);
-                });
-            } else {
-                pandagen.copyModule(exportStmt.getNode(), moduleReg);
-            }
-        } else {
-            let bindingNameMap = exportStmt.getBindingNameMap();
-            bindingNameMap.forEach((value: string, key: string) => {
-                let v = moduleScope.findLocal(value);
-                if (typeof v == 'undefined') {
-                    throw new DiagnosticError(exportStmt.getNode(), DiagnosticCode.Cannot_export_0_Only_local_declarations_can_be_exported_from_a_module, jshelpers.getSourceFileOfNode(exportStmt.getNode()), [value]);
-                }
-
-                (<LocalVariable>v).setExport();
-                (<LocalVariable>v).setExportedName(key);
-            });
-        }
-    })
 }

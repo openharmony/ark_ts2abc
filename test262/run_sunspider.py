@@ -50,6 +50,9 @@ def parse_args():
                         required=False,
                         nargs='?', choices=ARK_FRONTEND_LIST, type=str,
                         help="Choose one of them")
+    parser.add_argument('--module-list',
+                        required=True,
+                        help="module file list")
     parser.add_argument('--ark-arch',
                         default=DEFAULT_ARK_ARCH,
                         required=False,
@@ -135,6 +138,7 @@ class ArkProgram():
         self.ark_frontend_tool = ARK_FRONTEND_TOOL
         self.libs_dir = LIBS_DIR
         self.ark_frontend = ARK_FRONTEND
+        self.module_list = []
         self.js_file = ""
         self.arch = ARK_ARCH
         self.arch_root = ""
@@ -151,6 +155,8 @@ class ArkProgram():
 
         if self.args.ark_frontend:
             self.ark_frontend = self.args.ark_frontend
+
+        self.module_list = self.args.module_list.splitlines()
 
         self.js_file = self.args.js_file
 
@@ -175,7 +181,7 @@ class ArkProgram():
             cmd_args = [frontend_tool, '-c',
                         '-e', 'js', '-o', out_file, '-i', js_file]
 
-        if file_name in MODULE_FILES_LIST:
+        if file_name in self.module_list:
             cmd_args.insert(mod_opt_index, "-m")
 
         retcode = exec_command(cmd_args)
