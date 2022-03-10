@@ -14,6 +14,7 @@
  */
 
 import { CmdOptions } from "./cmdOptions";
+import { SourceTextModuleRecord } from "./ecmaModule";
 import {
     Imm,
     IRNode,
@@ -30,6 +31,11 @@ import {
     ExportedSymbol2Type,
     Function,
     Ins,
+    IndirectExportEntry,
+    LocalExportEntry,
+    ModuleRecord,
+    NamespaceImportEntry,
+    RegularImportEntry,
     Signature
 } from "./pandasm";
 import { generateCatchTables } from "./statement/tryStatement";
@@ -40,6 +46,7 @@ import {
 } from "./base/util";
 import { LiteralBuffer } from "./base/literal";
 import { CompilerDriver } from "./compilerDriver";
+import { ModuleScope } from "./scope";
 
 const dollarSign: RegExp = /\$/g;
 
@@ -48,13 +55,14 @@ const JsonType = {
     "record": 1,
     "string": 2,
     "literal_arr": 3,
-    "options": 4,
-    "type_arr": 5
+    "module": 4,
+    "options": 5
 };
 export class Ts2Panda {
     static strings: Set<string> = new Set();
     static labelPrefix = "L_";
     static jsonString: string = "";
+    static moduleRecordlist: Array<ModuleRecord> = [];
 
     constructor() {
     }
@@ -234,6 +242,12 @@ export class Ts2Panda {
             }
         }
 
+        if (pg.getScope() instanceof ModuleScope) {
+            Ts2Panda.moduleRecordlist.push(
+                makeModuleRecord((<ModuleScope>pg.getScope()).module())
+            );
+        }
+
         let variables, sourceCode;
         if (CmdOptions.isDebugMode()) {
             variables = pg.getVariableDebugInfoArray();
@@ -292,8 +306,55 @@ export class Ts2Panda {
         ts2abc.stdio[3].write(jsonFuncUnicode + '\n');
     }
 
+    static dumpModuleRecords(ts2abc: any): void {
+        Ts2Panda.moduleRecordlist.forEach(function(module){
+            let moduleObject = {
+                "t": JsonType.module,
+                "mod": module
+            };
+            let jsonModuleUnicode = escapeUnicode(JSON.stringify(moduleObject, null, 2));
+            jsonModuleUnicode = "$" + jsonModuleUnicode.replace(dollarSign, '#$') + "$";
+            if (CmdOptions.isEnableDebugLog()) {
+                Ts2Panda.jsonString += jsonModuleUnicode;
+            }
+            ts2abc.stdio[3].write(jsonModuleUnicode + '\n');
+        });
+    }
+
     static clearDumpData() {
         Ts2Panda.strings.clear();
         Ts2Panda.jsonString = "";
+        Ts2Panda.moduleRecordlist = [];
     }
+}
+
+function makeModuleRecord(sourceTextModule: SourceTextModuleRecord): ModuleRecord {
+    let moduleRecord = new ModuleRecord();
+    moduleRecord.moduleName = sourceTextModule.getModuleName();
+
+    moduleRecord.moduleRequests = [...sourceTextModule.getModuleRequests()];
+
+    sourceTextModule.getRegularImportEntries().forEach(e => {
+        moduleRecord.regularImportEntries.push(new RegularImportEntry(e.localName!, e.importName!, e.moduleRequest!));
+    });
+
+    sourceTextModule.getNamespaceImportEntries().forEach(e => {
+        moduleRecord.namespaceImportEntries.push(new NamespaceImportEntry(e.localName!, e.moduleRequest!));
+    });
+
+    sourceTextModule.getLocalExportEntries().forEach(entries => {
+        entries.forEach(e => {
+            moduleRecord.localExportEntries.push(new LocalExportEntry(e.localName!, e.exportName!));
+        });
+    });
+
+    sourceTextModule.getIndirectExportEntries().forEach(e => {
+        moduleRecord.indirectExportEntries.push(new IndirectExportEntry(e.exportName!, e.importName!, e.moduleRequest!));
+    });
+
+    sourceTextModule.getStarExportEntries().forEach(e => {
+        moduleRecord.starExportEntries.push(e.moduleRequest!);
+    });
+
+    return moduleRecord;
 }

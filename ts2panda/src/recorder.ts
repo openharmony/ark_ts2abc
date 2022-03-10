@@ -15,14 +15,18 @@
 
 import * as ts from "typescript";
 import * as astutils from "./astutils";
-import { isAnonymousFunctionDefinition } from "./base/util";
+import {
+    hasDefaultKeywordModifier,
+    hasExportKeywordModifier,
+    isAnonymousFunctionDefinition
+} from "./base/util";
 import { CmdOptions } from "./cmdOptions";
 import { CompilerDriver } from "./compilerDriver";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
 import { findOuterNodeOfParenthesis } from "./expression/parenthesizedExpression";
 import * as jshelpers from "./jshelpers";
 import { LOGD } from "./log";
-import { ModuleStmt } from "./modules";
+import { ModuleStmt } from "./modules";  // [delete it when type system adapts for ESM]
 import {
     CatchParameter,
     ClassDecl,
@@ -36,6 +40,7 @@ import {
     LocalScope,
     LoopScope,
     ModuleScope,
+    ModuleVarKind,
     Scope,
     VarDecl,
     VariableScope
@@ -51,6 +56,7 @@ import { TypeChecker } from "./typeChecker";
 import { VarDeclarationKind } from "./variable";
 import { TypeRecorder } from "./typeRecorder";
 import { PandaGen } from "./pandagen";
+import path from "path";
 
 export class Recorder {
     node: ts.Node;
@@ -62,10 +68,10 @@ export class Recorder {
     private parametersMap: Map<ts.FunctionLikeDeclaration, FunctionParameter[]> = new Map<ts.FunctionLikeDeclaration, FunctionParameter[]>();
     private funcNameMap: Map<string, number>;
     private class2Ctor: Map<ts.ClassLikeDeclaration, ts.ConstructorDeclaration> = new Map<ts.ClassLikeDeclaration, ts.ConstructorDeclaration>();
+    private isTsFile: boolean;
+    // [delete it when type system adapts for ESM]
     private importStmts: Array<ModuleStmt> = [];
     private exportStmts: Array<ModuleStmt> = [];
-    private defaultUsed: boolean = false;
-    private isTsFile: boolean;
 
     constructor(node: ts.Node, scope: Scope, compilerDriver: CompilerDriver, recordType: boolean, isTsFile: boolean) {
         this.node = node;
@@ -116,7 +122,7 @@ export class Recorder {
     private recordInfo(node: ts.Node, scope: Scope) {
         node.forEachChild(childNode => {
             if (!this.recordType) {
-                checkSyntaxError(childNode);
+                checkSyntaxError(childNode, scope);
             }
             switch (childNode.kind) {
                 case ts.SyntaxKind.FunctionExpression:
@@ -132,7 +138,17 @@ export class Recorder {
                 }
                 case ts.SyntaxKind.FunctionDeclaration: {
                     let functionScope = this.buildVariableScope(scope, <ts.FunctionLikeDeclaration>childNode);
-                    this.recordFuncDecl(<ts.FunctionDeclaration>childNode, scope);
+                    let isExport: boolean = false;
+                    if (hasExportKeywordModifier(childNode)) {
+                        if (!CmdOptions.isModules()) {
+                            throw new DiagnosticError(childNode, DiagnosticCode.Cannot_use_imports_exports_or_module_augmentations_when_module_is_none, jshelpers.getSourceFileOfNode(childNode));
+                        }
+                        this.recordEcmaExportInfo(<ts.FunctionDeclaration>childNode, scope);
+                        isExport = true;
+                    }
+                    // recordFuncDecl must behind recordEcmaExportInfo() cause function without name
+                    // should be SyntaxChecked in recordEcmaExportInfo
+                    this.recordFuncDecl(<ts.FunctionDeclaration>childNode, scope, isExport);
                     if (this.recordType) {
                         TypeChecker.getInstance().formatNodeType(childNode);
                     }
@@ -161,9 +177,23 @@ export class Recorder {
                     this.recordInfo(childNode, loopScope);
                     break;
                 }
-                case ts.SyntaxKind.ClassDeclaration:
+                case ts.SyntaxKind.ClassDeclaration: {
+                    let isExport: boolean = false;
+                    if (hasExportKeywordModifier(childNode)) {
+                        if (!CmdOptions.isModules()) {
+                            throw new DiagnosticError(childNode, DiagnosticCode.Cannot_use_imports_exports_or_module_augmentations_when_module_is_none, jshelpers.getSourceFileOfNode(childNode));
+                        }
+                        this.recordEcmaExportInfo(<ts.ClassDeclaration>childNode, scope);
+                        isExport = true;
+                    }
+                    this.recordClassInfo(<ts.ClassLikeDeclaration>childNode, scope, isExport);
+                    if (this.recordType) {
+                        TypeChecker.getInstance().formatNodeType(childNode);
+                    }
+                    break;
+                }
                 case ts.SyntaxKind.ClassExpression: {
-                    this.recordClassInfo(<ts.ClassLikeDeclaration>childNode, scope);
+                    this.recordClassInfo(<ts.ClassLikeDeclaration>childNode, scope, false);
                     if (this.recordType) {
                         TypeChecker.getInstance().formatNodeType(childNode);
                     }
@@ -181,12 +211,11 @@ export class Recorder {
                 }
                 case ts.SyntaxKind.ImportDeclaration: {
                     if (!CmdOptions.isModules()) {
-                        throw new DiagnosticError(childNode, DiagnosticCode.An_import_declaration_can_only_be_used_in_a_namespace_or_module, jshelpers.getSourceFileOfNode(childNode));
+                        throw new DiagnosticError(childNode, DiagnosticCode.Cannot_use_imports_exports_or_module_augmentations_when_module_is_none, jshelpers.getSourceFileOfNode(childNode));
                     }
-                    if (!(scope instanceof ModuleScope)) {
-                        throw new Error("SyntaxError: import statement cannot in other scope except ModuleScope");
-                    }
-                    let importStmt = this.recordImportInfo(<ts.ImportDeclaration>childNode, scope);
+                    this.recordEcmaImportInfo(<ts.ImportDeclaration>childNode, scope);
+
+                    let importStmt = this.recordImportInfo(<ts.ImportDeclaration>childNode); // [delete it when type system adapts for ESM]
                     if (this.recordType) {
                         TypeChecker.getInstance().formatNodeType(childNode, importStmt);
                     }
@@ -194,22 +223,22 @@ export class Recorder {
                 }
                 case ts.SyntaxKind.ExportDeclaration: {
                     if (!CmdOptions.isModules()) {
-                        throw new DiagnosticError(childNode, DiagnosticCode.An_export_declaration_can_only_be_used_in_a_module, jshelpers.getSourceFileOfNode(childNode));
+                        throw new DiagnosticError(childNode, DiagnosticCode.Cannot_use_imports_exports_or_module_augmentations_when_module_is_none, jshelpers.getSourceFileOfNode(childNode));
                     }
-                    if (!(scope instanceof ModuleScope)) {
-                        throw new Error("SyntaxError: export statement cannot in other scope except ModuleScope");
-                    }
-                    let exportStmt = this.recordExportInfo(<ts.ExportDeclaration>childNode);
+                    this.recordEcmaExportInfo(<ts.ExportDeclaration>childNode, scope);
+
+                    let exportStmt = this.recordExportInfo(<ts.ExportDeclaration>childNode); // [delete it when type system adapts for ESM]
                     if (this.recordType) {
                         TypeChecker.getInstance().formatNodeType(childNode, exportStmt);
                     }
                     break;
                 }
                 case ts.SyntaxKind.ExportAssignment: {
-                    if (this.defaultUsed) {
-                        throw new DiagnosticError(childNode, DiagnosticCode.Duplicate_identifier_0, jshelpers.getSourceFileOfNode(childNode), ["default"]);
+                    if (!CmdOptions.isModules()) {
+                        throw new DiagnosticError(childNode, DiagnosticCode.Cannot_use_imports_exports_or_module_augmentations_when_module_is_none, jshelpers.getSourceFileOfNode(childNode));
                     }
-                    this.defaultUsed = true;
+                    this.recordEcmaExportInfo(<ts.ExportAssignment>childNode, scope);
+
                     this.recordInfo(childNode, scope);
                     if (this.recordType) {
                         TypeChecker.getInstance().formatNodeType(childNode);
@@ -217,6 +246,12 @@ export class Recorder {
                     break;
                 }
                 case ts.SyntaxKind.VariableStatement: {
+                    if (hasExportKeywordModifier(childNode)) {
+                        if (!CmdOptions.isModules()) {
+                            throw new DiagnosticError(childNode, DiagnosticCode.Cannot_use_imports_exports_or_module_augmentations_when_module_is_none, jshelpers.getSourceFileOfNode(childNode));
+                        }
+                        this.recordEcmaExportInfo(<ts.VariableStatement>childNode, scope);
+                    }
                     if (this.recordType) {
                         TypeChecker.getInstance().formatNodeType(childNode);
                     }
@@ -229,7 +264,7 @@ export class Recorder {
         });
     }
 
-    private recordClassInfo(childNode: ts.ClassLikeDeclaration, scope: Scope) {
+    private recordClassInfo(childNode: ts.ClassLikeDeclaration, scope: Scope, isExport: boolean) {
         let localScope = new LocalScope(scope);
         this.setScopeMap(childNode, localScope);
         let ctor = extractCtorOfClass(childNode);
@@ -240,8 +275,9 @@ export class Recorder {
         }
         if (childNode.name) {
             let name = jshelpers.getTextOfIdentifierOrLiteral(childNode.name);
-            let calssDecl = new ClassDecl(name, childNode);
-            scope.setDecls(calssDecl);
+            let moduleKind = isExport ? ModuleVarKind.EXPORTED : ModuleVarKind.NOT;
+            let classDecl = new ClassDecl(name, childNode, moduleKind);
+            scope.setDecls(classDecl);
         }
         this.recordInfo(childNode, localScope);
     }
@@ -261,9 +297,13 @@ export class Recorder {
 
         if (parent) {
             let declKind = astutils.getVarDeclarationKind(<ts.VariableDeclaration>parent);
+            let isExportDecl: boolean = false;
+            if ((<ts.VariableDeclaration>parent).parent.parent.kind == ts.SyntaxKind.VariableStatement) {
+                isExportDecl = hasExportKeywordModifier((<ts.VariableDeclaration>parent).parent.parent);
+            }
 
             // collect declaration information to corresponding scope
-            let decl = this.addVariableDeclToScope(scope, id, parent, name, declKind);
+            let decl = this.addVariableDeclToScope(scope, id, parent, name, declKind, isExportDecl);
             if (declKind == VarDeclarationKind.VAR) {
                 let variableScopeParent = <VariableScope>scope.getNearestVariableScope();
                 this.collectHoistDecls(id, variableScopeParent, decl);
@@ -303,8 +343,10 @@ export class Recorder {
         }
     }
 
-    private addVariableDeclToScope(scope: Scope, node: ts.Node, parent: ts.Node, name: string, declKind: VarDeclarationKind): Decl {
-        let decl = new VarDecl(name, node);
+    private addVariableDeclToScope(scope: Scope, node: ts.Node, parent: ts.Node, name: string, declKind: VarDeclarationKind, isExportDecl: boolean): Decl {
+        let moduleKind = isExportDecl ? ModuleVarKind.EXPORTED : ModuleVarKind.NOT;
+        let decl = new VarDecl(name, node, moduleKind);
+
         switch (declKind) {
             case VarDeclarationKind.VAR:
                 break;
@@ -312,11 +354,11 @@ export class Recorder {
                     if (parent.parent.kind == ts.SyntaxKind.CatchClause) {
                     decl = new CatchParameter(name, node);
                 } else {
-                    decl = new LetDecl(name, node);
+                    decl = new LetDecl(name, node, moduleKind);
                 }
                 break;
             case VarDeclarationKind.CONST:
-                decl = new ConstDecl(name, node);
+                decl = new ConstDecl(name, node, moduleKind);
                 break;
             default:
                 throw new Error("Wrong type of declaration");
@@ -342,7 +384,8 @@ export class Recorder {
         }
     }
 
-    private recordImportInfo(node: ts.ImportDeclaration, scope: ModuleScope): ModuleStmt {
+    // [delete it when type system adapts for ESM]
+    private recordImportInfo(node: ts.ImportDeclaration): ModuleStmt {
         if (!ts.isStringLiteral(node.moduleSpecifier)) {
             throw new Error("moduleSpecifier must be a stringLiteral");
         }
@@ -359,7 +402,6 @@ export class Recorder {
             // import defaultExport from "a.js"
             if (importClause.name) {
                 let name = jshelpers.getTextOfIdentifierOrLiteral(importClause.name);
-                scope.setDecls(new ConstDecl(name, importClause.name));
                 importStmt.addLocalName(name, "default");
                 importStmt.addNodeMap(importClause.name, importClause.name);
             }
@@ -372,7 +414,6 @@ export class Recorder {
                 // import * as a from "a.js"
                 if (ts.isNamespaceImport(namedBindings)) {
                     let nameSpace = jshelpers.getTextOfIdentifierOrLiteral((<ts.NamespaceImport>namedBindings).name);
-                    scope.setDecls(new ConstDecl(nameSpace, namedBindings));
                     importStmt.setNameSpace(nameSpace);
                 }
 
@@ -381,7 +422,6 @@ export class Recorder {
                     namedBindings.elements.forEach((element) => {
                         let name: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
                         let exoticName: string = element.propertyName ? jshelpers.getTextOfIdentifierOrLiteral(element.propertyName) : name;
-                        scope.setDecls(new ConstDecl(name, element));
                         importStmt.addLocalName(name, exoticName);
                         importStmt.addNodeMap(element.name, element.propertyName ? element.propertyName : element.name);
                     });
@@ -393,6 +433,7 @@ export class Recorder {
         return importStmt;
     }
 
+    // [delete it when type system adapts for ESM]
     private recordExportInfo(node: ts.ExportDeclaration): ModuleStmt {
         let origNode = <ts.ExportDeclaration>ts.getOriginalNode(node);
         let exportStmt: ModuleStmt;
@@ -415,13 +456,6 @@ export class Recorder {
             if (ts.isNamedExports(namedBindings)) {
                 namedBindings.elements.forEach((element) => {
                     let name: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
-                    if (name == 'default') {
-                        if (this.defaultUsed) {
-                            throw new DiagnosticError(origNode, DiagnosticCode.Duplicate_identifier_0, jshelpers.getSourceFileOfNode(origNode), [name]);
-                        } else {
-                            this.defaultUsed = true;
-                        }
-                    }
                     let exoticName: string = element.propertyName ? jshelpers.getTextOfIdentifierOrLiteral(element.propertyName) : name;
                     exportStmt.addLocalName(name, exoticName);
                     exportStmt.addNodeMap(element.name, element.propertyName ? element.propertyName : element.name);
@@ -432,16 +466,166 @@ export class Recorder {
         return exportStmt;
     }
 
-    private recordFuncDecl(node: ts.FunctionDeclaration, scope: Scope) {
+    private getNormalizeModuleSpecifier(moduleSpecifier: ts.Expression): string {
+        if (!ts.isStringLiteral(moduleSpecifier)) {
+            throw new Error("moduleSpecifier must be a stringLiteral");
+        }
+        return path.normalize(jshelpers.getTextOfIdentifierOrLiteral(moduleSpecifier));
+    }
+
+    private recordEcmaNamedBindings(namedBindings: ts.NamedImportBindings, scope: ModuleScope, moduleRequest: string) {
+        // import * as a from "a.js"
+        if (ts.isNamespaceImport(namedBindings)) {
+            let nameSpace = jshelpers.getTextOfIdentifierOrLiteral((<ts.NamespaceImport>namedBindings).name);
+            scope.setDecls(new ConstDecl(nameSpace, namedBindings, ModuleVarKind.NOT));
+            scope.module().addStarImportEntry(namedBindings, nameSpace, moduleRequest);
+        } else if (ts.isNamedImports(namedBindings)) {
+            if (namedBindings.elements.length == 0) {
+                // import {} from "a.js"
+                scope.module().addEmptyImportEntry(moduleRequest);
+            }
+            // import { ... } from "a.js"
+            namedBindings.elements.forEach((element: any) => {
+                let localName: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
+                let importName: string = element.propertyName ? jshelpers.getTextOfIdentifierOrLiteral(element.propertyName) : localName;
+                scope.setDecls(new ConstDecl(localName, element, ModuleVarKind.IMPORTED));
+                scope.module().addImportEntry(element, importName, localName, moduleRequest);
+            });
+        } else {
+            throw new Error("Unreachable kind for namedBindings");
+        }
+    }
+
+    private recordEcmaImportClause(importClause: ts.ImportClause, scope: ModuleScope, moduleRequest: string) {
+        // import defaultExport from "a.js"
+        if (importClause.name) {
+            let localName = jshelpers.getTextOfIdentifierOrLiteral(importClause.name);
+            scope.setDecls(new ConstDecl(localName, importClause.name, ModuleVarKind.IMPORTED));
+            scope.module().addImportEntry(importClause, "default", localName, moduleRequest);
+        }
+        if (importClause.namedBindings) {
+            let namedBindings = importClause.namedBindings;
+            this.recordEcmaNamedBindings(namedBindings, scope, moduleRequest);
+        }
+    }
+
+    private recordEcmaImportInfo(node: ts.ImportDeclaration, scope: Scope) {
+        if (!(scope instanceof ModuleScope)) {
+            return;
+        }
+
+        let moduleRequest: string = this.getNormalizeModuleSpecifier(node.moduleSpecifier);
+
+        if (node.importClause) {
+            let importClause: ts.ImportClause = node.importClause;
+            this.recordEcmaImportClause(importClause, scope, moduleRequest);
+        } else {
+            // import "a.js"
+            scope.module().addEmptyImportEntry(moduleRequest);
+        }
+    }
+
+    private recordEcmaExportDecl(node: ts.ExportDeclaration, scope: ModuleScope) {
+        if (node.moduleSpecifier) {
+            let moduleRequest: string = this.getNormalizeModuleSpecifier(node.moduleSpecifier);
+
+            if (node.exportClause) {
+                let namedBindings: ts.NamedExportBindings = node.exportClause;
+                if (ts.isNamespaceExport(namedBindings)) {
+                    // export * as m from "mod";
+                    // `export namespace` is not the ECMA2018's feature
+                } else if (ts.isNamedExports(namedBindings)) {
+                    if (namedBindings.elements.length == 0) {
+                        // export {} from "mod";
+                        scope.module().addEmptyImportEntry(moduleRequest);
+                    }
+                    // export {x} from "mod";
+                    // export {v as x} from "mod";
+                    namedBindings.elements.forEach((element: any) => {
+                        let exportName: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
+                        let importName: string = element.propertyName ? jshelpers.getTextOfIdentifierOrLiteral(element.propertyName) : exportName;
+                        scope.module().addIndirectExportEntry(element, importName, exportName, moduleRequest);
+                    });
+                }
+            } else {
+                // export * from "mod";
+                scope.module().addStarExportEntry(node, moduleRequest);
+            }
+        } else if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+            // export {x};
+            // export {v as x};
+            node.exportClause.elements.forEach((element: any) => {
+                let exportName: string = jshelpers.getTextOfIdentifierOrLiteral(element.name);
+                let localName: string = element.propertyName ? jshelpers.getTextOfIdentifierOrLiteral(element.propertyName) : exportName;
+                scope.module().addLocalExportEntry(element, exportName, localName);
+            });
+        } else {
+            throw new Error("Unreachable node kind for Export Declaration");
+        }
+    }
+
+    private recordEcmaExportInfo(node: ts.ExportDeclaration | ts.ExportAssignment | ts.VariableStatement | ts.FunctionDeclaration | ts.ClassDeclaration, scope: Scope) {
+        if (!(scope instanceof ModuleScope)) {
+            return;
+        }
+
+        switch (node.kind) {
+            case ts.SyntaxKind.ExportDeclaration: {
+                this.recordEcmaExportDecl(<ts.ExportDeclaration>node, scope);
+                break;
+            }
+            case ts.SyntaxKind.ExportAssignment: {
+                // export default 42;
+                // export default v;
+                // "*default*" is used within this specification as a synthetic name for anonymous default export values.
+                scope.module().addLocalExportEntry(node, "default", "*default*");
+                break;
+            }
+            case ts.SyntaxKind.VariableStatement: {
+                // export var a,b;
+                node.declarationList.declarations.forEach(decl => {
+                    let name = jshelpers.getTextOfIdentifierOrLiteral(decl.name);
+                    scope.module().addLocalExportEntry(decl, name, name);
+                });
+                break;
+            }
+            case ts.SyntaxKind.FunctionDeclaration:
+            case ts.SyntaxKind.ClassDeclaration: {
+                if (hasDefaultKeywordModifier(node)) {
+                    // HoistableDeclaration : FunctionDecl/GeneratorDecl/AsyncFunctionDecl/AsyncGeneratorDecl
+                    // export default function f(){}
+                    // export default function(){}
+                    // export default class{}
+                    let localName = node.name ? jshelpers.getTextOfIdentifierOrLiteral(node.name) : "*default*";
+                    scope.module().addLocalExportEntry(node, "default", localName);
+                } else {
+                    // export function f(){}
+                    // export class c{}
+                    if (!node.name) {
+                        throw new DiagnosticError(node, DiagnosticCode.A_class_or_function_declaration_without_the_default_modifier_must_have_a_name, jshelpers.getSourceFileOfNode(node));
+                    }
+                    let name = jshelpers.getTextOfIdentifierOrLiteral(node.name!);
+                    scope.module().addLocalExportEntry(node, name, name);
+                }
+                break;
+            }
+            default:
+                throw new Error("Unreachable syntax kind for static exporting");
+        }
+    }
+
+    private recordFuncDecl(node: ts.FunctionDeclaration, scope: Scope, isExport: boolean) {
         this.recordFuncInfo(node);
 
         let funcId = <ts.Identifier>(node).name;
-        if (!funcId) {
-            // function declaration without name doesn't need to record hoisting.
+        if (!funcId && !isExport) {
+            // unexported function declaration without name doesn't need to record hoisting.
             return;
         }
-        let funcName = jshelpers.getTextOfIdentifierOrLiteral(funcId);
-        let funcDecl = new FuncDecl(funcName, node);
+        // if function without name must has modifiers of 'export' & 'default'
+        let funcName = funcId ? jshelpers.getTextOfIdentifierOrLiteral(funcId) : '*default*';
+        let moduleKind = isExport ? ModuleVarKind.EXPORTED : ModuleVarKind.NOT;
+        let funcDecl = new FuncDecl(funcName, node, moduleKind);
         scope.setDecls(funcDecl);
         let hoistScope = scope;
         if (scope instanceof GlobalScope || scope instanceof ModuleScope) {
@@ -601,14 +785,6 @@ export class Recorder {
 
     getScopeOfNode(node: ts.Node) {
         return this.scopeMap.get(node);
-    }
-
-    getImportStmts() {
-        return this.importStmts;
-    }
-
-    getExportStmts() {
-        return this.exportStmts;
     }
 
     setHoistMap(scope: VariableScope, decl: Decl) {
