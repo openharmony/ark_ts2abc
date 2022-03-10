@@ -608,7 +608,7 @@ function generatePropertyFromExpr(node: ts.ClassLikeDeclaration, classFields: Ar
     let staticItems = properties.slice(properties.length - staticNum)
     properties = properties.slice(0, properties.length - staticNum);
     properties = properties.reverse();
-    properties = properties.concat(staticItems);
+    properties.push(...staticItems);
 
     if (constructNode) {
         defineClassMember("constructor", constructNode, PropertyKind.Variable, properties, namedPropertyMap);
