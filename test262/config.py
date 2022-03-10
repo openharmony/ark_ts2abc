@@ -34,11 +34,6 @@ ICUI_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/global/i18n_standard"
 LLVM_DIR = f"{CODE_ROOT}/prebuilts/clang/ohos/linux-x86_64/llvm/lib/"
 ARK_JS_RUNTIME_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark_js_runtime"
 
-# " mode_type": {
-#     "1": "only default",
-#     "2": "only strict mode",
-#     "3": "both default and strict mode"
-# }
 DEFAULT_MODE = 2
 
 TEST_ES5_DIR = os.path.join(DATA_DIR, "test_es51")

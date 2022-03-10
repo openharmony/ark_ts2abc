@@ -32,7 +32,7 @@ export class CacheExpander implements Pass {
             if (item.isNeeded()) {
                 let expander = item.getExpander();
                 let expansion = expander(pandaGen);
-                insns.splice(0, 0, ...expansion);
+                insns.unshift(...expansion);
             }
         }
     }
