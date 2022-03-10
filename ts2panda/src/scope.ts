@@ -15,7 +15,6 @@
 
 import * as ts from "typescript";
 import { SourceTextModuleRecord } from "./ecmaModule";
-import { DebugInsPlaceHolder } from "./irnodes";
 import { LOGD, LOGE } from "./log";
 import {
     GlobalVariable,
@@ -93,8 +92,8 @@ export abstract class Scope {
     protected decls: Decl[] = [];
     protected parent: Scope | undefined = undefined;
     // for debuginfo
-    protected startIns: DebugInsPlaceHolder = new DebugInsPlaceHolder();
-    protected endIns: DebugInsPlaceHolder = new DebugInsPlaceHolder();
+    protected startInsIdx: number | undefined;
+    protected endInsIdx: number | undefined;
     private callOpt: Set<String> = new Set();
     private isArgumentsOrRestargs: boolean = false;
 
@@ -106,20 +105,20 @@ export abstract class Scope {
         return this.name2variable;
     }
 
-    getScopeStartIns() {
-        return this.startIns;
+    getScopeStartInsIdx() {
+        return this.startInsIdx;
     }
 
-    setScopeStartIns(startIns: DebugInsPlaceHolder) {
-        this.startIns = startIns;
+    setScopeStartInsIdx(startInsIdx: number) {
+        this.startInsIdx = startInsIdx;
     }
 
-    setScopeEndIns(endIns: DebugInsPlaceHolder) {
-        this.endIns = endIns;
+    setScopeEndInsIdx(endInsIdx: number) {
+        this.endInsIdx = endInsIdx;
     }
 
-    getScopeEndIns() {
-        return this.endIns;
+    getScopeEndInsIdx() {
+        return this.endInsIdx;
     }
 
     setParent(parentScope: Scope | undefined) {

@@ -1,7 +1,7 @@
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 52}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'bar'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'foo'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 51}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 51}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'baz'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 54}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 52}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'bing'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 56}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 52}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'bar'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'foo'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 51}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 51}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'baz'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 54}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 52}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'bing'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 56}]}

@@ -1,1 +1,1 @@
-{'literalBuffer': [{'tag': 2, 'value': 6}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'new'}, {'tag': 2, 'value': 0}]}
+{'lb': [{'t': 2, 'v': 6}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'new'}, {'t': 2, 'v': 0}]}

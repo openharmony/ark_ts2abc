@@ -296,7 +296,6 @@ export class Recorder {
         let parent = this.getDeclarationNodeOfId(id);
 
         if (parent) {
-            // console.log(id.getText());
             let declKind = astutils.getVarDeclarationKind(<ts.VariableDeclaration>parent);
             let isExportDecl: boolean = false;
             if ((<ts.VariableDeclaration>parent).parent.parent.kind == ts.SyntaxKind.VariableStatement) {
