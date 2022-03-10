@@ -14,7 +14,6 @@
  */
 
 import { CmdOptions } from "./cmdOptions";
-import { DebugPosInfo } from "./debuginfo";
 import {
     Imm,
     IRNode,
@@ -74,7 +73,6 @@ export class Ts2Panda {
             let insIds: Array<string> = [];
             let insImms: Array<number> = [];
             let insLabel: string = "";
-            let insDebugInfo: DebugPosInfo = new DebugPosInfo();
 
             if (insn instanceof Label) {
                 insLabel = Ts2Panda.labelPrefix + insn.id;
@@ -104,12 +102,8 @@ export class Ts2Panda {
                     }
                 });
             }
-            insDebugInfo = insn.debugPosInfo;
-            if (CmdOptions.isDebugMode()) {
-                insDebugInfo.ClearMembersForDebugBuild();
-            } else {
-                insDebugInfo.ClearMembersForReleaseBuild();
-            }
+
+            insn.debugPosInfo.ClearNodeKind();
 
             insns.push(new Ins(
                 insOpcode,
@@ -117,7 +111,7 @@ export class Ts2Panda {
                 insIds.length == 0 ? undefined : insIds,
                 insImms.length == 0 ? undefined : insImms,
                 insLabel === "" ? undefined : insLabel,
-                insDebugInfo,
+                insn.debugPosInfo,
             ));
         });
 

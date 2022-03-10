@@ -173,6 +173,7 @@ import {
   DebugPosInfo,
   NodeKind
 } from "./debuginfo";
+import { Scope } from "./scope";
 
 export enum IRNodeKind {
 % Panda::instructions.group_by(&:mnemonic).each do |mnemonic, group|
@@ -181,7 +182,8 @@ export enum IRNodeKind {
   VREG,
   IMM,
   LABEL,
-  VIRTUALINS_DYN,
+  VIRTUALSTARTINS_DYN,
+  VIRTUALENDINS_DYN,
   DEFINE_GLOBAL_VAR,
 }
 
@@ -396,9 +398,29 @@ export class Label extends IRNode {
   }
 }
 
-export class DebugInsPlaceHolder extends IRNode {
-  constructor() {
-    super(IRNodeKind.VIRTUALINS_DYN, []);
+export class DebugInsStartPlaceHolder extends IRNode {
+  private scope: Scope;
+
+  constructor(scope: Scope) {
+    super(IRNodeKind.VIRTUALSTARTINS_DYN, []);
+    this.scope = scope;
+  }
+
+  getScope() {
+    return this.scope;
+  }
+}
+
+export class DebugInsEndPlaceHolder extends IRNode {
+  private scope: Scope;
+
+  constructor(scope: Scope) {
+    super(IRNodeKind.VIRTUALENDINS_DYN, []);
+    this.scope = scope;
+  }
+
+  getScope() {
+    return this.scope;
   }
 }
 
