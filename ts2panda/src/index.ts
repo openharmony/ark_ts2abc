@@ -161,7 +161,7 @@ namespace Compiler {
             allowJs: true,
             noEmitOnError: true,
             noImplicitAny: true,
-            target: ts.ScriptTarget.ES2015,
+            target: ts.ScriptTarget.ES2017,
             module: ts.ModuleKind.ES2015,
             strictNullChecks: true,
             skipLibCheck: true,
