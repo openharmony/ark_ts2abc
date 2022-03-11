@@ -26,7 +26,6 @@ import {
     LdaDyn,
     LdaiDyn,
     LdaStr,
-    ResultType,
     StaDyn,
     VReg
 } from "../../src/irnodes";
@@ -40,13 +39,10 @@ describe("deleteExpressionTest", function () {
         let propReg = new VReg();
 
         let expected = [
-            // let arr = [1, 2];
-            // ...
-            // delete arr[1];
             new EcmaStlettoglobalrecord('arr'),
             new EcmaTryldglobalbyname('arr'),
             new StaDyn(objReg),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(propReg),
             new EcmaDelobjprop(objReg, propReg),
             new EcmaReturnundefined()

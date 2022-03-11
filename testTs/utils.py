@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Copyright (c) 2022 Huawei Device Co., Ltd.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Description: Use ark to execute test 262 test suite
+"""
+
 import os
 import datetime
 import shutil
@@ -9,8 +29,7 @@ import json
 
 #执行终端命令
 def command_os(order):
-    cmd = order
-    os.system(cmd)
+    subprocess.run(order,shell=True)
 
 #创建文件夹   
 def mk_dir(path):
@@ -33,32 +52,26 @@ def remove_file(path):
 
 #清空文件内容（path：文件路径）
 def clean_file(path):
-    f = open(path,'w')
-    f.write('')
-    f.close()
+    with open(path,'w') as f:
+        f.write('')
 
 #读取文件内容(全部)
 def read_file(path):
-    try:
-        f =open(path,'r')
+    content = []
+    with open(path,'r') as f:
         content = f.readlines()
-        f.close()
-    except:
-        content = []
     
     return content
 
 #写入文件，覆盖之前内容
 def write_file(path,content):
-    f = open(path,'w')
-    f.write(content)
-    f.close()
+    with open(path,'w') as f:
+        f.write(content)
 
 #追加写入文件（path：文件路径，content：写入内容）
 def write_append(path,content):
-    f = open(path,'a+')
-    f.write(content)
-    f.close()
+    with open(path,'a+') as f:
+        f.write(content)
 
 def move_file(srcfile, dstfile):
     subprocess.getstatusoutput("mv %s %s" % (srcfile, dstfile))
@@ -121,3 +134,8 @@ def npm_install(cwd):
         os.chdir(WORK_PATH)
     except Exception as e:
         print(e)
+
+
+    
+
+    

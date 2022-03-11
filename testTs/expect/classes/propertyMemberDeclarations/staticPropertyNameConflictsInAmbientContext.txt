@@ -1,29 +1,29 @@
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'name'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'name'}, {'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 51}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'name'}, {'tag': 2, 'value': 55}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'name'}, {'tag': 2, 'value': 54}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'name'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 4}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'name'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 4}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 53}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'length'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'length'}, {'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 57}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'length'}, {'tag': 2, 'value': 61}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'length'}, {'tag': 2, 'value': 60}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'length'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'length'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 59}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'prototype'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'prototype'}, {'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 63}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'prototype'}, {'tag': 2, 'value': 66}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'prototype'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'prototype'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 65}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'caller'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'caller'}, {'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 68}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'caller'}, {'tag': 2, 'value': 72}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'caller'}, {'tag': 2, 'value': 71}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'caller'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'caller'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 70}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'arguments'}, {'tag': 2, 'value': 4}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'arguments'}, {'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 74}]}
-{'literalBuffer': [{'tag': 2, 'value': 1}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'arguments'}, {'tag': 2, 'value': 78}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'arguments'}, {'tag': 2, 'value': 77}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 1}, {'tag': 5, 'value': 'arguments'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 3}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}, {'tag': 5, 'value': 'arguments'}, {'tag': 2, 'value': 0}, {'tag': 2, 'value': 0}]}
-{'literalBuffer': [{'tag': 2, 'value': 2}, {'tag': 2, 'value': 76}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'name'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'name'}, {'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 51}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'name'}, {'t': 2, 'v': 55}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'name'}, {'t': 2, 'v': 54}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'name'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 4}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'name'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 4}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 53}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'length'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'length'}, {'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 57}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'length'}, {'t': 2, 'v': 61}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'length'}, {'t': 2, 'v': 60}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'length'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'length'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 59}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'prototype'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'prototype'}, {'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 63}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'prototype'}, {'t': 2, 'v': 66}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'prototype'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'prototype'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 65}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'caller'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'caller'}, {'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 68}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'caller'}, {'t': 2, 'v': 72}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'caller'}, {'t': 2, 'v': 71}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'caller'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'caller'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 70}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'arguments'}, {'t': 2, 'v': 4}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'arguments'}, {'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 74}]}
+{'lb': [{'t': 2, 'v': 1}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'arguments'}, {'t': 2, 'v': 78}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'arguments'}, {'t': 2, 'v': 77}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 1}, {'t': 5, 'v': 'arguments'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 3}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}, {'t': 5, 'v': 'arguments'}, {'t': 2, 'v': 0}, {'t': 2, 'v': 0}]}
+{'lb': [{'t': 2, 'v': 2}, {'t': 2, 'v': 76}]}

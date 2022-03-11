@@ -18,7 +18,8 @@ import { CmdOptions } from "./cmdOptions";
 import {
     CalliDynRange,
     CallRange,
-    DebugInsPlaceHolder,
+    DebugInsStartPlaceHolder,
+    DebugInsEndPlaceHolder,
     IRNode,
     Label,
     VReg
@@ -31,11 +32,10 @@ import {
 } from "./variable";
 
 export class DebugPosInfo {
-    private boundLeft: number | undefined = 0;
-    private boundRight: number | undefined = 0;
-    private lineNum: number = -1;
-    private columnNum: number = -1;
-    private wholeLine: string | undefined = "";
+    private bl: number | undefined;  // bound left
+    private br: number | undefined;  // bound right
+    private l: number = -1;  // line number
+    private c: number = -1;  // column number
     private nodeKind: NodeKind | undefined = NodeKind.FirstNodeOfFunction;
 
     constructor() { }
@@ -53,74 +53,65 @@ export class DebugPosInfo {
     }
 
     public setBoundLeft(boundLeft: number): void {
-        this.boundLeft = boundLeft;
+        this.bl = boundLeft;
     }
 
     public getBoundLeft(): number | undefined {
-        return this.boundLeft;
+        return this.bl;
     }
 
     public setBoundRight(boundRight: number): void {
-        this.boundRight = boundRight;
+        this.br = boundRight;
     }
 
     public getBoundRight(): number | undefined {
-        return this.boundRight;
+        return this.br;
     }
 
     public setSourecLineNum(lineNum: number): void {
-        this.lineNum = lineNum;
+        this.l = lineNum;
     }
 
     public getSourceLineNum(): number {
-        return this.lineNum;
+        return this.l;
     }
 
     public setSourecColumnNum(columnNum: number): void {
-        this.columnNum = columnNum;
+        this.c = columnNum;
     }
 
     public getSourceColumnNum(): number {
-        return this.columnNum;
+        return this.c;
     }
 
-    public setWholeLine(wholeLine: string): void {
-        this.wholeLine = wholeLine;
-    }
-
-    public getWholeLine(): string | undefined {
-        return this.wholeLine;
-    }
-
-    public ClearMembersForReleaseBuild(): void {
-        this.ClearMembersForDebugBuild();
-        this.boundLeft = undefined;
-        this.boundRight = undefined;
-    }
-
-    public ClearMembersForDebugBuild(): void {
-        this.wholeLine = undefined;
+    public ClearNodeKind(): void {
         this.nodeKind = undefined;
     }
 }
 
 export class VariableDebugInfo {
-    private name = "";
-    private variable: Variable | undefined;
-    private signature = "";
-    private signatureType = "";
-    private reg: number = -1;
+    // @ts-ignore
+    private n = "";  // name
+    // @ts-ignore
+    private v: Variable | undefined;  // variables
+    // @ts-ignore
+    private s = "";  // signature
+    // @ts-ignore
+    private st = "";  // signature type
+    // @ts-ignore
+    private r: number = -1;
     private start: number = -1;
-    private length: number = -1;
+    // @ts-ignore
+    private len: number = -1;
 
     constructor(name: string, signature: string, signatureType: string,
         reg: number, start: number = 0, length: number = 0) {
-        this.name = name;
-        this.signature = signature;
-        this.signatureType = signatureType;
-        this.reg = reg;
+        this.n = name;
+        this.s = signature;
+        this.st = signatureType;
+        this.r = reg;
         this.start = start;
-        this.length = length;
+        this.len = length;
     }
 
     public setStart(start: number): void {
@@ -132,7 +123,7 @@ export class VariableDebugInfo {
     }
 
     public setLength(length: number): void {
-        this.length = length;
+        this.len = length;
     }
 }
 
@@ -179,17 +170,14 @@ export class DebugInfo {
                 loc: {
                     line : -1,
                     character : -1
-                },
-                wholeLineText: ""
+                }
             }
         }
 
         pos = node.getStart();
         let loc = file.getLineAndCharacterOfPosition(pos); 
-        let wholeLineText = node.getText();
         return {
-            loc: loc,
-            wholeLineText: wholeLineText
+            loc: loc
         }
     }
 
@@ -202,7 +190,6 @@ export class DebugInfo {
             }
             posInfo.setSourecLineNum(res.loc.line);
             posInfo.setSourecColumnNum(res.loc.character);
-            posInfo.setWholeLine(res.wholeLineText);
         }
     }
 
@@ -223,35 +210,31 @@ export class DebugInfo {
 
         let lineNumber = -1;
         let columnNumber = -1;
-        let wholeLineText = "";
         if (DebugInfo.isNode(node)) {
             let tsNode = <ts.Node>(node);
             let res = this.searchForPos(tsNode);
             if (!res) {
                 return;
             }
-            wholeLineText = res.wholeLineText;
             lineNumber = res.loc.line;
             columnNumber = res.loc.character;
         }
 
-        for (let i = 0; i < insns.length; i++) {
-            let pos = new DebugPosInfo();
-            pos.setSourecLineNum(lineNumber);
-            pos.setSourecColumnNum(columnNumber);
-            pos.setWholeLine(wholeLineText);
-            pos.setDebugPosInfoNodeState(node);
-
-            insns[i].debugPosInfo = pos;
-        }
+        insns.forEach(insn => {
+            insn.debugPosInfo.setSourecLineNum(lineNumber);
+            insn.debugPosInfo.setSourecColumnNum(columnNumber);
+            insn.debugPosInfo.setDebugPosInfoNodeState(node);
+        })
     }
 
     private static matchFormat(irnode: IRNode): number {
         let formatIndex = 0;
-        for (let i = 0; i < irnode.formats[0].length; i++) {
+        let formats = irnode.getFormats();
+        for (let i = 0; i < formats[0].length; i++) {
             if (irnode.operands[i] instanceof VReg) {
-                for (let j = 0; j < irnode.formats.length; j++) {
-                    if ((<VReg>irnode.operands[i]).num < (1 << irnode.formats[j][i].bitwidth)) {
+                for (let j = 0; j < formats.length; j++) {
+                    // formats[j][i][1] is vreg’s bitwidth
+                    if ((<VReg>irnode.operands[i]).num < (1 << formats[j][i][1])) {
                         formatIndex = j > formatIndex ? j : formatIndex;
                         continue;
                     }
@@ -262,72 +245,45 @@ export class DebugInfo {
     }
 
     private static getIRNodeWholeLength(irnode: IRNode): number {
-        if (irnode instanceof Label || irnode instanceof DebugInsPlaceHolder) {
+        if (irnode instanceof Label ||
+            irnode instanceof DebugInsStartPlaceHolder ||
+            irnode instanceof DebugInsEndPlaceHolder) {
             return 0;
         }
         let length = 1;
-        if (!irnode.formats[0]) {
+        if (!irnode.getFormats()[0]) {
             return 0;
         }
         let formatIndex = this.matchFormat(irnode);
-        let formats = irnode.formats[formatIndex];
+        let formats = irnode.getFormats()[formatIndex];
         // count operands length
         for (let i = 0; i < formats.length; i++) {
             if ((irnode instanceof CalliDynRange) || (irnode instanceof CallRange)) {
-                length += formats[0].bitwidth / 8; // 8 indicates that one byte is composed of 8 bits
-                length += formats[1].bitwidth / 8;
+                length += formats[0][1] / 8; // 8 indicates that one byte is composed of 8 bits
+                length += formats[1][1] / 8;
                 break;
             }
 
-            length += (formats[i].bitwidth / 8);
+            length += (formats[i][1] / 8);
         }
 
         return length;
     }
 
-    private static setVariablesDebugInfoInternal(pandaGen: PandaGen, scope: Scope) {
-        let insns = pandaGen.getInsns();
-        // count variables offset
-        let startIdx = 0;
-        let startIns = scope.getScopeStartIns();
-        let endIns = scope.getScopeEndIns();
-
-        for (let i = 0; i < insns.length; i++) {
-            if (startIns == insns[i]) {
-                startIdx = i;
-            }
-
-            if (endIns == insns[i]) {
-                let name2variable = scope.getName2variable();
-                name2variable.forEach((value, key) => {
-                    if (!value.hasAlreadyBinded()) {
-                        return;
-                    }
-                    let variableInfo = new VariableDebugInfo(key, "any", "any", (value.getVreg().num));
-                    variableInfo.setStart(startIdx);
-                    variableInfo.setLength(i - startIdx + 1);
-                    pandaGen.addDebugVariableInfo(variableInfo);
-                });
-            }
-        }
-    }
-
     private static setPosDebugInfo(pandaGen: PandaGen) {
-        let insns = pandaGen.getInsns();
+        let insns: IRNode[] = pandaGen.getInsns();
         let offset = 0;
 
+        // count pos offset
         for (let i = 0; i < insns.length; i++) {
             if (insns[i].debugPosInfo.getDebugPosInfoNodeState() == NodeKind.FirstNodeOfFunction) {
                 DebugInfo.setPosInfoForUninitializeIns(insns[i].debugPosInfo, pandaGen);
             }
-        }
 
-        // count pos offset
-        for (let i = 0; i < insns.length; i++) {
             let insLength = DebugInfo.getIRNodeWholeLength(insns[i]);
             let insnsDebugPosInfo = insns[i].debugPosInfo;
 
-            if (insnsDebugPosInfo) {
+            if (insnsDebugPosInfo && CmdOptions.isDebugMode()) {
                 insnsDebugPosInfo.setBoundLeft(offset);
                 insnsDebugPosInfo.setBoundRight(offset + insLength);
             }
@@ -340,20 +296,36 @@ export class DebugInfo {
         }
     }
 
-    private static removeDebugIns(pandaGen: PandaGen) {
+    private static setVariablesDebugInfo(pandaGen: PandaGen) {
         let insns = pandaGen.getInsns();
+
         for (let i = 0; i < insns.length; i++) {
-            if (insns[i] instanceof DebugInsPlaceHolder) {
+            if (insns[i] instanceof DebugInsStartPlaceHolder) {
+                (<DebugInsStartPlaceHolder> insns[i]).getScope().setScopeStartInsIdx(i);
+                // delete ins placeholder
+                insns.splice(i, 1);
+                i--;
+            }
+            if (insns[i] instanceof DebugInsEndPlaceHolder) {
+                (<DebugInsEndPlaceHolder> insns[i]).getScope().setScopeEndInsIdx(i);
+                // delete ins placeholder
                 insns.splice(i, 1);
                 i--;
             }
         }
-    }
 
-    private static setVariablesDebugInfo(pandaGen: PandaGen) {
         let recordArray = DebugInfo.getScopeArray();
         recordArray.forEach(scope => {
-            DebugInfo.setVariablesDebugInfoInternal(pandaGen, scope);
+            let name2variable = scope.getName2variable();
+            name2variable.forEach((value, key) => {
+                if (!value.hasAlreadyBinded()) {
+                    return;
+                }
+                let variableInfo = new VariableDebugInfo(key, "any", "any", (value.getVreg().num));
+                variableInfo.setStart(scope.getScopeStartInsIdx());
+                variableInfo.setLength(scope.getScopeEndInsIdx() - scope.getScopeStartInsIdx());
+                pandaGen.addDebugVariableInfo(variableInfo);
+            });
         });
     }
 
@@ -363,9 +335,6 @@ export class DebugInfo {
         if (CmdOptions.isDebugMode()) {
             // set variable debug info
             DebugInfo.setVariablesDebugInfo(pandaGen);
-
-            // delete ins placeholder
-            DebugInfo.removeDebugIns(pandaGen)
 
             // clear scope array
             DebugInfo.clearScopeArray();
@@ -387,24 +356,22 @@ export class DebugInfo {
 
 
     public static copyDebugInfo(insn: IRNode, expansion: IRNode[]) {
-        let debugPosInfo = insn.debugPosInfo;
-        for (let j = 0; j < expansion.length; j++) {
-            expansion[j].debugPosInfo = debugPosInfo;
-        }
+        expansion.forEach(irNode => irNode.debugPosInfo = insn.debugPosInfo);
     }
 
     public static addDebugIns(scope: Scope, pandaGen: PandaGen, isStart: boolean) {
         if (!CmdOptions.isDebugMode()) {
             return;
         }
+
         let insns = pandaGen.getInsns();
-        let placeHolder = new DebugInsPlaceHolder();
-        insns.push(placeHolder);
+        let placeHolder: IRNode;
         if (isStart) {
-            scope.setScopeStartIns(placeHolder);
+            placeHolder = new DebugInsStartPlaceHolder(scope);
             DebugInfo.addScope(scope);
         } else {
-            scope.setScopeEndIns(placeHolder);
+            placeHolder = new DebugInsEndPlaceHolder(scope);
         }
+        insns.push(placeHolder);
     }
 }

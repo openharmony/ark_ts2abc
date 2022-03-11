@@ -26,44 +26,44 @@ export enum LiteralTag {
 }
 
 export class Literal {
-  private tag: LiteralTag;
-  private value: any;
+  private t: LiteralTag;
+  private v: any;
 
-  constructor(tag: LiteralTag, value: any) {
-      this.tag = tag;
-      this.value = value;
+  constructor(t: LiteralTag, v: any) {
+      this.t = t;
+      this.v = v;
   }
 
   getTag() {
-      return this.tag;
+      return this.t;
   }
 
   getValue() {
-      return this.value;
+      return this.v;
   }
 }
 
 export class LiteralBuffer {
-  private literalBuffer: Literal[] = [];
+  private lb: Literal[] = [];
 
   constructor() { };
 
   addLiterals(...literals: Array<Literal>) {
-      this.literalBuffer.push(...literals);
+      this.lb.push(...literals);
   }
 
   getLiterals() {
-    return this.literalBuffer;
+    return this.lb;
   }
 
   isEmpty() {
-      return this.literalBuffer.length == 0;
+      return this.lb.length == 0;
   }
 
   getLiteral(index: number) {
-    if (index >= this.literalBuffer.length || this.literalBuffer.length <=0) {
+    if (index >= this.lb.length || this.lb.length <=0) {
       return ;
     }
-    return this.literalBuffer[index];
+    return this.lb[index];
   }
 }

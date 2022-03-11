@@ -1,3 +1,3 @@
-{'literalBuffer': [{'tag': 2,'value': 7},{'tag': 5,'value': '#x#./reExportX'}]}
-{'literalBuffer': [{'tag': 2,'value':7},{'tag': 5,'value': '#*#$'}]}
-{'literalBuffer': [{'tag': 2,'value': 7},{'tag': 5, 'value': '#x#jquery'}]}
+{'lb': [{'t': 2, 'v': 7}, {'t': 5, 'v': '#x#./reExportX'}]}
+{'lb': [{'t': 2, 'v': 7}, {'t': 5, 'v': '#*#$'}]}
+{'lb': [{'t': 2, 'v': 7}, {'t': 5, 'v': '#x#jquery'}]}

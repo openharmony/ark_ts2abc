@@ -33,6 +33,7 @@ enum class JsonType {
     RECORD,
     STRING,
     LITERALBUFFER,
+    MODULE,
     OPTIONS
 };
 
@@ -46,10 +47,8 @@ enum class OptLevel {
 };
 
 bool HandleJsonFile(const std::string &input, std::string &data);
-bool ReadFromPipe(std::string &data);
-bool GenerateProgram(const std::string &data, std::string output,
-                     int optLevel,
-                     std::string optLogLevel);
+bool GenerateProgram(const std::string &data, std::string output, bool isParsingFromPipe,
+                     int optLevel, std::string optLogLevel);
 bool GetDebugLog();
 void ParseLogEnable(const Json::Value &rootValue);
 bool GetDebugModeEnabled();

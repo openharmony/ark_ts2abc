@@ -31,8 +31,13 @@ ohos_copy("node_modules") {
   module_install_name = ""
 }
 
-ohos_copy("tsconfig_json") {
-  sources = [ "${ts2abc_root}/tsconfig.json" ]
+ohos_copy("config_files") {
+  sources = [
+    "${ts2abc_root}/package-lock.json",
+    "${ts2abc_root}/package.json",
+    "${ts2abc_root}/tsconfig.json",
+    "${ts2abc_root}/webpack.config.js",
+  ]
 
   outputs = [ target_out_dir + "/{{source_file_part}}" ]
   module_install_name = ""
@@ -71,12 +76,16 @@ ark_gen_file("ts2abc_irnodes_ts") {
 action("npm_run_build") {
   visibility = [ ":*" ]
   deps = [
+    "$ts2abc_root:config_files",
     "$ts2abc_root:node_modules",
     "$ts2abc_root:ts2abc_diagnostic_ts",
     "$ts2abc_root:ts2abc_irnodes_ts",
     "$ts2abc_root:ts2abc_src",
-    "$ts2abc_root:tsconfig_json",
   ]
+
+  if (is_linux || is_mingw || is_mac) {
+    deps += [ "$ts2abc_root/ts2abc:ts2abc" ]
+  }
 
   script = "${ts2abc_root}/scripts/run.py"
   args = [
@@ -94,79 +103,58 @@ action("npm_run_build") {
     args += [
       "--platform",
       "linux",
+      "--js2abc",
+      rebase_path("${root_out_dir}/ark/ark/js2abc"),
     ]
   } else if (is_mingw) {
     args += [
       "--platform",
       "win",
+      "--js2abc",
+      rebase_path("${root_out_dir}/ark/ark/js2abc.exe"),
     ]
   } else if (is_mac) {
     args += [
       "--platform",
       "mac",
+      "--js2abc",
+      rebase_path("${root_out_dir}/ark/ark/js2abc"),
     ]
   }
+
+  if (is_debug) {
+    args += [
+      "--buildMode",
+      "debug",
+    ]
+  } else {
+    args += [
+      "--buildMode",
+      "release",
+    ]
+  }
+
   outputs = []
   if (is_mingw) {
-    outputs += [ "${target_out_dir}/build-win" ]
+    outputs += [ "${root_out_dir}/ark/ark/build-win" ]
   } else if (is_mac) {
-    outputs += [ "${target_out_dir}/build-mac" ]
+    outputs += [ "${root_out_dir}/ark/ark/build-mac" ]
   } else {
-    outputs += [ "${target_out_dir}/build" ]
+    outputs += [ "${root_out_dir}/ark/ark/build" ]
   }
 }
 
 if (is_linux) {
-  ohos_copy("src_linux") {
-    deps = [ "$ts2abc_root:npm_run_build" ]
-    sources = [ "${target_out_dir}/build" ]
-    outputs = [ "${root_out_dir}/ark/ark/build" ]
-    module_source_dir = target_out_dir + "/build/src"
-    module_install_name = ""
-  }
-
-  ohos_copy("ts2abc_tool") {
-    sources = [ "${root_out_dir}/ark/ark/js2abc" ]
-    outputs = [ "${root_out_dir}/ark/ark/build/bin/{{source_file_part}}" ]
-    module_install_name = ""
-
-    deps = [
-      ":src_linux",
-      "$ts2abc_root/ts2abc:ts2abc",
-    ]
-  }
-
-  ohos_copy("ts2abc_linux") {
-    deps = [
-      ":ts2abc_tool",
-      "$ts2abc_root/ts2abc:ts2abc",
-    ]
-    sources = [ "${root_out_dir}/ark/ark/js2abc" ]
-    outputs = [ "${target_out_dir}/build/bin/{{source_file_part}}" ]
-    module_source_dir = "${root_out_dir}/ark/ark/build/bin"
-    module_install_name = ""
-  }
-
   ohos_copy("ts2abc_build") {
-    deps = [
-      ":panda_ts2abc",
-      ":ts2abc_linux",
-    ]
-    sources = [
-      "${ts2abc_root}/package-lock.json",
-      "${ts2abc_root}/package.json",
-    ]
-
-    outputs = [ "${root_out_dir}/ark/ark/build/{{source_file_part}}" ]
+    deps = [ "$ts2abc_root:npm_run_build" ]
+    sources = [ "${root_out_dir}/ark/ark/build" ]
+    outputs = [ "${target_out_dir}/build-tmp" ]
     module_source_dir = "${root_out_dir}/ark/ark/build"
     module_install_name = ""
   }
 
   ohos_copy("ts2abc_build_ets") {
-    deps = [
-      ":src_linux",
-      ":ts2abc_build",
-    ]
+    deps = [ "$ts2abc_root:npm_run_build" ]
 
     sources = [ "${root_out_dir}/ark/ark/build" ]
     outputs = [ "${root_out_dir}/ark/ark/build-ets" ]
@@ -176,55 +164,16 @@ if (is_linux) {
 }
 
 if (is_mingw) {
-  ohos_copy("src_win") {
-    deps = [ "$ts2abc_root:npm_run_build" ]
-    sources = [ "${target_out_dir}/build-win" ]
-    outputs = [ "${root_out_dir}/ark/ark/build-win" ]
-    module_source_dir = target_out_dir + "/build-win/src"
-    module_install_name = ""
-  }
-
-  ohos_copy("ts2abc_tool_win") {
-    sources = [ "${root_out_dir}/ark/ark/js2abc.exe" ]
-    outputs = [ "${root_out_dir}/ark/ark/build-win/bin/{{source_file_part}}" ]
-    module_install_name = ""
-
-    deps = [
-      ":src_win",
-      "$ts2abc_root/ts2abc:ts2abc",
-    ]
-  }
-
-  ohos_copy("ts2abc_win") {
-    deps = [
-      ":ts2abc_tool_win",
-      "$ts2abc_root/ts2abc:ts2abc",
-    ]
-    sources = [ "${root_out_dir}/ark/ark/js2abc.exe" ]
-    outputs = [ "${target_out_dir}/build-win/bin/{{source_file_part}}" ]
-    module_source_dir = "${root_out_dir}/ark/ark/build-win/bin"
-    module_install_name = ""
-  }
-
   ohos_copy("ts2abc_build_win") {
-    deps = [
-      ":panda_ts2abc",
-      ":ts2abc_win",
-    ]
-    sources = [
-      "${ts2abc_root}/package-lock.json",
-      "${ts2abc_root}/package.json",
-    ]
-    outputs = [ "${root_out_dir}/ark/ark/build-win/{{source_file_part}}" ]
+    deps = [ "$ts2abc_root:npm_run_build" ]
+    sources = [ "${root_out_dir}/ark/ark/build-win" ]
+    outputs = [ "${target_out_dir}/build-tmp" ]
     module_source_dir = "${root_out_dir}/ark/ark/build-win"
     module_install_name = ""
   }
 
   ohos_copy("ts2abc_build_win_ets") {
-    deps = [
-      ":src_win",
-      ":ts2abc_build_win",
-    ]
+    deps = [ "$ts2abc_root:npm_run_build" ]
     sources = [ "${root_out_dir}/ark/ark/build-win" ]
     outputs = [ "${root_out_dir}/ark/ark/build-win-ets" ]
     module_source_dir = "${root_out_dir}/ark/ark/build-win-ets"
@@ -233,55 +182,16 @@ if (is_mingw) {
 }
 
 if (is_mac) {
-  ohos_copy("src_mac") {
-    deps = [ "$ts2abc_root:npm_run_build" ]
-    sources = [ "${target_out_dir}/build-mac" ]
-    outputs = [ "${root_out_dir}/ark/ark/build-mac" ]
-    module_source_dir = target_out_dir + "/build-mac/src"
-    module_install_name = ""
-  }
-
-  ohos_copy("ts2abc_tool_mac") {
-    sources = [ "${root_out_dir}/ark/ark/js2abc" ]
-    outputs = [ "${root_out_dir}/ark/ark/build-mac/bin/{{source_file_part}}" ]
-    module_install_name = ""
-
-    deps = [
-      ":src_mac",
-      "$ts2abc_root/ts2abc:ts2abc",
-    ]
-  }
-
-  ohos_copy("ts2abc_mac") {
-    deps = [
-      ":ts2abc_tool_mac",
-      "$ts2abc_root/ts2abc:ts2abc",
-    ]
-    sources = [ "${root_out_dir}/ark/ark/js2abc" ]
-    outputs = [ "${target_out_dir}/build-mac/bin/{{source_file_part}}" ]
-    module_source_dir = "${root_out_dir}/ark/ark/build-mac/bin"
-    module_install_name = ""
-  }
-
   ohos_copy("ts2abc_build_mac") {
-    deps = [
-      ":panda_ts2abc",
-      ":ts2abc_mac",
-    ]
-    sources = [
-      "${ts2abc_root}/package-lock.json",
-      "${ts2abc_root}/package.json",
-    ]
-    outputs = [ "${root_out_dir}/ark/ark/build-mac/{{source_file_part}}" ]
+    deps = [ "$ts2abc_root:npm_run_build" ]
+    sources = [ "${root_out_dir}/ark/ark/build-mac" ]
+    outputs = [ "${target_out_dir}/build-tmp" ]
     module_source_dir = "${root_out_dir}/ark/ark/build-mac"
     module_install_name = ""
   }
 
   ohos_copy("ts2abc_build_mac_ets") {
-    deps = [
-      ":src_mac",
-      ":ts2abc_build_mac",
-    ]
+    deps = [ "$ts2abc_root:npm_run_build" ]
     sources = [ "${root_out_dir}/ark/ark/build-mac" ]
     outputs = [ "${root_out_dir}/ark/ark/build-mac-ets" ]
     module_source_dir = "${root_out_dir}/ark/ark/build-mac-ets"

@@ -62,7 +62,7 @@ describe("ElementAccess", function () {
             new EcmaTryldglobalbyname('obj'),
             new StaDyn(tempObj),
             new MovDyn(objReg, tempObj),
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStobjbyname("property", objReg),
         ];
 
@@ -81,9 +81,9 @@ describe("ElementAccess", function () {
             new EcmaStlettoglobalrecord('obj'),
             new EcmaTryldglobalbyname('obj'),
             new StaDyn(objReg),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(prop1Reg),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaAdd2dyn(prop1Reg),
             new StaDyn(val),
             new EcmaLdobjbyvalue(objReg, val)

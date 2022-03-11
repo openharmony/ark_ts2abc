@@ -15,6 +15,7 @@
 
 import * as ts from "typescript";
 import { isBindingPattern } from "./base/util";
+import { CmdOptions } from "./cmdOptions";
 import * as jshelpers from "./jshelpers";
 import { Recorder } from "./recorder";
 import {
@@ -30,13 +31,11 @@ import {
     VariableScope
 } from "./scope";
 import { isGlobalIdentifier } from "./syntaxCheckHelper";
+import { TypeRecorder } from "./typeRecorder";
 import {
     VarDeclarationKind,
     Variable
 } from "./variable";
-import { TypeRecorder } from "./typeRecorder";
-import { CmdOptions } from "./cmdOptions";
-import { PrimitiveType } from "./base/typeSystem";
 
 function setVariableOrParameterType(node: ts.Node, v: Variable | undefined) {
     if (v) {
@@ -78,14 +77,13 @@ function addInnerArgs(node: ts.Node, scope: VariableScope, enableTypeRecord: boo
         addParameters(funcNode, scope, enableTypeRecord);
     }
 
-    if (scope.getUseArgs()) {
+    if (scope.getUseArgs() || CmdOptions.isDebugMode()) {
         if (ts.isArrowFunction(node)) {
             let parentVariableScope = <VariableScope>scope.getParentVariableScope();
             parentVariableScope.add("arguments", VarDeclarationKind.CONST, InitStatus.INITIALIZED);
             parentVariableScope.setUseArgs(true);
-
             scope.setUseArgs(false);
-        } else {
+        } else if (scope.getUseArgs()){
             if (!scope.findLocal("arguments")) {
                 scope.add("arguments", VarDeclarationKind.CONST, InitStatus.INITIALIZED);
             }
@@ -107,9 +105,9 @@ export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean
                 hoistDecls.forEach(hoistDecl => {
                     let v: Variable | undefined;
                     if (hoistDecl instanceof VarDecl) {
-                        v = scope.add(hoistDecl.name, VarDeclarationKind.VAR);
+                        v = scope.add(hoistDecl, VarDeclarationKind.VAR);
                     } else if (hoistDecl instanceof FuncDecl) {
-                        v = scope.add(hoistDecl.name, VarDeclarationKind.FUNCTION);
+                        v = scope.add(hoistDecl, VarDeclarationKind.FUNCTION);
                     } else {
                         throw new Error("Wrong type of declaration to be hoisted")
                     }
@@ -127,25 +125,26 @@ export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean
         hoistDecls = <Decl[]>hoistMap.get(nearestVariableScope);
         for (let j = 0; j < decls.length; j++) {
             let decl = decls[j];
+            // @ts-ignore
             if (hoistDecls && hoistDecls.includes(decl)) {
                 continue;
             }
             let v: Variable | undefined;
             if (decl instanceof LetDecl) {
-                v = scope.add(decl.name, VarDeclarationKind.LET, InitStatus.UNINITIALIZED);
+                v = scope.add(decl, VarDeclarationKind.LET, InitStatus.UNINITIALIZED);
             } else if (decl instanceof ConstDecl) {
-                v = scope.add(decl.name, VarDeclarationKind.CONST, InitStatus.UNINITIALIZED);
+                v = scope.add(decl, VarDeclarationKind.CONST, InitStatus.UNINITIALIZED);
             } else if (decl instanceof FuncDecl) {
-                v = scope.add(decl.name, VarDeclarationKind.FUNCTION);
+                v = scope.add(decl, VarDeclarationKind.FUNCTION);
             } else if (decl instanceof CatchParameter) {
-                v = scope.add(decl.name, VarDeclarationKind.LET);
+                v = scope.add(decl, VarDeclarationKind.LET);
             } else if (decl instanceof ClassDecl) {
                 let classNode = decl.node;
                 if (ts.isClassDeclaration(classNode)) {
-                    v = scope.add(decl.name, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
+                    v = scope.add(decl, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
                 } else {
                     let classScope = <Scope>recorder.getScopeOfNode(classNode);
-                    v = classScope.add(decl.name, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
+                    v = classScope.add(decl, VarDeclarationKind.CLASS, InitStatus.UNINITIALIZED);
                 }
             } else {
                 /**

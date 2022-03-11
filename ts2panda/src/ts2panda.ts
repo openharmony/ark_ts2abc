@@ -14,10 +14,11 @@
  */
 
 import { CmdOptions } from "./cmdOptions";
-import { DebugPosInfo } from "./debuginfo";
+import { SourceTextModuleRecord } from "./ecmaModule";
 import {
     Imm,
     IRNode,
+    IRNodeKind,
     Label,
     OperandType,
     VReg
@@ -30,6 +31,11 @@ import {
     ExportedSymbol2Type,
     Function,
     Ins,
+    IndirectExportEntry,
+    LocalExportEntry,
+    ModuleRecord,
+    NamespaceImportEntry,
+    RegularImportEntry,
     Signature
 } from "./pandasm";
 import { generateCatchTables } from "./statement/tryStatement";
@@ -38,8 +44,9 @@ import {
     isRangeInst,
     getRangeStartVregPos
 } from "./base/util";
-import { TypeOfVreg } from "./pandasm";
 import { LiteralBuffer } from "./base/literal";
+import { CompilerDriver } from "./compilerDriver";
+import { ModuleScope } from "./scope";
 
 const dollarSign: RegExp = /\$/g;
 
@@ -48,13 +55,14 @@ const JsonType = {
     "record": 1,
     "string": 2,
     "literal_arr": 3,
-    "options": 4,
-    "type_arr": 5
+    "module": 4,
+    "options": 5
 };
 export class Ts2Panda {
     static strings: Set<string> = new Set();
-    static labelPrefix = "LABEL_";
+    static labelPrefix = "L_";
     static jsonString: string = "";
+    static moduleRecordlist: Array<ModuleRecord> = [];
 
     constructor() {
     }
@@ -68,12 +76,11 @@ export class Ts2Panda {
         let labels: Array<string> = [];
 
         pg.getInsns().forEach((insn: IRNode) => {
-            let insOpcode = insn.mnemonic;
+            let insOpcode = insn.kind >= IRNodeKind.VREG ? undefined : insn.kind;
             let insRegs: Array<number> = [];
             let insIds: Array<string> = [];
             let insImms: Array<number> = [];
             let insLabel: string = "";
-            let insDebugInfo: DebugPosInfo = new DebugPosInfo();
 
             if (insn instanceof Label) {
                 insLabel = Ts2Panda.labelPrefix + insn.id;
@@ -103,12 +110,8 @@ export class Ts2Panda {
                     }
                 });
             }
-            insDebugInfo = insn.debugPosInfo;
-            if (CmdOptions.isDebugMode()) {
-                insDebugInfo.ClearMembersForDebugBuild();
-            } else {
-                insDebugInfo.ClearMembersForReleaseBuild();
-            }
+
+            insn.debugPosInfo.ClearNodeKind();
 
             insns.push(new Ins(
                 insOpcode,
@@ -116,32 +119,31 @@ export class Ts2Panda {
                 insIds.length == 0 ? undefined : insIds,
                 insImms.length == 0 ? undefined : insImms,
                 insLabel === "" ? undefined : insLabel,
-                insDebugInfo,
+                insn.debugPosInfo,
             ));
         });
 
         return {
             insns: insns,
             regsNum: (pg.getTotalRegsNum() - pg.getParametersCount()),
-            labels: labels
+            labels: labels.length == 0 ? undefined : labels
         };
     }
 
     static dumpStringsArray(ts2abc: any) {
         let strings_arr = Array.from(Ts2Panda.strings);
 
-        strings_arr.forEach(function(str) {
-            let strObject = {
-                "type": JsonType.string,
-                "string": str
-            }
-            let jsonStrUnicode = escapeUnicode(JSON.stringify(strObject, null, 2));
-            jsonStrUnicode = "$" + jsonStrUnicode.replace(dollarSign, '#$') + "$";
-            if (CmdOptions.isEnableDebugLog()) {
-                Ts2Panda.jsonString += jsonStrUnicode;
-            }
-            ts2abc.stdio[3].write(jsonStrUnicode + '\n');
-        });
+        let strObject = {
+            "t": JsonType.string,
+            "s": strings_arr
+        }
+
+        let jsonStrUnicode = escapeUnicode(JSON.stringify(strObject, null, 2));
+        jsonStrUnicode = "$" + jsonStrUnicode.replace(dollarSign, '#$') + "$";
+        if (CmdOptions.isEnableDebugLog()) {
+            Ts2Panda.jsonString += jsonStrUnicode;
+        }
+        ts2abc.stdio[3].write(jsonStrUnicode + '\n');
     }
 
     static dumpTypeLiteralArrayBuffer() {
@@ -168,8 +170,8 @@ export class Ts2Panda {
 
         literalArrays.forEach(function(literalArray) {
             let literalArrayObject = {
-                "type": JsonType.literal_arr,
-                "literalArray": literalArray
+                "t": JsonType.literal_arr,
+                "lit_arr": literalArray
             }
             let jsonLiteralArrUnicode = escapeUnicode(JSON.stringify(literalArrayObject, null, 2));
             jsonLiteralArrUnicode = "$" + jsonLiteralArrUnicode.replace(dollarSign, '#$') + "$";
@@ -182,7 +184,7 @@ export class Ts2Panda {
 
     static dumpCmdOptions(ts2abc: any): void {
         let options = {
-            "type": JsonType.options,
+            "t": JsonType.options,
             "module_mode": CmdOptions.isModules(),
             "debug_mode": CmdOptions.isDebugMode(),
             "log_enabled": CmdOptions.isEnableDebugLog(),
@@ -197,6 +199,7 @@ export class Ts2Panda {
         ts2abc.stdio[3].write(jsonOpt + '\n');
     }
 
+    // @ts-ignore
     static dumpPandaGen(pg: PandaGen, ts2abc: any, recordType?: boolean): void {
         let funcName = pg.internalName;
         let funcSignature = Ts2Panda.getFuncSignature(pg);
@@ -204,34 +207,45 @@ export class Ts2Panda {
         let sourceFile = pg.getSourceFileDebugInfo();
         let callType = pg.getCallType();
         let typeRecord = pg.getLocals();
-        let typeInfo = new Array<TypeOfVreg>();
-        typeRecord.forEach((vreg) => {
-            let typeOfVreg = new TypeOfVreg(vreg.num, vreg.getTypeIndex());
-            typeInfo.push(typeOfVreg);
-            if (CmdOptions.enableTypeLog()) {
-                console.log("---------------------------------------");
-                console.log("- vreg name:", vreg.getVariableName());
-                console.log("- vreg local num:", vreg.num);
-                console.log("- vreg type:", vreg.getTypeIndex());
-            }
-        });
+        let typeInfo = undefined;
+        let exportedSymbol2Types: undefined | Array<ExportedSymbol2Type> = undefined;
+        let declaredSymbol2Types: undefined | Array<DeclaredSymbol2Type> = undefined;
+        if (CmdOptions.needRecordType() && CompilerDriver.isTsFile) {
+            typeInfo = new Array<number>();
+            typeRecord.forEach((vreg) => {
+                typeInfo.push(vreg.getTypeIndex());
+                if (CmdOptions.enableTypeLog()) {
+                    console.log("---------------------------------------");
+                    console.log("- vreg name:", vreg.getVariableName());
+                    console.log("- vreg local num:", vreg.num);
+                    console.log("- vreg type:", vreg.getTypeIndex());
+                }
+            });
 
-        let exportedTypes = PandaGen.getExportedTypes();
-        let exportedSymbol2Types = exportedTypes.size == 0 ? undefined : new Array<ExportedSymbol2Type>();
-        if (funcName == "func_main_0") {
-            exportedTypes.forEach((type: number, symbol: string) => {
-                let exportedSymbol2Type = new ExportedSymbol2Type(symbol, type);
-                exportedSymbol2Types!.push(exportedSymbol2Type);
-            })
+            if (funcName == "func_main_0") {
+                let exportedTypes = PandaGen.getExportedTypes();
+                let declareddTypes = PandaGen.getDeclaredTypes();
+                if (exportedTypes.size != 0) {
+                    exportedSymbol2Types = new Array<ExportedSymbol2Type>();
+                    exportedTypes.forEach((type: number, symbol: string) => {
+                        let exportedSymbol2Type = new ExportedSymbol2Type(symbol, type);
+                        exportedSymbol2Types.push(exportedSymbol2Type);
+                    });
+                }
+                if (declareddTypes.size != 0) {
+                    declaredSymbol2Types = new Array<DeclaredSymbol2Type>();
+                    declareddTypes.forEach((type: number, symbol: string) => {
+                        let declaredSymbol2Type = new DeclaredSymbol2Type(symbol, type);
+                        declaredSymbol2Types.push(declaredSymbol2Type);
+                    });
+                }
+            }
         }
 
-        let declareddTypes = PandaGen.getDeclaredTypes();
-        let declaredSymbol2Types = declareddTypes.size == 0 ? undefined : new Array<DeclaredSymbol2Type>();
-        if (funcName == "func_main_0") {
-            declareddTypes.forEach((type: number, symbol: string) => {
-                let declaredSymbol2Type = new DeclaredSymbol2Type(symbol, type);
-                declaredSymbol2Types!.push(declaredSymbol2Type);
-            })
+        if (pg.getScope() instanceof ModuleScope) {
+            Ts2Panda.moduleRecordlist.push(
+                makeModuleRecord((<ModuleScope>pg.getScope()).module())
+            );
         }
 
         let variables, sourceCode;
@@ -243,6 +257,25 @@ export class Ts2Panda {
             sourceCode = undefined;
         }
 
+        let catchTableArr;
+        let catchTables = generateCatchTables(pg.getCatchMap());
+        if (!catchTables) {
+            catchTableArr = undefined;
+        } else {
+            catchTableArr = [];
+            catchTables.forEach((catchTable) => {
+                let catchBeginLabel = catchTable.getCatchBeginLabel();
+                let labelPairs = catchTable.getLabelPairs();
+                labelPairs.forEach((labelPair) => {
+                    catchTableArr.push(new CatchTable(
+                        Ts2Panda.labelPrefix + labelPair.getBeginLabel().id,
+                        Ts2Panda.labelPrefix + labelPair.getEndLabel().id,
+                        Ts2Panda.labelPrefix + catchBeginLabel.id
+                    ));
+                });
+            });
+        }
+
         let func = new Function(
             funcName,
             funcSignature,
@@ -250,6 +283,7 @@ export class Ts2Panda {
             funcInsnsAndRegsNum.insns,
             funcInsnsAndRegsNum.labels,
             variables,
+            catchTableArr,
             sourceFile,
             sourceCode,
             callType,
@@ -257,24 +291,12 @@ export class Ts2Panda {
             exportedSymbol2Types,
             declaredSymbol2Types
         );
-        let catchTables = generateCatchTables(pg.getCatchMap());
-        catchTables.forEach((catchTable) => {
-            let catchBeginLabel = catchTable.getCatchBeginLabel();
-            let labelPairs = catchTable.getLabelPairs();
-            labelPairs.forEach((labelPair) => {
-                func.catchTables.push(new CatchTable(
-                    Ts2Panda.labelPrefix + labelPair.getBeginLabel().id,
-                    Ts2Panda.labelPrefix + labelPair.getEndLabel().id,
-                    Ts2Panda.labelPrefix + catchBeginLabel.id
-                ));
-            });
-        });
 
         LOGD(func);
 
         let funcObject = {
-            "type": JsonType.function,
-            "func_body": func
+            "t": JsonType.function,
+            "fb": func
         }
         let jsonFuncUnicode = escapeUnicode(JSON.stringify(funcObject, null, 2));
         jsonFuncUnicode = "$" + jsonFuncUnicode.replace(dollarSign, '#$') + "$";
@@ -284,8 +306,55 @@ export class Ts2Panda {
         ts2abc.stdio[3].write(jsonFuncUnicode + '\n');
     }
 
+    static dumpModuleRecords(ts2abc: any): void {
+        Ts2Panda.moduleRecordlist.forEach(function(module){
+            let moduleObject = {
+                "t": JsonType.module,
+                "mod": module
+            };
+            let jsonModuleUnicode = escapeUnicode(JSON.stringify(moduleObject, null, 2));
+            jsonModuleUnicode = "$" + jsonModuleUnicode.replace(dollarSign, '#$') + "$";
+            if (CmdOptions.isEnableDebugLog()) {
+                Ts2Panda.jsonString += jsonModuleUnicode;
+            }
+            ts2abc.stdio[3].write(jsonModuleUnicode + '\n');
+        });
+    }
+
     static clearDumpData() {
         Ts2Panda.strings.clear();
         Ts2Panda.jsonString = "";
+        Ts2Panda.moduleRecordlist = [];
     }
+}
+
+function makeModuleRecord(sourceTextModule: SourceTextModuleRecord): ModuleRecord {
+    let moduleRecord = new ModuleRecord();
+    moduleRecord.moduleName = sourceTextModule.getModuleName();
+
+    moduleRecord.moduleRequests = [...sourceTextModule.getModuleRequests()];
+
+    sourceTextModule.getRegularImportEntries().forEach(e => {
+        moduleRecord.regularImportEntries.push(new RegularImportEntry(e.localName!, e.importName!, e.moduleRequest!));
+    });
+
+    sourceTextModule.getNamespaceImportEntries().forEach(e => {
+        moduleRecord.namespaceImportEntries.push(new NamespaceImportEntry(e.localName!, e.moduleRequest!));
+    });
+
+    sourceTextModule.getLocalExportEntries().forEach(entries => {
+        entries.forEach(e => {
+            moduleRecord.localExportEntries.push(new LocalExportEntry(e.localName!, e.exportName!));
+        });
+    });
+
+    sourceTextModule.getIndirectExportEntries().forEach(e => {
+        moduleRecord.indirectExportEntries.push(new IndirectExportEntry(e.exportName!, e.importName!, e.moduleRequest!));
+    });
+
+    sourceTextModule.getStarExportEntries().forEach(e => {
+        moduleRecord.starExportEntries.push(e.moduleRequest!);
+    });
+
+    return moduleRecord;
 }

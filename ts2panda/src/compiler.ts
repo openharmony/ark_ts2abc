@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,11 @@ import { AssignmentOperator } from "typescript";
 import * as astutils from "./astutils";
 import { LReference } from "./base/lreference";
 import {
-    hasDefaultKeywordModifier,
     hasExportKeywordModifier,
     isBindingPattern,
-    setVariableExported
 } from "./base/util";
 import { CacheList, getVregisterCache } from "./base/vregisterCache";
+import { CmdOptions } from "./cmdOptions";
 import { CompilerDriver } from "./compilerDriver";
 import { DebugInfo, NodeKind } from "./debuginfo";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
@@ -85,7 +84,6 @@ import {
 import {
     checkValidUseSuperBeforeSuper,
     compileClassDeclaration,
-    compileConstructor,
     compileDefaultConstructor,
     compileDefaultInitClassMembers,
     compileReturnThis4Ctor,
@@ -115,6 +113,7 @@ import { isAssignmentOperator } from "./syntaxCheckHelper";
 import {
     GlobalVariable,
     LocalVariable,
+    ModuleVariable,
     VarDeclarationKind,
     Variable
 } from "./variable";
@@ -148,7 +147,7 @@ export class Compiler {
 
         // spare v3 to save the currrent lexcial env
         getVregisterCache(this.pandaGen, CacheList.LexEnv);
-        this.envUnion.push(getVregisterCache(this.pandaGen, CacheList.LexEnv))
+        this.envUnion.push(getVregisterCache(this.pandaGen, CacheList.LexEnv));
 
         this.pandaGen.loadAccFromArgs(this.rootNode);
     }
@@ -177,11 +176,15 @@ export class Compiler {
     }
 
     private callOpt() {
+        if (CmdOptions.isDebugMode()) {
+            return;
+        }
         let CallMap: Map<String, number> = new Map([
             ["this", 1],
             ["4newTarget", 2],
             ["0newTarget", 2],
-            ["argumentsOrRestargs", 4]
+            ["argumentsOrRestargs", 4],
+            ["4funcObj", 8]
         ]);
         let callType = 0;
         let scope = this.pandaGen.getScope();
@@ -205,6 +208,7 @@ export class Compiler {
                 tempLocals.push(this.pandaGen.getLocals()[i]);
             }
             let name2variable = scope.getName2variable();
+            // @ts-ignore
             name2variable.forEach((value, key) => {
                 if (tempNames.has(key)) {
                     name2variable.delete(key)
@@ -212,7 +216,7 @@ export class Compiler {
             })
 
             this.pandaGen.setLocals(tempLocals);
-            this.pandaGen.setParametersCount(this.pandaGen.getParametersCount()-count);
+            this.pandaGen.setParametersCount(this.pandaGen.getParametersCount() - count);
 
             if (scope.getArgumentsOrRestargs()) {
                 callType += CallMap.get("argumentsOrRestargs") ?? 0;
@@ -254,18 +258,25 @@ export class Compiler {
     private storeSpecialArg2LexEnv(arg: string) {
         let variableInfo = this.scope.find(arg);
         let v = variableInfo.v;
+        let pandaGen = this.pandaGen;
 
-        if (v && v.isLexVar) {
-            if ((arg === "this" || arg === "4newTarget") && variableInfo.scope instanceof FunctionScope) {
-                variableInfo.scope.setCallOpt(arg);
+        if (CmdOptions.isDebugMode()) {
+            variableInfo.scope!.setLexVar(v!, this.scope);
+            pandaGen.storeLexicalVar(this.rootNode, variableInfo.level,
+                                     (<Variable>variableInfo.v).idxLex,
+                                     pandaGen.getVregForVariable(<Variable>variableInfo.v));
+        } else {
+            if (v && v.isLexVar) {
+                if ((arg === "this" || arg === "4newTarget") && variableInfo.scope instanceof FunctionScope) {
+                    variableInfo.scope.setCallOpt(arg);
+                }
+                if (arg === "arguments" && variableInfo.scope instanceof FunctionScope) {
+                    variableInfo.scope.setArgumentsOrRestargs();
+                }
+                let vreg = "4funcObj" === arg ? getVregisterCache(pandaGen, CacheList.FUNC) :
+                                                pandaGen.getVregForVariable(<Variable>variableInfo.v);
+                pandaGen.storeLexicalVar(this.rootNode, variableInfo.level, v.idxLex, vreg);
             }
-            if (arg === "arguments" && variableInfo.scope instanceof FunctionScope) {
-                variableInfo.scope.setArgumentsOrRestargs();
-            }
-            let pandaGen = this.pandaGen;
-            let vreg = "4funcObj" === arg ? getVregisterCache(pandaGen, CacheList.FUNC) : pandaGen.getVregForVariable(<Variable>variableInfo.v);
-            let slot = (<Variable>variableInfo.v).idxLex;
-            pandaGen.storeLexicalVar(this.rootNode, variableInfo.level, slot, vreg);
         }
     }
 
@@ -516,18 +527,12 @@ export class Compiler {
 
     private compileVariableStatement(stmt: ts.VariableStatement) {
         let declList = stmt.declarationList;
-        let isExported: boolean = hasExportKeywordModifier(stmt);
         declList.declarations.forEach((decl) => {
-            this.compileVariableDeclaration(decl, isExported)
+            this.compileVariableDeclaration(decl)
         });
     }
 
-    compileVariableDeclaration(decl: ts.VariableDeclaration, isExported: boolean = false) {
-        if (isExported) {
-            let name = jshelpers.getTextOfIdentifierOrLiteral(decl.name);
-            setVariableExported(name, this.getCurrentScope());
-        }
-
+    compileVariableDeclaration(decl: ts.VariableDeclaration) {
         let lref = LReference.generateLReference(this, decl.name, true);
         if (decl.initializer) {
             this.compileExpression(decl.initializer);
@@ -541,7 +546,6 @@ export class Compiler {
                 && decl.parent.kind != ts.SyntaxKind.CatchClause) {
                 this.pandaGen.loadAccumulator(decl, getVregisterCache(this.pandaGen, CacheList.undefined));
             }
-
         }
         lref.setValue();
     }
@@ -696,26 +700,16 @@ export class Compiler {
 
     private compileFunctionDeclaration(decl: ts.FunctionDeclaration) {
         if (!decl.name) {
-            let hasExport: boolean = hasExportKeywordModifier(decl);
-            let hasDefault: boolean = hasDefaultKeywordModifier(decl);
-            if (hasExport && hasDefault) {
-                if (this.scope instanceof ModuleScope) {
-                    let internalName = this.compilerDriver.getFuncInternalName(decl, this.recorder);
-                    let env = this.getCurrentEnv();
-                    this.pandaGen.defineFunction(NodeKind.FirstNodeOfFunction, <ts.FunctionDeclaration>decl, internalName, env);
-                    this.pandaGen.storeModuleVar(decl, "default");
-                } else {
-                    throw new Error("SyntaxError: export function declaration cannot in other scope except ModuleScope");
-                }
-            } else {
-                throw new Error("Function declaration without name is unimplemented");
+            if (hasExportKeywordModifier(decl) && this.scope instanceof ModuleScope) {
+                return;
             }
+            throw new Error("Function declaration without name is unimplemented");
         }
     }
 
     private compileExportAssignment(stmt: ts.ExportAssignment) {
         this.compileExpression(stmt.expression);
-        this.pandaGen.storeModuleVar(stmt, "default");
+        this.pandaGen.storeModuleVariable(stmt, "*default*");
     }
 
     compileCondition(expr: ts.Expression, ifFalseLabel: Label) {
@@ -1483,13 +1477,43 @@ export class Compiler {
             } else {
                 this.pandaGen.storeGlobalVar(node, variable.v.getName());
             }
+        } else if (variable.v instanceof ModuleVariable) {
+            // import module variable is const, throw `const assignment error`
+            if (!isDeclaration && variable.v.isConst()) {
+                let nameReg = this.pandaGen.getTemp();
+                this.pandaGen.loadAccumulatorString(node, variable.v.getName());
+                this.pandaGen.storeAccumulator(node, nameReg);
+                this.pandaGen.throwConstAssignment(node, nameReg);
+                this.pandaGen.freeTemps(nameReg);
+                return;
+            }
+
+            if (isDeclaration) {
+                variable.v.initialize();
+            }
+
+            if ((variable.v.isLet() || variable.v.isClass()) && !variable.v.isInitialized()) {
+                let valueReg = this.pandaGen.getTemp();
+                let holeReg = this.pandaGen.getTemp();
+                let nameReg = this.pandaGen.getTemp();
+                this.pandaGen.storeAccumulator(node, valueReg);
+                this.pandaGen.loadModuleVariable(node, variable.v.getName(), true);
+                this.pandaGen.storeAccumulator(node, holeReg);
+                this.pandaGen.loadAccumulatorString(node, variable.v.getName());
+                this.pandaGen.storeAccumulator(node, nameReg);
+                this.pandaGen.throwUndefinedIfHole(node, holeReg, nameReg);
+                this.pandaGen.loadAccumulator(node, valueReg);
+                this.pandaGen.freeTemps(valueReg, holeReg, nameReg);
+            }
+
+            this.pandaGen.storeModuleVariable(node, variable.v.getName());
         } else {
             throw new Error("invalid lhsRef to store");
         }
     }
 
     loadTarget(node: ts.Node, variable: { scope: Scope | undefined, level: number, v: Variable | undefined }) {
-         if (variable.v instanceof LocalVariable) {
+        if (variable.v instanceof LocalVariable) {
             if (variable.v.isLetOrConst() || variable.v.isClass()) {
                 if (variable.scope instanceof GlobalScope) {
                     this.pandaGen.tryLoadGlobalByName(node, variable.v.getName());
@@ -1497,7 +1521,7 @@ export class Compiler {
                 }
             }
 
-            if (variable.scope && variable.level >= 0) { // inner most function will load outer env instead of new a lex env
+            if (variable.scope && variable.level >= 0) { // leaf function will load outer env instead of new a lex env
                 let scope = this.scope;
                 let needSetLexVar: boolean = false;
                 while (scope != variable.scope) {
@@ -1525,6 +1549,19 @@ export class Compiler {
                 }
             } else {
                 this.pandaGen.loadGlobalVar(node, variable.v.getName());
+            }
+        } else if (variable.v instanceof ModuleVariable) {
+            let isLocal: boolean = variable.v.isExportVar() ? true : false;
+            this.pandaGen.loadModuleVariable(node, variable.v.getName(), isLocal);
+            if ((variable.v.isLetOrConst() || variable.v.isClass()) && !variable.v.isInitialized()) {
+                let valueReg = this.pandaGen.getTemp();
+                let nameReg = this.pandaGen.getTemp();
+                this.pandaGen.storeAccumulator(node, valueReg);
+                this.pandaGen.loadAccumulatorString(node, variable.v.getName());
+                this.pandaGen.storeAccumulator(node, nameReg);
+                this.pandaGen.throwUndefinedIfHole(node, valueReg, nameReg);
+                this.pandaGen.loadAccumulator(node, valueReg);
+                this.pandaGen.freeTemps(valueReg, nameReg);
             }
         } else {
             // Handle the variables from lexical scope

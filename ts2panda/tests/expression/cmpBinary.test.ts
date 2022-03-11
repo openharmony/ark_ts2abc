@@ -58,9 +58,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaLessdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -80,9 +80,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaGreaterdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -102,9 +102,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 4)),
+            new LdaiDyn(new Imm(4)),
             new EcmaLesseqdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -124,9 +124,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaGreatereqdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -146,9 +146,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaEqdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -168,9 +168,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaNoteqdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -190,9 +190,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaStricteqdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -212,9 +212,9 @@ describe("CmpBinaryOperators", function () {
         let endLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaStrictnoteqdyn(lhs),
             new Jeqz(falseLabel),
             new LdaDyn(new VReg()),
@@ -233,11 +233,11 @@ describe("CmpBinaryOperators", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaAnd2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -251,11 +251,11 @@ describe("CmpBinaryOperators", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaOr2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -269,11 +269,11 @@ describe("CmpBinaryOperators", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 5)),
+            new LdaiDyn(new Imm(5)),
             new EcmaStlettoglobalrecord('a'),
             new EcmaTryldglobalbyname('a'),
             new StaDyn(lhs),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaXor2dyn(lhs),
             new EcmaTrystglobalbyname('a'),
             new EcmaReturnundefined()
@@ -289,7 +289,7 @@ describe("CmpBinaryOperators", function () {
         let lhs = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStlettoglobalrecord('x'),
             new EcmaTryldglobalbyname('x'),
             new StaDyn(lhs),

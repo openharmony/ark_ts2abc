@@ -13,20 +13,16 @@
  * limitations under the License.
  */
 
+import * as path from "path";
 import * as ts from "typescript";
+import * as fs from "fs";
 import { CmdOptions } from "./cmdOptions";
 import { CompilerDriver } from "./compilerDriver";
 import * as diag from "./diagnostic";
-import { LOGD, LOGE } from "./log";
-import { Pass } from "./pass";
-import { CacheExpander } from "./pass/cacheExpander";
-import { ICPass } from "./pass/ICPass";
-import { RegAlloc } from "./regAllocator";
-import { setGlobalStrict, setGlobalDeclare, isGlobalDeclare } from "./strictMode";
+import * as jshelpers from "./jshelpers";
+import { LOGE } from "./log";
+import { setGlobalDeclare, setGlobalStrict } from "./strictMode";
 import { TypeChecker } from "./typeChecker";
-import { TypeRecorder } from "./typeRecorder";
-import jshelpers = require("./jshelpers");
-import path = require("path");
 import { setPos } from "./base/util";
 
 function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
@@ -50,15 +46,6 @@ function generateDTs(node: ts.SourceFile, options: ts.CompilerOptions) {
     let outputBinName = getOutputBinName(node);
     let compilerDriver = new CompilerDriver(outputBinName);
     setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
-    if (CmdOptions.isVariantBytecode()) {
-        LOGD("variant bytecode dump");
-        let passes: Pass[] = [
-            new CacheExpander(),
-            new ICPass(),
-            new RegAlloc()
-        ];
-        compilerDriver.setCustomPasses(passes);
-    }
     compilerDriver.compile(node);
     compilerDriver.showStatistics();
 }
@@ -84,6 +71,7 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
         undefined,
         {
             before: [
+                // @ts-ignore
                 (ctx: ts.TransformationContext) => {
                     return (node: ts.SourceFile) => {
                         let outputBinName = getOutputBinName(node);
@@ -94,6 +82,7 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                 }
             ],
             after: [
+                // @ts-ignore
                 (ctx: ts.TransformationContext) => {
                     return (node: ts.SourceFile) => {
                         if (ts.getEmitHelpers(node)) {
@@ -113,15 +102,6 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                         let outputBinName = getOutputBinName(node);
                         let compilerDriver = new CompilerDriver(outputBinName);
                         setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(node, options));
-                        if (CmdOptions.isVariantBytecode()) {
-                            LOGD("variant bytecode dump");
-                            let passes: Pass[] = [
-                                new CacheExpander(),
-                                new ICPass(),
-                                new RegAlloc()
-                            ];
-                            compilerDriver.setCustomPasses(passes);
-                        }
                         compilerDriver.compile(node);
                         compilerDriver.showStatistics();
                         return node;
@@ -155,6 +135,25 @@ function getOutputBinName(node: ts.SourceFile) {
     return outputBinName;
 }
 
+function getDtsFiles(libDir: string): string[] {
+    let dtsFiles:string[] = [];
+    function finDtsFile(dir){
+        let files = fs.readdirSync(dir);
+        files.forEach(function (item, _) {
+            let fPath = path.join(dir,item);
+            let stat = fs.statSync(fPath);
+            if(stat.isDirectory() === true) {
+                finDtsFile(fPath);
+            }
+            if (stat.isFile() === true && item.endsWith(".d.ts") === true) {
+                dtsFiles.push(fPath);
+            }
+        });
+    }
+    finDtsFile(libDir);
+    return dtsFiles;
+}
+
 namespace Compiler {
     export namespace Options {
         export let Default: ts.CompilerOptions = {
@@ -166,7 +165,8 @@ namespace Compiler {
             module: ts.ModuleKind.ES2015,
             strictNullChecks: true,
             skipLibCheck: true,
-            alwaysStrict: true
+            alwaysStrict: true,
+            importsNotUsedAsValues: ts.ImportsNotUsedAsValues.Preserve
         };
     }
 }
@@ -200,5 +200,7 @@ function run(args: string[], options?: ts.CompilerOptions): void {
     }
 }
 
+let dtsFiles = getDtsFiles(path["join"](__dirname, "../node_modules/typescript/lib"));
+process.argv.push(...dtsFiles);
 run(process.argv.slice(2), Compiler.Options.Default);
 global.gc();

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { Ts2Panda } from "src/ts2panda";
 import * as ts from "typescript";
 import { Literal, LiteralBuffer, LiteralTag } from "../base/literal";
 import { LReference } from "../base/lreference";
@@ -24,7 +23,13 @@ import {
     propertyKeyAsString,
     PropertyKind
 } from "../base/properties";
-import { getParameterLength4Ctor, getParamLengthOfFunc, isUndefinedIdentifier } from "../base/util";
+import {
+    getParameterLength4Ctor,
+    getParamLengthOfFunc,
+    hasDefaultKeywordModifier,
+    hasExportKeywordModifier,
+    isUndefinedIdentifier
+} from "../base/util";
 import { CacheList, getVregisterCache } from "../base/vregisterCache";
 import { Compiler } from "../compiler";
 import { createArrayFromElements } from "../expression/arrayLiteralExpression";
@@ -43,7 +48,7 @@ import {
     Scope,
     VariableScope
 } from "../scope";
-import { LocalVariable, Variable } from "../variable";
+import { LocalVariable, ModuleVariable, Variable } from "../variable";
 
 export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDeclaration) {
     compiler.pushScope(stmt);
@@ -113,15 +118,30 @@ export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDe
     compileUnCompiledProperty(compiler, properties, classReg);
     pandaGen.loadAccumulator(stmt, classReg);
 
-    if (stmt.name) {
-        let className = jshelpers.getTextOfIdentifierOrLiteral(stmt.name);
-        let classScope = <Scope>compiler.getRecorder().getScopeOfNode(stmt);
-        if (!ts.isClassExpression(stmt) && classScope.getParent() instanceof GlobalScope) {
-            pandaGen.stClassToGlobalRecord(stmt, className);
-        } else {
+    let classScope = <Scope>compiler.getRecorder().getScopeOfNode(stmt);
+    if (hasExportKeywordModifier(stmt)) {
+        if (stmt.name) {
+            let className = jshelpers.getTextOfIdentifierOrLiteral(stmt.name);
             let classInfo = classScope.find(className);
-            (<LocalVariable>classInfo.v).initialize();
-            pandaGen.storeAccToLexEnv(stmt, classInfo.scope!, classInfo.level, classInfo.v!, true);
+            (<ModuleVariable>classInfo.v).initialize();
+            pandaGen.storeModuleVariable(stmt, className);
+        } else if (hasDefaultKeywordModifier(stmt)) {
+            pandaGen.storeModuleVariable(stmt, "*default*");
+        } else {
+            // throw SyntaxError in Recorder
+        }
+    } else {
+        if (stmt.name) {
+            let className = jshelpers.getTextOfIdentifierOrLiteral(stmt.name);
+            if (!ts.isClassExpression(stmt) && classScope.getParent() instanceof GlobalScope) {
+                pandaGen.stClassToGlobalRecord(stmt, className);
+            } else {
+                let classInfo = classScope.find(className);
+                (<LocalVariable>classInfo.v).initialize();
+                pandaGen.storeAccToLexEnv(stmt, classInfo.scope!, classInfo.level, classInfo.v!, true);
+            }
+        } else {
+            // throw SyntaxError in SyntaxChecker
         }
     }
 
@@ -402,7 +422,6 @@ function loadCtorObj(node: ts.CallExpression, compiler: Compiler) {
     }
 
     if (ts.isConstructorDeclaration(nearestFunc)) {
-        let funcObj = <Variable>nearestFuncScope.findLocal("4funcObj");
         pandaGen.loadAccumulator(node, getVregisterCache(pandaGen, CacheList.FUNC));
     } else {
         let outerFunc = jshelpers.getContainingFunctionDeclaration(nearestFunc);
@@ -499,6 +518,10 @@ export function getClassNameForConstructor(classNode: ts.ClassLikeDeclaration) {
     if (!isAnonymousClass(classNode)) {
         className = jshelpers.getTextOfIdentifierOrLiteral(classNode.name!);
     } else {
+        if (ts.isClassDeclaration(classNode) && hasExportKeywordModifier(classNode) && hasDefaultKeywordModifier(classNode)) {
+            return 'default';
+        }
+
         let outerNode = findOuterNodeOfParenthesis(classNode);
 
         if (ts.isVariableDeclaration(outerNode)) {
@@ -516,6 +539,8 @@ export function getClassNameForConstructor(classNode: ts.ClassLikeDeclaration) {
             if (ts.isIdentifier(propName) || ts.isStringLiteral(propName) || ts.isNumericLiteral(propName)) {
                 className = jshelpers.getTextOfIdentifierOrLiteral(propName);
             }
+        } else if (ts.isExportAssignment(outerNode)) {
+            className = 'default';
         }
     }
 
@@ -610,7 +635,7 @@ function generatePropertyFromExpr(node: ts.ClassLikeDeclaration, classFields: Ar
     let staticItems = properties.slice(properties.length - staticNum)
     properties = properties.slice(0, properties.length - staticNum);
     properties = properties.reverse();
-    properties = properties.concat(staticItems);
+    properties.push(...staticItems);
 
     if (constructNode) {
         defineClassMember("constructor", constructNode, PropertyKind.Variable, properties, namedPropertyMap);

@@ -46,26 +46,26 @@ export function createDiagnosticOnFirstToken(file:ts.SourceFile, node: ts.Node ,
    return diagnostic;
 }
 
-export function createFileDiagnostic(file:ts.SourceFile, node: ts.Node, message: ts.DiagnosticMessage,...args:(string | number | undefined)[]) {
+export function createFileDiagnostic(node: ts.Node, message: ts.DiagnosticMessage, ...args: (string | number | undefined)[]) {
+    let diagnostic;
+    let soureceFile: ts.SourceFile = jshelpers.getSourceFileOfNode(node);
+    let span = jshelpers.getErrorSpanForNode(soureceFile, node);
+    switch (node.kind) {
+        case ts.SyntaxKind.Identifier:
+            diagnostic = jshelpers.createFileDiagnostic(soureceFile, span.start, span.length, message, ts.idText(<ts.Identifier>node));
+            break;
+        case ts.SyntaxKind.PrivateIdentifier:
+            diagnostic = jshelpers.createFileDiagnostic(soureceFile, span.start, span.length, message, ts.idText(<ts.PrivateIdentifier>node));
+            break;
+        case ts.SyntaxKind.ReturnStatement:
+            diagnostic = createDiagnosticOnFirstToken(soureceFile, node, message, ...args);
+            break;
+        default:
+            diagnostic = jshelpers.createDiagnosticForNode(node, message, ...args);
+            break;
+    }
 
-  let diagnostic;
-  let span = jshelpers.getErrorSpanForNode(file, node);
-  switch (node.kind) {
-    case ts.SyntaxKind.Identifier:
-      diagnostic = jshelpers.createFileDiagnostic(file,span.start,span.length,message,ts.idText(<ts.Identifier>node));
-      break;
-    case ts.SyntaxKind.PrivateIdentifier:
-      diagnostic = jshelpers.createFileDiagnostic(file,span.start,span.length,message,ts.idText(<ts.PrivateIdentifier>node));
-      break;
-    case ts.SyntaxKind.ReturnStatement:
-       diagnostic = createDiagnosticOnFirstToken(file,node,message,...args);
-      break;
-    default:
-      diagnostic = jshelpers.createFileDiagnostic(file,span.start,span.length,message,...args);
-      break;
-  }
-
-   return diagnostic;
+    return diagnostic;
 }
 
 export function createDiagnostic(file:ts.SourceFile | undefined, location: ts.Node | undefined, message: ts.DiagnosticMessage,...args:(string | number | undefined)[]) {
@@ -76,7 +76,7 @@ export function createDiagnostic(file:ts.SourceFile | undefined, location: ts.No
    }
 
   if (file) {
-    diagnostic = createFileDiagnostic(file, location, message, ...args);
+    diagnostic = createFileDiagnostic(location, message, ...args);
   } else {
     diagnostic = jshelpers.createDiagnosticForNode(location, message, ...args)
   }
@@ -84,6 +84,7 @@ export function createDiagnostic(file:ts.SourceFile | undefined, location: ts.No
   return diagnostic
 }
 
+// @ts-ignore
 function diag(code:number, category:ts.DiagnosticCategory, key:string, message:string, reportsUnnecessary?:{},elidedInCompatabilityPyramid?:{}):ts.DiagnosticMessage {
    return { code: code, category: category, key: key, message: message, reportsUnnecessary: reportsUnnecessary };
 }

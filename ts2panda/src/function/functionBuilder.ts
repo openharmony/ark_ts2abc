@@ -20,9 +20,11 @@ import { AsyncFunctionBuilder } from "./asyncFunctionBuilder";
 export type FunctionBuilderType = AsyncFunctionBuilder | GeneratorFunctionBuilder | FunctionBuilder;
 
 export class FunctionBuilder {
+    // @ts-ignore
     prepare(node: ts.Node): void {
     }
 
+    // @ts-ignore
     cleanUp(node: ts.Node): void {
     }
 }
