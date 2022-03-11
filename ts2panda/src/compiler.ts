@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,7 @@ import { CompilerDriver } from "./compilerDriver";
 import { DebugInfo, NodeKind } from "./debuginfo";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
 import { compileArrayLiteralExpression } from "./expression/arrayLiteralExpression";
+import { compileBigIntLiteral } from "./expression/bigIntLiteral";
 import {
     compileCallExpression,
     getHiddenParameters
@@ -772,6 +773,7 @@ export class Compiler {
                 compileNumericLiteral(this.pandaGen, <ts.NumericLiteral>expr);
                 break;
             case ts.SyntaxKind.BigIntLiteral: // line 35
+                compileBigIntLiteral(this.pandaGen, <ts.BigIntLiteral>expr);
                 break;
             case ts.SyntaxKind.StringLiteral: // line 36
                 compileStringLiteral(this.pandaGen, <ts.StringLiteral>expr);

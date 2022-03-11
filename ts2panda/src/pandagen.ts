@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,7 +100,8 @@ import {
     throwThrowNotExists,
     throwUndefinedIfHole,
     tryLoadGlobalByName,
-    tryStoreGlobalByName
+    tryStoreGlobalByName,
+    loadAccumulatorBigInt
 } from "./base/bcGenUtil";
 import {
     Literal,
@@ -1255,6 +1256,12 @@ export class PandaGen {
         this.add(
             node,
             stClassToGlobalRecord(string_id));
+    }
+    
+    loadAccumulatorBigInt(node: ts.Node | NodeKind, str: string) {
+        this.add(
+            node,
+            loadAccumulatorBigInt(str));
     }
 
     private binaryRelation(node: ts.Node, op: BinaryOperator, lhs: VReg) {
