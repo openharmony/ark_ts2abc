@@ -21,7 +21,8 @@ import {
 } from "./diagnostic";
 import { hasExportKeywordModifier } from "./base/util";
 import { findInnerExprOfParenthesis } from "./expression/parenthesizedExpression";
-import jshelpers, { getContainingFunction, getContainingFunctionDeclaration, getSourceFileOfNode } from "./jshelpers";
+import * as jshelpers from "./jshelpers";
+import { getContainingFunction, getContainingFunctionDeclaration, getSourceFileOfNode } from "./jshelpers";
 import { LOGE } from "./log";
 import { Recorder } from "./recorder";
 import {
@@ -143,6 +144,7 @@ function hasDuplicateEntryInScope(decl1: Decl, decl2: Decl, scope: Scope) {
         return decl1.name == decl2.name;
     }
     // Var and FunctionDeclaration with same names, FunctionDeclaration and FunctionDeclaration with same names are illegal in strict mode
+    // and Module
     /**
      * eg1.
      * if (true) {
@@ -155,15 +157,16 @@ function hasDuplicateEntryInScope(decl1: Decl, decl2: Decl, scope: Scope) {
      *     function a() {};
      *     function a() {};
      * }
+     * eg3. [module]
+     * var a;
+     * function a(){};
      */
-    if (scope instanceof LocalScope) {
-        if (isStrictMode(decl1.node)) {
-            if (decl1 instanceof FuncDecl || decl2 instanceof FuncDecl) {
-                if (isFunctionLikeDeclaration(decl1.node.parent.parent) || isFunctionLikeDeclaration(decl2.node.parent.parent)) {
-                    return false;
-                }
-                return decl1.name == decl2.name;
+    if (scope instanceof LocalScope && isStrictMode(decl1.node) || scope instanceof ModuleScope) {
+        if (decl1 instanceof FuncDecl || decl2 instanceof FuncDecl) {
+            if (isFunctionLikeDeclaration(decl1.node.parent.parent) || isFunctionLikeDeclaration(decl2.node.parent.parent)) {
+                return false;
             }
+            return decl1.name == decl2.name;
         }
     }
 
@@ -215,6 +218,7 @@ function checkDuplicateParameter(node: ts.FunctionLikeDeclaration, recorder: Rec
         return;
     }
     parameters.forEach(param => {
+        // @ts-ignore
         if (tempNames.includes(param.name)) {
             throwDupIdError(param);
         } else {
@@ -233,6 +237,7 @@ function checkDuplicateParameterVar(parameterNames: string[] | undefined, scope:
             continue;
         }
         let name = decls[i].name;
+        // @ts-ignore
         if (parameterNames.includes(name)) {
             throwDupIdError(decls[i]);
         }
@@ -263,10 +268,10 @@ function throwDupIdError(decl: Decl) {
 }
 
 //**********************************Part 2: Implementing syntax check except declaration******************************************//
-export function checkSyntaxError(node: ts.Node) {
+export function checkSyntaxError(node: ts.Node, scope:Scope) {
     checkSyntaxErrorForSloppyAndStrictMode(node);
     if (isStrictMode(node) || CmdOptions.isModules()) {
-        checkSyntaxErrorForStrictMode(node);
+        checkSyntaxErrorForStrictMode(node, scope);
     }
 }
 
@@ -1028,6 +1033,7 @@ function checkInvalidQuestionMark(questionToken: ts.QuestionToken | undefined) {
     }
 }
 
+// @ts-ignore
 function getPropertieDeclaration(node: ts.Node, name: ts.Node) {
     let decl = undefined;
     if (ts.isShorthandPropertyAssignment(node)) {
@@ -1417,19 +1423,4 @@ function checkBindingPattern(node: ts.BindingPattern) {
             }
         }
     }
-}
-
-export function checkExportEntries(recorder: Recorder) {
-    let exportStmts = recorder.getExportStmts();
-    let exportNames: Set<string> = new Set<string>();
-    exportStmts.forEach(exportStmt => {
-        let bindingNameMap = exportStmt.getBindingNameMap();
-        bindingNameMap.forEach((value: string, key: string) => {
-            if (!exportNames.has(key)) {
-                exportNames.add(key);
-            } else {
-                throw new DiagnosticError(exportStmt.getNode(), DiagnosticCode.Duplicate_identifier_0, jshelpers.getSourceFileOfNode(exportStmt.getNode()), [key]);
-            }
-        })
-    })
 }

@@ -64,7 +64,7 @@ export function compileForOfStatement(stmt: ts.ForOfStatement, compiler: Compile
     let object = pandaGen.getTemp();
 
     let loopScope = <LoopScope>compiler.getRecorder().getScopeOfNode(stmt);
-    let needCreateLoopEnv: boolean = loopScope.need2CreateLexEnv() ? true : false;
+    let needCreateLoopEnv: boolean = loopScope.need2CreateLexEnv();
     let loopEnv = pandaGen.getTemp();
 
     // for now Async is not handled.
@@ -80,7 +80,8 @@ export function compileForOfStatement(stmt: ts.ForOfStatement, compiler: Compile
     LabelTarget.pushLabelTarget(labelTarget);
     LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
 
-    let tryBuilderWithForOf = new TryBuilderWithForOf(compiler, pandaGen, stmt, doneReg, iterator, labelTarget, needCreateLoopEnv, needCreateLoopEnv ? loopEnv : undefined);
+    let tryBuilderWithForOf = new TryBuilderWithForOf(compiler, pandaGen, stmt, doneReg, iterator, labelTarget, 
+                                                      needCreateLoopEnv, needCreateLoopEnv ? loopEnv : undefined);
     compiler.constructTry(stmt, tryBuilderWithForOf, nextLabel);
 
     pandaGen.label(stmt, endLabel);

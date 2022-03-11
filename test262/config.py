@@ -34,11 +34,6 @@ ICUI_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/global/i18n_standard"
 LLVM_DIR = f"{CODE_ROOT}/prebuilts/clang/ohos/linux-x86_64/llvm/lib/"
 ARK_JS_RUNTIME_DIR = f"{CODE_ROOT}/out/hi3516dv300/clang_x64/ark/ark_js_runtime"
 
-# " mode_type": {
-#     "1": "only default",
-#     "2": "only strict mode",
-#     "3": "both default and strict mode"
-# }
 DEFAULT_MODE = 2
 
 TEST_ES5_DIR = os.path.join(DATA_DIR, "test_es51")
@@ -60,6 +55,7 @@ DEFAULT_TIMEOUT = 60000
 ES5_LIST_FILE = os.path.join("test262", "es5_tests.txt")
 ES2015_LIST_FILE = os.path.join("test262", "es2015_tests.txt")
 CI_LIST_FILE = os.path.join("test262", "CI_tests.txt")
+MODULE_FILES_LIST = os.path.join("test262", "module_tests.txt")
 
 TEST262_GIT_HASH = "9ca13b12728b7e0089c7eb03fa2bd17f8abe297f"
 HARNESS_GIT_HASH = "9c499f028eb24e67781435c0bb442e00343eb39d"
@@ -86,27 +82,3 @@ ARK_ARCH_LIST = [
 ]
 
 DEFAULT_ARK_ARCH = ARK_ARCH_LIST[0]
-
-MODULE_FILES_LIST = [
-    "early-dup-export-decl.js",
-    "early-dup-export-dflt-id.js",
-    "early-dup-export-dflt.js",
-    "early-dup-export-id-as.js",
-    "early-dup-export-id.js",
-    "early-dup-lables.js",
-    "early-dup-lex.js",
-    "early-export-global.js",
-    "early-lex-and-var.js",
-    "early-new-target.js",
-    "early-strict-mode.js",
-    "early-super.js",
-    "early-undef-break.js",
-    "early-undef-continue.js",
-    "parse-err-export-dflt-const.js",
-    "parse-err-export-dflt-let.js",
-    "parse-err-export-dflt-var.js",
-    "parse-err-return.js",
-    "parse-err-yield.js",
-    "dup-bound-names.js",
-    "await-module.js"
-]

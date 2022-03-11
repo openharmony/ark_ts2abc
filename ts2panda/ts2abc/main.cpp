@@ -45,10 +45,6 @@ int Preprocess(const panda::ts2abc::Options &options, const panda::PandArgParser
             std::cerr << argParser.GetHelpString();
             return RETURN_FAILED;
         }
-
-        if (!ReadFromPipe(data)) {
-            return RETURN_FAILED;
-        }
     }
     return RETURN_SUCCESS;
 }
@@ -95,7 +91,8 @@ int main(int argc, const char *argv[])
         return RETURN_FAILED;
     }
 
-    if (!GenerateProgram(data, output, options.GetOptLevelArg(), options.GetOptLogLevelArg())) {
+    if (!GenerateProgram(data, output, options.GetCompileByPipeArg(),
+                         options.GetOptLevelArg(), options.GetOptLogLevelArg())) {
         std::cerr << "call GenerateProgram fail" << std::endl;
         return RETURN_FAILED;
     }

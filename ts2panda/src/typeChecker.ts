@@ -1,21 +1,20 @@
-import ts, { forEachChild } from "typescript";
+import * as ts from "typescript";
 import {
-    ClassType,
-    ClassInstType,
-    ExternalType,
-    UnionType,
     ArrayType,
+    ClassInstType,
+    ClassType,
+    ExternalType,
     FunctionType,
     InterfaceType,
-    ObjectType
+    ObjectType,
+    PrimitiveType,
+    UnionType
 } from "./base/typeSystem";
-import { ModuleStmt } from "./modules";
-import { TypeRecorder } from "./typeRecorder";
 import * as jshelpers from "./jshelpers";
 import { LOGD } from "./log";
-import { PrimitiveType } from "./base/typeSystem";
+import { ModuleStmt } from "./modules";
 import { isGlobalDeclare } from "./strictMode";
-import { syncBuiltinESMExports } from "module";
+import { TypeRecorder } from "./typeRecorder";
 
 export class TypeChecker {
     private static instance: TypeChecker;

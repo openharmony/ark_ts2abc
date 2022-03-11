@@ -395,6 +395,9 @@ def get_host_args(args, host_type):
     libs_dir = DEFAULT_LIBS_DIR
     ark_frontend = DEFAULT_ARK_FRONTEND
     ark_arch = DEFAULT_ARK_ARCH
+    module_list = ''
+    with open(MODULE_FILES_LIST) as fopen:
+        module_list = fopen.read()
 
     if args.hostArgs:
         host_args = args.hostArgs
@@ -417,6 +420,7 @@ def get_host_args(args, host_type):
         host_args += f"--ark-frontend-tool={ark_frontend_tool} "
         host_args += f"--libs-dir={libs_dir} "
         host_args += f"--ark-frontend={ark_frontend} "
+        host_args += f"--module-list={module_list}"
 
     if args.ark_arch != ark_arch:
         host_args += f"--ark-arch={args.ark_arch} "

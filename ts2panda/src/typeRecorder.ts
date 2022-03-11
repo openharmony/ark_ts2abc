@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-import ts, { IndexedAccessType } from "typescript";
+import * as ts from "typescript";
 import {
-    ClassType,
-    ExternalType,
-    TypeSummary
+    ExternalType, PrimitiveType, TypeSummary
 } from "./base/typeSystem";
+import * as jshelpers from "./jshelpers";
 import { ModuleStmt } from "./modules";
 import { TypeChecker } from "./typeChecker";
-import { PrimitiveType } from "./base/typeSystem";
-import * as jshelpers from "./jshelpers";
 
 export class TypeRecorder {
     private static instance: TypeRecorder;

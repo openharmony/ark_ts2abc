@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-import path = require("path");
+import * as path from "path";
 import { extractCtorOfClass } from "../statement/classStatement";
-import { LocalVariable, Variable } from "../variable";
 import * as ts from "typescript";
 import {
     EcmaCallirangedyn,
@@ -26,7 +25,6 @@ import {
 } from "../irnodes";
 import * as jshelpers from "../jshelpers";
 import { LOGD } from "../log";
-import { ModuleScope, Scope } from "../scope";
 import { isFunctionLikeDeclaration } from "../syntaxCheckHelper";
 
 export function containSpreadElement(args?: ts.NodeArray<ts.Expression>): boolean {
@@ -67,16 +65,6 @@ export function hasDefaultKeywordModifier(node: ts.Node): boolean {
     }
 
     return hasDefault;
-}
-
-export function setVariableExported(varName: string, scope: Scope) {
-    if (!(scope instanceof ModuleScope)) {
-        throw new Error("variable can't be exported out of module scope");
-    }
-
-    let variable: { scope: Scope | undefined, level: number, v: Variable | undefined } = scope.find(varName);
-    (<LocalVariable>variable.v!).setExport();
-    (<LocalVariable>variable.v!).setExportedName(varName);
 }
 
 export function execute(cmd: string, args: Array<string>) {
@@ -192,8 +180,9 @@ export function escapeUnicode(data: string) {
 }
 
 export function initiateTs2abc(args: Array<string>) {
-    let js2abc = path.join(path.resolve(__dirname, '../../bin'), "js2abc");
+    let js2abc = path.join(path.resolve(__dirname, '../bin'), "js2abc");
     args.unshift("--compile-by-pipe");
+    // @ts-ignore
     var spawn = require('child_process').spawn;
     let child = spawn(js2abc, [...args], {
         stdio: ['pipe', 'inherit', 'inherit', 'pipe']

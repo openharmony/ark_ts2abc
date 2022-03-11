@@ -43,7 +43,7 @@ describe("HoistTest", function () {
         let expected = [
             new LdaDyn(new VReg()),
             new EcmaStglobalvar("a"),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStglobalvar("a"),
             new EcmaReturnundefined()
         ]
@@ -64,7 +64,7 @@ describe("HoistTest", function () {
             new LdaDyn(new VReg()),
             new EcmaIstrue(),
             new Jeqz(endLabel),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaStglobalvar("a"),
             endLabel,
             new EcmaReturnundefined()
@@ -79,7 +79,7 @@ describe("HoistTest", function () {
 
         let insns = snippetCompiler.getGlobalInsns();
         let expected = [
-            new EcmaDefinefuncdyn("a", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("a", new Imm(0), new VReg()),
             new EcmaStglobalvar("a"),
             new EcmaReturnundefined()
         ]
@@ -93,7 +93,7 @@ describe("HoistTest", function () {
 
         let insns = snippetCompiler.getGlobalInsns();
         let expected = [
-            new EcmaDefinefuncdyn("#2#a", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("#2#a", new Imm(0), new VReg()),
             new EcmaStglobalvar("a"),
             new EcmaReturnundefined()
         ]
@@ -107,9 +107,9 @@ describe("HoistTest", function () {
         snippetCompiler.compile(`var a = 1; function a() {}`);
         let insns = snippetCompiler.getGlobalInsns();
         let expected = [
-            new EcmaDefinefuncdyn("a", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("a", new Imm(0), new VReg()),
             new EcmaStglobalvar("a"),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaStglobalvar("a"),
             new EcmaReturnundefined()
         ]
@@ -128,7 +128,7 @@ describe("HoistTest", function () {
         let expected = [
             new LdaDyn(a),
             new StaDyn(new VReg()),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(a),
 
             new EcmaReturnundefined()
@@ -144,7 +144,7 @@ describe("HoistTest", function () {
         let insns = funcPg!.getInsns();
         let a = new VReg();
         let expected = [
-            new EcmaDefinefuncdyn("b", new Imm(ResultType.Int, 0), new VReg()),
+            new EcmaDefinefuncdyn("b", new Imm(0), new VReg()),
             new StaDyn(a),
 
             new EcmaReturnundefined()

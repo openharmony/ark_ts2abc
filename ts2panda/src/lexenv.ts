@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-import ts from "typescript";
+import * as ts from "typescript";
 import {
     loadAccumulator,
     loadAccumulatorString,
     loadLexicalVar,
     storeAccumulator,
     storeLexicalVar,
-    storeModuleVariable,
     throwConstAssignment,
     throwUndefinedIfHole
 } from "./base/bcGenUtil";
@@ -37,7 +36,7 @@ import {
     LocalVariable,
     Variable
 } from "./variable";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 
 abstract class VariableAccessBase {
     variable: Variable;
@@ -93,10 +92,9 @@ export class VariableAccessLoad extends VariableAccessBase {
             return insns;
         }
         if (v.getName() === "4funcObj") {
-            insns.push(loadAccumulator(getVregisterCache(pandaGen, CacheList.FUNC)));
-        } else {
-            insns.push(loadAccumulator(bindVreg));
+            this.scope.setCallOpt("4funcObj")
         }
+        insns.push(loadAccumulator(bindVreg));
 
         return insns;
     }
@@ -109,7 +107,7 @@ export class VariableAccessLoad extends VariableAccessBase {
         insns.push(loadLexicalVar(this.level, slot));
 
         // check TDZ
-        if (v.isLetOrConst()) {
+        if (v.isLetOrConst() || v.isClass()) {
             let tempReg = pandaGen.getTemp();
 
             insns.push(storeAccumulator(tempReg));
@@ -162,11 +160,10 @@ export class VariableAcessStore extends VariableAccessBase {
             checkConstAssignment(pandaGen, v, insns, this.node);
         }
 
-        insns.push(storeAccumulator(bindVreg));
-
-        if (v.isExportVar()) {
-            insns.push(storeModuleVariable(v.getExportedName()));
+        if (v.getName() === "4funcObj") {
+            this.scope.setCallOpt("4funcObj")
         }
+        insns.push(storeAccumulator(bindVreg));
 
         return insns;
     }
@@ -200,9 +197,7 @@ export class VariableAcessStore extends VariableAccessBase {
 
         insns.push(storeLexicalVar(this.level, slot, valueReg));
         insns.push(loadAccumulator(valueReg));
-        if (v.isExportVar()) {
-            insns.push(storeModuleVariable(v.getExportedName()));
-        }
+
         pandaGen.freeTemps(valueReg);
 
         return insns;

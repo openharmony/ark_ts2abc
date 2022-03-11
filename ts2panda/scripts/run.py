@@ -23,6 +23,7 @@ import sys
 import subprocess
 import argparse
 import platform
+import shutil
 
 
 def parse_args():
@@ -38,7 +39,10 @@ def parse_args():
                         help='node path')
     parser.add_argument("--node-modules",
                         help='path to node-modules exetuable')
-
+    parser.add_argument("--buildMode",
+                        help='buildMode, as: debug, release')
+    parser.add_argument("--js2abc",
+                        help='js2abc file')
     return parser.parse_args()
 
 
@@ -72,20 +76,47 @@ def node_modules(options):
         run_command(['npm', 'install'], dist_dir)
 
 
+def per_platForm_config(options, dir):
+    dist_dir = options.dist_dir
+    if os.path.exists(os.path.join(dist_dir, dir)):
+        shutil.rmtree(os.path.join(dist_dir, dir), ignore_errors=True)
+    cmd = ['mv', 'dist', dir]
+    run_command(cmd, dist_dir)
+    run_command(['cp', '-f', "package.json",
+                 "./{}/package.json".format(dir)], dist_dir)
+    run_command(['cp', '-f', "package-lock.json",
+                 "./{}/package-lock.json".format(dir)], dist_dir)
+    (js2abc_dir, _) = os.path.split(options.js2abc)
+    build_dir = os.path.join(js2abc_dir, dir)
+    if os.path.exists(build_dir):
+        shutil.rmtree(build_dir)
+    run_command(['cp', '-r', os.path.join(dist_dir, dir), js2abc_dir])
+    bin_dir = os.path.join(build_dir, 'bin')
+    if not os.path.exists(bin_dir):
+        os.mkdir(bin_dir)
+    run_command(['cp', '-f', options.js2abc, bin_dir])
+    obj_bin_dir = os.path.join(dist_dir, dir, 'bin/')
+    if not os.path.exists(obj_bin_dir):
+        os.mkdir(obj_bin_dir)
+    run_command(['cp', '-f', options.js2abc, obj_bin_dir])
+    run_command(['cp', '-r', os.path.join(dist_dir,"node_modules"),
+                os.path.join(dist_dir, dir)])
+
+
 def npm_run_build(options):
     plat_form = options.platform
     os.chdir(options.dist_dir)
-    tsc = "node_modules/typescript/bin/tsc"
+    webpack = "node_modules/webpack/bin/webpack.js"
 
+    cmd = [webpack,  '--config', 'webpack.config.js', '--progress',
+           '--env', 'buildMode={}'.format(options.buildMode)]
+    run_command(cmd, options.dist_dir)
     if plat_form == "linux":
-        cmd = [tsc, '-b', 'src']
-        run_command(cmd, options.dist_dir)
+        per_platForm_config(options, "build")
     elif plat_form == "win":
-        cmd = [tsc, '-b', 'src/tsconfig.win.json']
-        run_command(cmd, options.dist_dir)
+        per_platForm_config(options, "build-win")
     elif plat_form == 'mac':
-        cmd = [tsc, '-b', 'src/tsconfig.mac.json']
-        run_command(cmd, options.dist_dir)
+        per_platForm_config(options, "build-mac")
 
 
 def main():

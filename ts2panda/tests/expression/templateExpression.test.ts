@@ -42,9 +42,9 @@ function MicroCreateAddInsns(leftVal: number, rightVal: number): IRNode[] {
     let insns = [];
     let lhs = new VReg();
 
-    insns.push(new LdaiDyn(new Imm(ResultType.Int, leftVal)));
+    insns.push(new LdaiDyn(new Imm(leftVal)));
     insns.push(new StaDyn(lhs));
-    insns.push(new LdaiDyn(new Imm(ResultType.Int, rightVal)));
+    insns.push(new LdaiDyn(new Imm(rightVal)));
     insns.push(new EcmaAdd2dyn(lhs));
 
     return insns;
@@ -71,11 +71,11 @@ function MicroGetTemplateObject(rawArr: VReg, cookedArr: VReg): IRNode[] {
     insns.push(new EcmaCreateemptyarray());
     insns.push(new StaDyn(objReg));
 
-    insns.push(new LdaiDyn(new Imm(ResultType.Int, 0)));
+    insns.push(new LdaiDyn(new Imm(0)));
     insns.push(new StaDyn(indexReg));
     insns.push(new LdaDyn(rawArr));
     insns.push(new EcmaStobjbyvalue(objReg, indexReg));
-    insns.push(new LdaiDyn(new Imm(ResultType.Int, 1)));
+    insns.push(new LdaiDyn(new Imm(1)));
     insns.push(new StaDyn(indexReg));
     insns.push(new LdaDyn(cookedArr));
     insns.push(new EcmaStobjbyvalue(objReg, indexReg));
@@ -127,7 +127,7 @@ describe("templateExpressionTest", function () {
             new EcmaCreateemptyarray(),
             new StaDyn(cookedArr),
 
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(elemIdxReg),
             new LdaStr("string text line 1"),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
@@ -141,7 +141,7 @@ describe("templateExpressionTest", function () {
             new StaDyn(templateObj),
 
             // structure call 
-            new EcmaCallithisrangedyn(new Imm(ResultType.Int, 2), [prop, obj, templateObj]),
+            new EcmaCallithisrangedyn(new Imm(2), [prop, obj, templateObj]),
 
             new EcmaReturnundefined()
         ];
@@ -168,7 +168,7 @@ describe("templateExpressionTest", function () {
             new EcmaCreateemptyarray(),
             new StaDyn(cookedArr),
 
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(elemIdxReg),
             new LdaStr("string text line 1\\nstring text line 2"),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
@@ -182,7 +182,7 @@ describe("templateExpressionTest", function () {
             new StaDyn(templateObj),
 
             // structure call 
-            new EcmaCallithisrangedyn(new Imm(ResultType.Int, 2), [prop, obj, templateObj]),
+            new EcmaCallithisrangedyn(new Imm(2), [prop, obj, templateObj]),
 
             new EcmaReturnundefined()
         ];
@@ -210,13 +210,13 @@ describe("templateExpressionTest", function () {
             new EcmaCreateemptyarray(),
             new StaDyn(cookedArr),
 
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(elemIdxReg),
             new LdaStr("Fifteen is "),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
             new LdaStr("Fifteen is "),
             new EcmaStobjbyvalue(cookedArr, elemIdxReg),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(elemIdxReg),
             new LdaStr(" !!"),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
@@ -232,7 +232,7 @@ describe("templateExpressionTest", function () {
             new StaDyn(addRet),
 
             // structure call
-            new EcmaCallithisrangedyn(new Imm(ResultType.Int, 3), [prop, obj, rawArr, templateObj]),
+            new EcmaCallithisrangedyn(new Imm(3), [prop, obj, rawArr, templateObj]),
             new EcmaReturnundefined()
         ];
         expect(checkInstructions(insns, expected)).to.be.true;
@@ -260,19 +260,19 @@ describe("templateExpressionTest", function () {
             new EcmaCreateemptyarray(),
             new StaDyn(cookedArr),
 
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new StaDyn(elemIdxReg),
             new LdaStr("Fifteen is "),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
             new LdaStr("Fifteen is "),
             new EcmaStobjbyvalue(cookedArr, elemIdxReg),
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new StaDyn(elemIdxReg),
             new LdaStr(" !!\\n Is not "),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
             new LdaStr(" !!\n Is not "),
             new EcmaStobjbyvalue(cookedArr, elemIdxReg),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new StaDyn(elemIdxReg),
             new LdaStr(" !!!\\n"),
             new EcmaStobjbyvalue(rawArr, elemIdxReg),
@@ -290,7 +290,7 @@ describe("templateExpressionTest", function () {
             new StaDyn(addRet2),
 
             // structure call
-            new EcmaCallithisrangedyn(new Imm(ResultType.Int, 4), [prop, obj, rawArr, cookedArr, templateObj]),
+            new EcmaCallithisrangedyn(new Imm(4), [prop, obj, rawArr, cookedArr, templateObj]),
             new EcmaReturnundefined()
         ];
         expect(checkInstructions(insns, expected)).to.be.true;

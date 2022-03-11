@@ -14,17 +14,15 @@
  */
 
 import * as ts from "typescript";
+import * as jshelpers from "../jshelpers";
+import { PandaGen } from "../pandagen";
+import { TypeChecker } from "../typeChecker";
+import { TypeRecorder } from "../typeRecorder";
 import {
     Literal,
     LiteralBuffer,
     LiteralTag
 } from "./literal";
-import { LOGD } from "../log";
-import { TypeChecker } from "../typeChecker";
-import { TypeRecorder } from "../typeRecorder";
-import { PandaGen } from "../pandagen";
-import * as jshelpers from "../jshelpers";
-import { access } from "fs";
 
 export enum PrimitiveType {
     ANY,
