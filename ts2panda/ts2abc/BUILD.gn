@@ -53,6 +53,8 @@ ohos_executable("ts2abc") {
 
   configs = [ ":ts2abc_config" ]
 
+  cflags = [ "-Wno-c++20-designator" ]
+
   deps = [ sdk_libc_secshared_dep ]
 
   if (is_linux || is_mingw || is_mac) {
