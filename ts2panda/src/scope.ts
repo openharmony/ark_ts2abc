@@ -14,12 +14,10 @@
  */
 
 import * as ts from "typescript";
-import { SourceTextModuleRecord } from "./ecmaModule";
 import { LOGD, LOGE } from "./log";
 import {
     GlobalVariable,
     LocalVariable,
-    ModuleVariable,
     VarDeclarationKind,
     Variable
 } from "./variable";
@@ -28,66 +26,61 @@ export enum InitStatus {
     INITIALIZED, UNINITIALIZED
 }
 
-export enum ModuleVarKind {
-    IMPORTED, EXPORTED, NOT
-}
-
 export abstract class Decl {
     name: string;
     node: ts.Node;
-    isModule: ModuleVarKind;
-
-    constructor(name: string, node: ts.Node, isModule: ModuleVarKind) {
+    constructor(name: string, node: ts.Node) {
         this.name = name;
         this.node = node;
-        this.isModule = isModule;
     }
 }
 
 export class VarDecl extends Decl {
-    constructor(varName: string, node: ts.Node, isModule: ModuleVarKind) {
-        super(varName, node, isModule);
+    constructor(varName: string, node: ts.Node) {
+        super(varName, node);
     }
 }
 
 export class LetDecl extends Decl {
-    constructor(letName: string, node: ts.Node, isModule: ModuleVarKind) {
-        super(letName, node, isModule);
+    constructor(letName: string, node: ts.Node) {
+        super(letName, node);
     }
 }
 
 export class ConstDecl extends Decl {
-    constructor(constName: string, node: ts.Node, isModule: ModuleVarKind) {
-        super(constName, node, isModule);
+    constructor(constName: string, node: ts.Node) {
+        super(constName, node);
     }
 }
 
 export class FuncDecl extends Decl {
-    constructor(funcName: string, node: ts.Node, isModule: ModuleVarKind) {
-        super(funcName, node, isModule);
+    constructor(funcName: string, node: ts.Node) {
+        super(funcName, node);
     }
 }
 
 export class ClassDecl extends Decl {
-    constructor(className: string, node: ts.Node, isModule: ModuleVarKind) {
-        super(className, node, isModule);
+    constructor(className: string, node: ts.Node) {
+        super(className, node);
     }
 }
 
 export class CatchParameter extends Decl {
-    constructor(CpName: string, node: ts.Node, isModule: ModuleVarKind = ModuleVarKind.NOT) {
-        super(CpName, node, isModule);
+    constructor(CpName: string, node: ts.Node) {
+        super(CpName, node);
     }
 }
 
 export class FunctionParameter extends Decl {
-    constructor(FpName: string, node: ts.Node, isModule: ModuleVarKind = ModuleVarKind.NOT) {
-        super(FpName, node, isModule);
+    constructor(FpName: string, node: ts.Node) {
+        super(FpName, node);
     }
 }
 
 export abstract class Scope {
     protected debugTag = "scope";
+    protected globals: Variable[] = [];
+    protected locals: Variable[] = [];
     protected name2variable: Map<string, Variable> = new Map<string, Variable>();
     protected decls: Decl[] = [];
     protected parent: Scope | undefined = undefined;
@@ -99,7 +92,7 @@ export abstract class Scope {
 
     constructor() { }
 
-    abstract add(decl: Decl | string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined;
+    abstract add(name: string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined;
 
     getName2variable(): Map<string, Variable> {
         return this.name2variable;
@@ -395,14 +388,15 @@ export class GlobalScope extends VariableScope {
         this.node = node ? node : undefined;
     }
 
-    add(decl: Decl | string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
-        let name = decl instanceof Decl ? decl.name : decl;
+    add(name: string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
         LOGD(this.debugTag, "globalscope.add (" + name + "), kind:" + declKind);
         let v: Variable | undefined;
         if (declKind == VarDeclarationKind.NONE || declKind == VarDeclarationKind.VAR || declKind == VarDeclarationKind.FUNCTION) {
             v = new GlobalVariable(declKind, name);
+            this.globals.push(v);
         } else {
             v = new LocalVariable(declKind, name, status);
+            this.locals.push(v);
         }
         this.name2variable.set(name, v);
         return v;
@@ -410,45 +404,24 @@ export class GlobalScope extends VariableScope {
 }
 
 export class ModuleScope extends VariableScope {
-    private moduleRecord: SourceTextModuleRecord;
-
-    constructor(node: ts.SourceFile) {
+    constructor(node?: ts.SourceFile | ts.ModuleBlock) {
         super();
-        this.node = node;
-        this.moduleRecord = new SourceTextModuleRecord(node.fileName);
+        this.node = node ? node : undefined;
     }
 
-    setExportDecl(exportedLocalName: string) {
-        let decl = this.getDecl(exportedLocalName);
-        if (decl) {
-            decl.isModule = ModuleVarKind.EXPORTED;
-        }
-    }
-
-    module() {
-        return this.moduleRecord;
-    }
-
-    add(decl: Decl | string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
-        let [name, isModule] = decl instanceof Decl ? [decl.name, decl.isModule] : [decl, ModuleVarKind.NOT];
+    add(name: string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
         LOGD(this.debugTag, "modulescope.add (" + name + "), kind:" + declKind);
         let v: Variable | undefined;
-
-        if (isModule !== ModuleVarKind.NOT) {
-            v = new ModuleVariable(declKind, name, InitStatus.UNINITIALIZED);
-            if (isModule == ModuleVarKind.EXPORTED) {
-                (<ModuleVariable>v).setExport();
-            }
+        if (declKind == VarDeclarationKind.NONE) {
+            v = new GlobalVariable(declKind, name);
+            this.globals.push(v);
+        } else if (declKind == VarDeclarationKind.VAR || declKind == VarDeclarationKind.FUNCTION) {
+            v = new LocalVariable(declKind, name);
+            this.locals.push(v);
         } else {
-            if (declKind === VarDeclarationKind.NONE) {
-                v = new GlobalVariable(declKind, name);
-            } else if (declKind == VarDeclarationKind.VAR || declKind == VarDeclarationKind.FUNCTION) {
-                v = new LocalVariable(declKind, name);
-            } else {
-                v = new LocalVariable(declKind, name, status);
-            }
+            v = new LocalVariable(declKind, name, status);
+            this.locals.push(v);
         }
-
         this.name2variable.set(name, v);
         return v;
     }
@@ -483,8 +456,7 @@ export class FunctionScope extends VariableScope {
         return this.parent;
     }
 
-    add(decl: Decl | string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
-        let name = decl instanceof Decl ? decl.name : decl;
+    add(name: string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
         let v: Variable | undefined;
         LOGD(this.debugTag, "functionscope.add (" + name + "), kind:" + declKind);
 
@@ -492,7 +464,7 @@ export class FunctionScope extends VariableScope {
             // the variable declared without anything should be global
             // See EcmaStandard: 13.3.2 Variable Statement
             let globalScope = this.getRootScope();
-            if (globalScope instanceof GlobalScope) {
+            if (globalScope instanceof GlobalScope || globalScope instanceof ModuleScope) {
                 v = globalScope.add(name, declKind);
             } else {
                 v = undefined;
@@ -500,9 +472,11 @@ export class FunctionScope extends VariableScope {
             }
         } else if (declKind == VarDeclarationKind.VAR || declKind == VarDeclarationKind.FUNCTION) {
             v = new LocalVariable(declKind, name);
+            this.locals.push(v);
             this.name2variable.set(name, v);
         } else {
             v = new LocalVariable(declKind, name, status);
+            this.locals.push(v);
             this.name2variable.set(name, v);
         }
         return v;
@@ -521,15 +495,14 @@ export class LocalScope extends Scope {
     }
 
 
-    add(decl: Decl | string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
-        let name = decl instanceof Decl ? decl.name : decl;
+    add(name: string, declKind: VarDeclarationKind, status?: InitStatus): Variable | undefined {
         let v: Variable | undefined;
 
         LOGD(this.debugTag, "localscope.add (" + name + "), kind:" + declKind);
         if (declKind == VarDeclarationKind.NONE) {
             let root = this.getRootScope();
 
-            if (root instanceof GlobalScope) {
+            if (root instanceof GlobalScope || root instanceof ModuleScope) {
                 return root.add(name, declKind, status);
             } else {
                 LOGE(undefined, "Error: the root of this scope is not global scope, it is wrong");
@@ -545,6 +518,7 @@ export class LocalScope extends Scope {
             v = functionScope!.add(name, declKind);
         } else {
             v = new LocalVariable(declKind, name, status);
+            this.locals.push(v);
             this.name2variable.set(name, v);
         }
 

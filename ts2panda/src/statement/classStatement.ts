@@ -23,13 +23,7 @@ import {
     propertyKeyAsString,
     PropertyKind
 } from "../base/properties";
-import {
-    getParameterLength4Ctor,
-    getParamLengthOfFunc,
-    hasDefaultKeywordModifier,
-    hasExportKeywordModifier,
-    isUndefinedIdentifier
-} from "../base/util";
+import { getParameterLength4Ctor, getParamLengthOfFunc, isUndefinedIdentifier } from "../base/util";
 import { CacheList, getVregisterCache } from "../base/vregisterCache";
 import { Compiler } from "../compiler";
 import { createArrayFromElements } from "../expression/arrayLiteralExpression";
@@ -48,7 +42,7 @@ import {
     Scope,
     VariableScope
 } from "../scope";
-import { LocalVariable, ModuleVariable, Variable } from "../variable";
+import { LocalVariable, Variable } from "../variable";
 
 export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDeclaration) {
     compiler.pushScope(stmt);
@@ -118,30 +112,15 @@ export function compileClassDeclaration(compiler: Compiler, stmt: ts.ClassLikeDe
     compileUnCompiledProperty(compiler, properties, classReg);
     pandaGen.loadAccumulator(stmt, classReg);
 
-    let classScope = <Scope>compiler.getRecorder().getScopeOfNode(stmt);
-    if (hasExportKeywordModifier(stmt)) {
-        if (stmt.name) {
-            let className = jshelpers.getTextOfIdentifierOrLiteral(stmt.name);
+    if (stmt.name) {
+        let className = jshelpers.getTextOfIdentifierOrLiteral(stmt.name);
+        let classScope = <Scope>compiler.getRecorder().getScopeOfNode(stmt);
+        if (!ts.isClassExpression(stmt) && classScope.getParent() instanceof GlobalScope) {
+            pandaGen.stClassToGlobalRecord(stmt, className);
+        } else {
             let classInfo = classScope.find(className);
-            (<ModuleVariable>classInfo.v).initialize();
-            pandaGen.storeModuleVariable(stmt, className);
-        } else if (hasDefaultKeywordModifier(stmt)) {
-            pandaGen.storeModuleVariable(stmt, "*default*");
-        } else {
-            // throw SyntaxError in Recorder
-        }
-    } else {
-        if (stmt.name) {
-            let className = jshelpers.getTextOfIdentifierOrLiteral(stmt.name);
-            if (!ts.isClassExpression(stmt) && classScope.getParent() instanceof GlobalScope) {
-                pandaGen.stClassToGlobalRecord(stmt, className);
-            } else {
-                let classInfo = classScope.find(className);
-                (<LocalVariable>classInfo.v).initialize();
-                pandaGen.storeAccToLexEnv(stmt, classInfo.scope!, classInfo.level, classInfo.v!, true);
-            }
-        } else {
-            // throw SyntaxError in SyntaxChecker
+            (<LocalVariable>classInfo.v).initialize();
+            pandaGen.storeAccToLexEnv(stmt, classInfo.scope!, classInfo.level, classInfo.v!, true);
         }
     }
 
@@ -518,10 +497,6 @@ export function getClassNameForConstructor(classNode: ts.ClassLikeDeclaration) {
     if (!isAnonymousClass(classNode)) {
         className = jshelpers.getTextOfIdentifierOrLiteral(classNode.name!);
     } else {
-        if (ts.isClassDeclaration(classNode) && hasExportKeywordModifier(classNode) && hasDefaultKeywordModifier(classNode)) {
-            return 'default';
-        }
-
         let outerNode = findOuterNodeOfParenthesis(classNode);
 
         if (ts.isVariableDeclaration(outerNode)) {
@@ -539,8 +514,6 @@ export function getClassNameForConstructor(classNode: ts.ClassLikeDeclaration) {
             if (ts.isIdentifier(propName) || ts.isStringLiteral(propName) || ts.isNumericLiteral(propName)) {
                 className = jshelpers.getTextOfIdentifierOrLiteral(propName);
             }
-        } else if (ts.isExportAssignment(outerNode)) {
-            className = 'default';
         }
     }
 

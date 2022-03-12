@@ -144,7 +144,6 @@ function hasDuplicateEntryInScope(decl1: Decl, decl2: Decl, scope: Scope) {
         return decl1.name == decl2.name;
     }
     // Var and FunctionDeclaration with same names, FunctionDeclaration and FunctionDeclaration with same names are illegal in strict mode
-    // and Module
     /**
      * eg1.
      * if (true) {
@@ -157,16 +156,15 @@ function hasDuplicateEntryInScope(decl1: Decl, decl2: Decl, scope: Scope) {
      *     function a() {};
      *     function a() {};
      * }
-     * eg3. [module]
-     * var a;
-     * function a(){};
      */
-    if (scope instanceof LocalScope && isStrictMode(decl1.node) || scope instanceof ModuleScope) {
-        if (decl1 instanceof FuncDecl || decl2 instanceof FuncDecl) {
-            if (isFunctionLikeDeclaration(decl1.node.parent.parent) || isFunctionLikeDeclaration(decl2.node.parent.parent)) {
-                return false;
+    if (scope instanceof LocalScope) {
+        if (isStrictMode(decl1.node)) {
+            if (decl1 instanceof FuncDecl || decl2 instanceof FuncDecl) {
+                if (isFunctionLikeDeclaration(decl1.node.parent.parent) || isFunctionLikeDeclaration(decl2.node.parent.parent)) {
+                    return false;
+                }
+                return decl1.name == decl2.name;
             }
-            return decl1.name == decl2.name;
         }
     }
 
@@ -268,10 +266,10 @@ function throwDupIdError(decl: Decl) {
 }
 
 //**********************************Part 2: Implementing syntax check except declaration******************************************//
-export function checkSyntaxError(node: ts.Node, scope:Scope) {
+export function checkSyntaxError(node: ts.Node) {
     checkSyntaxErrorForSloppyAndStrictMode(node);
     if (isStrictMode(node) || CmdOptions.isModules()) {
-        checkSyntaxErrorForStrictMode(node, scope);
+        checkSyntaxErrorForStrictMode(node);
     }
 }
 
@@ -1423,4 +1421,20 @@ function checkBindingPattern(node: ts.BindingPattern) {
             }
         }
     }
+}
+
+export function checkExportEntries(recorder: Recorder) {
+    let exportStmts = recorder.getExportStmts();
+    let exportNames: Set<string> = new Set<string>();
+    exportStmts.forEach(exportStmt => {
+        let bindingNameMap = exportStmt.getBindingNameMap();
+        // @ts-ignore
+        bindingNameMap.forEach((value: string, key: string) => {
+            if (!exportNames.has(key)) {
+                exportNames.add(key);
+            } else {
+                throw new DiagnosticError(exportStmt.getNode(), DiagnosticCode.Duplicate_identifier_0, jshelpers.getSourceFileOfNode(exportStmt.getNode()), [key]);
+            }
+        })
+    })
 }

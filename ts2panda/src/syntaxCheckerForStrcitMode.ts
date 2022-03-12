@@ -14,12 +14,10 @@
  */
 
 import * as ts from "typescript";
-import { hasDefaultKeywordModifier, hasExportKeywordModifier } from "./base/util";
 import { CmdOptions } from "./cmdOptions";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
 import { findInnerExprOfParenthesis } from "./expression/parenthesizedExpression";
 import * as jshelpers from "./jshelpers";
-import { ModuleScope, Scope } from "./scope";
 import { checkStrictModeStatementList } from "./strictMode";
 import {
     isAssignmentOperator,
@@ -173,6 +171,7 @@ function checkNoSubstitutionTemplateLiteral(expr: ts.NoSubstitutionTemplateLiter
 }
 
 function checkFunctionDeclaration(node: ts.FunctionDeclaration) {
+
     checkEvalOrArgumentsOrOriginalKeyword(node, node.name);
     checkParameters(node);
     if (!isInBlockScope(node.parent!)) {
@@ -180,57 +179,7 @@ function checkFunctionDeclaration(node: ts.FunctionDeclaration) {
     }
 }
 
-function checkClassDeclaration(node: ts.ClassDeclaration) {
-    if (!hasExportKeywordModifier(node) && !node.name) {
-        if (!node.name && !hasDefaultKeywordModifier(node)) {
-            throw new DiagnosticError(node, DiagnosticCode.Identifier_expected);
-        }
-    }
-}
-
-function checkImportDeclaration(node: ts.ImportDeclaration, scope: Scope) {
-    if (!(scope instanceof ModuleScope)) {
-        throw new DiagnosticError(node, DiagnosticCode.An_import_declaration_can_only_be_used_in_a_namespace_or_module);
-    }
-
-    if (node.modifiers) {
-        throw new DiagnosticError(node, DiagnosticCode.An_import_declaration_cannot_have_modifiers);
-    }
-
-    if (node.importClause && node.importClause.namedBindings) {
-        let namedBindings = node.importClause.namedBindings;
-        if (ts.isNamedImports(namedBindings)) {
-            namedBindings.elements.forEach((element: any) => {
-                if (jshelpers.getTextOfIdentifierOrLiteral(element.name) == 'arguments'
-                    || jshelpers.getTextOfIdentifierOrLiteral(element.name) == 'eval') {
-                    throw new DiagnosticError(node, DiagnosticCode.Unexpected_eval_or_arguments_in_strict_mode);
-                }
-            });
-        }
-    }
-}
-
-function checkExportAssignment(node: ts.ExportAssignment, scope: Scope) {
-    if (!(scope instanceof ModuleScope)) {
-        throw new DiagnosticError(node, DiagnosticCode.An_export_assignment_must_be_at_the_top_level_of_a_file_or_module_declaration);
-    }
-
-    if (node.modifiers) {
-        throw new DiagnosticError(node, DiagnosticCode.An_export_assignment_cannot_have_modifiers);
-    }
-}
-
-function checkExportDeclaration(node: ts.ExportDeclaration, scope: Scope) {
-    if (!(scope instanceof ModuleScope)) {
-        throw new DiagnosticError(node, DiagnosticCode.An_export_declaration_can_only_be_used_in_a_module);
-    }
-
-    if (node.modifiers) {
-        throw new DiagnosticError(node, DiagnosticCode.An_export_declaration_cannot_have_modifiers);
-    }
-}
-
-export function checkSyntaxErrorForStrictMode(node: ts.Node, scope: Scope) {
+export function checkSyntaxErrorForStrictMode(node: ts.Node) {
     switch (node.kind) {
         case ts.SyntaxKind.NumericLiteral:
             checkNumericLiteral(<ts.NumericLiteral>node);
@@ -249,9 +198,6 @@ export function checkSyntaxErrorForStrictMode(node: ts.Node, scope: Scope) {
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.ArrowFunction:
             checkParameters(<ts.FunctionLikeDeclaration | ts.FunctionExpression>node);
-            break;
-        case ts.SyntaxKind.ClassDeclaration:
-            checkClassDeclaration(<ts.ClassDeclaration>node);
             break;
         case ts.SyntaxKind.VariableDeclaration:
             let varNode = <ts.VariableDeclaration>node;
@@ -282,15 +228,6 @@ export function checkSyntaxErrorForStrictMode(node: ts.Node, scope: Scope) {
         case ts.SyntaxKind.FirstTemplateToken:
         case ts.SyntaxKind.LastLiteralToken:
             checkNoSubstitutionTemplateLiteral(<ts.NoSubstitutionTemplateLiteral>node);
-            break;
-        case ts.SyntaxKind.ImportDeclaration:
-            checkImportDeclaration(<ts.ImportDeclaration>node, scope);
-            break;
-        case ts.SyntaxKind.ExportAssignment:
-            checkExportAssignment(<ts.ExportAssignment>node, scope);
-            break;
-        case ts.SyntaxKind.ExportDeclaration:
-            checkExportDeclaration(<ts.ExportDeclaration>node, scope);
             break;
         default:
             break;
