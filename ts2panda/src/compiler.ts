@@ -636,6 +636,7 @@ export class Compiler {
     compileFinallyBeforeCFC(endTry: TryStatement | undefined, cfc: ControlFlowChange, continueTargetLabel: Label | undefined) {// compile finally before control flow change
         let startTry = TryStatement.getCurrentTryStatement();
         let originTry = startTry;
+        let currentScope = this.scope;
         for (; startTry != endTry; startTry = startTry?.getOuterTryStatement()) {
 
             if (startTry && startTry.trybuilder) {
@@ -655,6 +656,7 @@ export class Compiler {
                 updateCatchTables(originTry, startTry, inlinedLabelPair);
             }
         }
+        this.scope = currentScope;
     }
 
     constructTry(node: ts.Node, tryBuilder: TryBuilderBase, endLabel?: Label) {
