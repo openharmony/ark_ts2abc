@@ -143,10 +143,6 @@
         "category": "Error",
         "code": 1119
     },
-    "An export assignment cannot have modifiers.": {
-        "category": "Error",
-        "code": 1120
-    },
     "Octal literals are not allowed in strict mode.": {
         "category": "Error",
         "code": 1121
@@ -162,10 +158,6 @@
     "Line break not permitted here.": {
         "category": "Error",
         "code": 1142
-    },
-    "Cannot use imports, exports, or module augmentations when '--module' is 'none'.": {
-        "category": "Error",
-        "code": 1148
     },
     "The 'const' declarations can only be declared inside a block.": {
         "category": "Error",
@@ -235,14 +227,6 @@
         "category": "Error",
         "code": 1190
     },
-    "An import declaration cannot have modifiers.": {
-        "category": "Error",
-        "code": 1191
-    },
-    "An export declaration cannot have modifiers.": {
-        "category": "Error",
-        "code": 1193
-    },
     "Line terminator not permitted before arrow.": {
         "category": "Error",
         "code": 1200
@@ -259,10 +243,6 @@
         "category": "Error",
         "code": 1210
     },
-    "A class or function declaration without the 'default' modifier must have a name.": {
-        "category": "Error",
-        "code": 1211
-    },
     "Identifier expected. '{0}' is a reserved word in strict mode.": {
         "category": "Error",
         "code": 1212
@@ -274,10 +254,6 @@
     "Identifier expected. '{0}' is a reserved word in strict mode. Modules are automatically in strict mode.": {
         "category": "Error",
         "code": 1214
-    },
-    "An export assignment must be at the top level of a file or module declaration.": {
-        "category": "Error",
-        "code": 1231
     },
     "An import declaration can only be used in a namespace or module.": {
         "category": "Error",
@@ -363,18 +339,6 @@
         "category": "Error",
         "code": 2300
     },
-    "Module '{0}' has no exported member '{1}'.": {
-        "category": "Error",
-        "code": 2305
-    },
-    "Module '{0}' has already exported a member named '{1}'.": {
-        "category": "Error",
-        "code": 2308
-    },
-    "An export assignment cannot be used in a module with other exported elements.": {
-        "category": "Error",
-        "code": 2309
-    },
     "The 'super' can only be referenced in a derived class.": {
         "category": "Error",
         "code": 2335
@@ -431,10 +395,6 @@
         "category": "Error",
         "code": 2404
     },
-    "Import declaration conflicts with local declaration of '{0}'.": {
-        "category": "Error",
-        "code": 2440
-    },
     "The 'super' cannot be referenced in a computed property name.": {
         "category": "Error",
         "code": 2466
@@ -462,10 +422,6 @@
     "A rest element cannot contain a binding pattern.": {
         "category": "Error",
         "code": 2501
-    },
-    "A module cannot have multiple default exports.": {
-        "category": "Error",
-        "code": 2528
     },
     "The 'super' can only be referenced in members of derived classes or object literal expressions.": {
         "category": "Error",
@@ -556,12 +512,8 @@
         "category": "Error",
         "code": 19009
     },
-    "Invalid regular expression flag '{0}'": {
+    "Invalid regular expression flag '{0}'":{
         "category": "Error",
         "code": 19010
-    },
-    "Unexpected eval or arguments in strict mode": {
-        "category": "Error",
-        "code": 20000
     }
 }

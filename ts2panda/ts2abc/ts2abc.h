@@ -33,7 +33,6 @@ enum class JsonType {
     RECORD,
     STRING,
     LITERALBUFFER,
-    MODULE,
     OPTIONS
 };
 
