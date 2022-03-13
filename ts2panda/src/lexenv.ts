@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ts from "typescript";
+import * as ts from "typescript";
 import {
     loadAccumulator,
     loadAccumulatorString,
@@ -37,7 +37,7 @@ import {
     LocalVariable,
     Variable
 } from "./variable";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 
 abstract class VariableAccessBase {
     variable: Variable;
@@ -93,10 +93,9 @@ export class VariableAccessLoad extends VariableAccessBase {
             return insns;
         }
         if (v.getName() === "4funcObj") {
-            insns.push(loadAccumulator(getVregisterCache(pandaGen, CacheList.FUNC)));
-        } else {
-            insns.push(loadAccumulator(bindVreg));
+            this.scope.setCallOpt("4funcObj")
         }
+        insns.push(loadAccumulator(bindVreg));
 
         return insns;
     }
@@ -162,6 +161,9 @@ export class VariableAcessStore extends VariableAccessBase {
             checkConstAssignment(pandaGen, v, insns, this.node);
         }
 
+        if (v.getName() === "4funcObj") {
+            this.scope.setCallOpt("4funcObj")
+        }
         insns.push(storeAccumulator(bindVreg));
 
         if (v.isExportVar()) {

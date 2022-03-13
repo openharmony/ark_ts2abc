@@ -29,7 +29,7 @@ import {
     Label,
     VReg
 } from "./irnodes";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 import {
     CatchTable,
     LabelPair
@@ -221,7 +221,6 @@ function emitRestElement(restElement: ts.BindingName | ts.Expression, iterator: 
     );
 
     // get value from iter and store it to arrayObj
-    // getIterValue(iterRecord, iterValue, pandaGen, restElement);
     iterator.iteratorValue(iterResult);
     pandaGen.storeObjProperty(restElement, arrayObj, index);
 
@@ -339,7 +338,6 @@ function compileObjectDestructuring(obj: ts.ObjectBindingOrAssignmentPattern, pa
         if (ts.isComputedPropertyName(key)) {
             compiler.compileExpression(key.expression);
         } else {
-            // compiler.compileExpression(key);
             if (ts.isIdentifier(key)) {
                 let keyName = jshelpers.getTextOfIdentifierOrLiteral(key);
                 pandaGen.loadAccumulatorString(key, keyName);

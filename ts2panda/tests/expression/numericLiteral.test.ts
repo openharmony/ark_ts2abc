@@ -50,7 +50,7 @@ describe("compileNumericLiteral", function () {
         let node: ts.NumericLiteral = ts.createNumericLiteral("1");
         compileNumericLiteral(pandaGen, node);
         let insns = pandaGen.getInsns();
-        let expected = [new LdaiDyn(new Imm(ResultType.Int, 1))];
+        let expected = [new LdaiDyn(new Imm(1))];
         expect(checkInstructions(insns, expected)).to.be.true;
     });
     it("Integer overflow", function () {
@@ -58,7 +58,7 @@ describe("compileNumericLiteral", function () {
         let node: ts.NumericLiteral = ts.createNumericLiteral("2147483648");
         compileNumericLiteral(pandaGen, node);
         let insns = pandaGen.getInsns();
-        let expected = [new FldaiDyn(new Imm(ResultType.Float, 2147483648))];
+        let expected = [new FldaiDyn(new Imm(2147483648))];
         expect(checkInstructions(insns, expected)).to.be.true;
     });
     it("double", function () {
@@ -66,7 +66,7 @@ describe("compileNumericLiteral", function () {
         let node: ts.NumericLiteral = ts.createNumericLiteral("1.1");
         compileNumericLiteral(pandaGen, node);
         let insns = pandaGen.getInsns();
-        let expected = [new FldaiDyn(new Imm(ResultType.Float, 1.1))];
+        let expected = [new FldaiDyn(new Imm(1.1))];
         expect(checkInstructions(insns, expected)).to.be.true;
     });
 })

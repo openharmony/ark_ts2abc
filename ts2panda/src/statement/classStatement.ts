@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { Ts2Panda } from "src/ts2panda";
 import * as ts from "typescript";
 import { Literal, LiteralBuffer, LiteralTag } from "../base/literal";
 import { LReference } from "../base/lreference";
@@ -402,7 +401,6 @@ function loadCtorObj(node: ts.CallExpression, compiler: Compiler) {
     }
 
     if (ts.isConstructorDeclaration(nearestFunc)) {
-        let funcObj = <Variable>nearestFuncScope.findLocal("4funcObj");
         pandaGen.loadAccumulator(node, getVregisterCache(pandaGen, CacheList.FUNC));
     } else {
         let outerFunc = jshelpers.getContainingFunctionDeclaration(nearestFunc);
@@ -610,7 +608,7 @@ function generatePropertyFromExpr(node: ts.ClassLikeDeclaration, classFields: Ar
     let staticItems = properties.slice(properties.length - staticNum)
     properties = properties.slice(0, properties.length - staticNum);
     properties = properties.reverse();
-    properties = properties.concat(staticItems);
+    properties.push(...staticItems);
 
     if (constructNode) {
         defineClassMember("constructor", constructNode, PropertyKind.Variable, properties, namedPropertyMap);

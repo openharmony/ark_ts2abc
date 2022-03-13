@@ -15,6 +15,7 @@
 
 import * as ts from "typescript";
 import { isBindingPattern } from "./base/util";
+import { CmdOptions } from "./cmdOptions";
 import * as jshelpers from "./jshelpers";
 import { Recorder } from "./recorder";
 import {
@@ -30,13 +31,11 @@ import {
     VariableScope
 } from "./scope";
 import { isGlobalIdentifier } from "./syntaxCheckHelper";
+import { TypeRecorder } from "./typeRecorder";
 import {
     VarDeclarationKind,
     Variable
 } from "./variable";
-import { TypeRecorder } from "./typeRecorder";
-import { CmdOptions } from "./cmdOptions";
-import { PrimitiveType } from "./base/typeSystem";
 
 function setVariableOrParameterType(node: ts.Node, v: Variable | undefined) {
     if (v) {
@@ -78,14 +77,13 @@ function addInnerArgs(node: ts.Node, scope: VariableScope, enableTypeRecord: boo
         addParameters(funcNode, scope, enableTypeRecord);
     }
 
-    if (scope.getUseArgs()) {
+    if (scope.getUseArgs() || CmdOptions.isDebugMode()) {
         if (ts.isArrowFunction(node)) {
             let parentVariableScope = <VariableScope>scope.getParentVariableScope();
             parentVariableScope.add("arguments", VarDeclarationKind.CONST, InitStatus.INITIALIZED);
             parentVariableScope.setUseArgs(true);
-
             scope.setUseArgs(false);
-        } else {
+        } else if (scope.getUseArgs()){
             if (!scope.findLocal("arguments")) {
                 scope.add("arguments", VarDeclarationKind.CONST, InitStatus.INITIALIZED);
             }
@@ -127,6 +125,7 @@ export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean
         hoistDecls = <Decl[]>hoistMap.get(nearestVariableScope);
         for (let j = 0; j < decls.length; j++) {
             let decl = decls[j];
+            // @ts-ignore
             if (hoistDecls && hoistDecls.includes(decl)) {
                 continue;
             }

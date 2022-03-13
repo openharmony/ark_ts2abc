@@ -14,7 +14,7 @@
  */
 
 import { Scope } from "src/scope";
-import ts from "typescript";
+import * as ts from "typescript";
 import { CacheList, getVregisterCache } from "../base/vregisterCache";
 import { Compiler, ControlFlowChange } from "../compiler";
 import {
@@ -47,8 +47,8 @@ export class GeneratorFunctionBuilder {
 
     prepare(node: ts.Node, recorder: Recorder) {
         let pandaGen = this.pandaGen;
+        // @ts-ignore
         let scope = <Scope>recorder.getScopeOfNode(node);
-        let funcObj = scope.getName2variable().get("4funcObj")!.getVreg();
 
         // backend handle funcobj, frontend set undefined
         pandaGen.createGeneratorObj(node, getVregisterCache(pandaGen, CacheList.FUNC));

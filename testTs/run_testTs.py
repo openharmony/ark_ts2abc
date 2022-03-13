@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Copyright (c) 2022 Huawei Device Co., Ltd.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Description: Use ark to execute test 262 test suite
+"""
+
 import os
 import subprocess
 import argparse
@@ -22,21 +42,20 @@ def parse_args():
 
 
 def skip(filepath,flag = False):
-    f = open(SKIP_FILE_PATH,'r')
-    content = f.read()
-    f.close()
-    test_list = []
-    import_list =[]
-    skip_test = json.loads(content)
-    skip_test_list = skip_test['error.txt'] + skip_test['no2015'] + skip_test['tsc_error'] + skip_test['import_skip'] + skip_test['code_rule'] + skip_test['no_case']
-    if os.path.isfile(filepath):
-        if '.ts' in filepath:
-            if filepath not in skip_test_list:
-                return True
-            else:
-                if flag:
-                    print(f'This file is outside the scope of validation : {filepath}\n')
-                return False
+    with open(SKIP_FILE_PATH,'r') as f:
+        content = f.read()
+        test_list = []
+        import_list =[]
+        skip_test = json.loads(content)
+        skip_test_list = skip_test['error.txt'] + skip_test['no2015'] + skip_test['tsc_error'] + skip_test['import_skip'] + skip_test['code_rule'] + skip_test['no_case']
+        if os.path.isfile(filepath):
+            if '.ts' in filepath:
+                if filepath not in skip_test_list:
+                    return True
+                else:
+                    if flag:
+                        print(f'This file is outside the scope of validation : {filepath}\n')
+                    return False
 
 def abc_judge(filepath):
     if not os.path.getsize(filepath):
@@ -59,7 +78,7 @@ def run_test(file, tool,flag = False):
     if not os.path.exists(out_dir_path):  
         os.makedirs(out_dir_path)
     try:
-        command_os(f'node --expose-gc {tool} -m {file}  --output-type')
+        command_os(f'node --expose-gc {tool} -m {file} --output-type')
     except:
         e = str(e)
     if flag:
@@ -124,14 +143,12 @@ def run_test_machine(args):
                         run_test(test_path, ark_frontend_tool)
                         result = compare(test_path)
                         result_path.append(result)
-    f = open(OUT_RESULT_FILE,'w')
-    f.writelines(result_path)
-    f.close()
+    with open(OUT_RESULT_FILE,'w') as f:
+        f.writelines(result_path)
     
 def read_out_file(file_path):
-    f = open(file_path,'r')
-    content = f.read()
-    f.close()
+    with open(file_path, 'r') as f:
+        content = f.read()
     if content:
         if '}\n{' in content:
             out_list = content.split('}\n{')
@@ -172,11 +189,10 @@ def compare(file,flag = False):
             for fi in files:
                 fi = f'{root}/{fi}'
                 if fi != out_path:
-                    f = open(fi,'r')
-                    el_file_txt = f.read()
-                    f.close()
-                    write_append(out_path,el_file_txt)
-                    remove_file(fi)
+                    with open(fi,'r') as f:
+                        el_file_txt = f.read()
+                        write_append(out_path,el_file_txt)
+                        remove_file(fi)
     if (not os.path.exists(out_path) or not os.path.exists(expect_path)):
         print("There are no expected files or validation file generation: %s", file)
         result = f'FAIL {file}\n'
@@ -200,10 +216,11 @@ def summary():
         return
     count = -1
     fail_count = 0
-    for count, line in enumerate(open(OUT_RESULT_FILE, 'r')):
-        if line.startswith("FAIL"):
-            fail_count += 1
-        pass
+    with open(OUT_RESULT_FILE, 'r') as f:
+        for count, line in enumerate(f):
+            if line.startswith("FAIL"):
+                fail_count += 1
+            pass
     count += 1
 
     print("\n      Regression summary")
@@ -235,7 +252,7 @@ def prepare_ts_code():
             remove_dir(TS_CASES_DIR)
             raise MyException("Pull TypeScript Code Fail, Please Check The Network Request")
         command_os(f'git apply ../test-case.patch')
-        command_os(f'cp -r tests/cases/conformance/*   ./')
+        command_os(f'cp -r tests/cases/conformance/* ./')
         command_os(f'rm -rf ./tests')
         command_os('rm -rf .git')
         os.chdir('../../')
