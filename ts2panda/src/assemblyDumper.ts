@@ -82,7 +82,7 @@ export class AssemblyDumper {
         for (let i = 0; i < parametersCount; ++i) {
             let node = irNodes[i];
             this.output += "\t";
-            this.output += node.mnemonic + " v" + (<VReg>node.operands[0]).num + ", a" + ((<VReg>node.operands[0]).num) + "\n";
+            this.output += node.getMnemonic() + " v" + (<VReg>node.operands[0]).num + ", a" + ((<VReg>node.operands[0]).num) + "\n";
         }
 
         for (let i = parametersCount; i < irNodes.length; ++i) {
@@ -96,16 +96,16 @@ export class AssemblyDumper {
             }
 
             this.output += "\t"
-            this.output += node.mnemonic + " ";
+            this.output += node.getMnemonic() + " ";
             let operands = node.operands;
-            let formats = node.formats;
+            let formats = node.getFormats();
             var outputRangeVregNum = getRangeExplicitVregNums(node);
             for (let j = 0; j < operands.length; ++j) {
                 if (outputRangeVregNum == 0) {
                     break;
                 }
                 let format = formats[0];
-                let kind = format[j].kind;
+                let kind = format[j][0];
                 let op = operands[j];
 
                 if (kind == OperandKind.Imm) {
@@ -122,7 +122,7 @@ export class AssemblyDumper {
                     || kind == OperandKind.SrcVReg) {
                     let v = <VReg>op;
                     if (v.num < 0) {
-                        throw Error("invalid register, please check your insn!\nRegister was allocated at:\n" + v.getStackTrace() + "\n");
+                        throw Error("invalid register, please check your insn!\n");
                     }
                     this.output += "v" + v.num.toString();
                     // we don't need to print all the registers for range inst, just the first one

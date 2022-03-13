@@ -49,12 +49,12 @@ namespace {
     constexpr std::size_t BOUND_RIGHT = 0;
     constexpr std::size_t LINE_NUMBER = 0;
     constexpr bool IS_DEFINED = true;
-    // Temprorary map to simplify debuging
-    std::unordered_map<std::string, panda::pandasm::Opcode> g_opcodeMap = {
-#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) {name, panda::pandasm::Opcode::opcode},
+    int g_opCodeIndex = 0;
+    std::unordered_map<int, panda::pandasm::Opcode> g_opcodeMap = {
+#define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) {g_opCodeIndex++, panda::pandasm::Opcode::opcode},
         PANDA_INSTRUCTION_LIST(OPLIST)
 #undef OPLIST
-            {"", panda::pandasm::Opcode::INVALID},
+            {-1, panda::pandasm::Opcode::INVALID},
     };
 }
 
@@ -221,7 +221,7 @@ static void ParseLiteral(const Json::Value &literal, std::vector<panda::pandasm:
     panda::pandasm::LiteralArray::Literal tagLiteral;
     panda::pandasm::LiteralArray::Literal valueLiteral;
 
-    uint8_t tagValue = static_cast<uint8_t>(literal["tag"].asUInt());
+    uint8_t tagValue = static_cast<uint8_t>(literal["t"].asUInt());
 
     tagLiteral.tag_ = panda::panda_file::LiteralTag::TAGVALUE;
     tagLiteral.value_ = tagValue;
@@ -230,32 +230,32 @@ static void ParseLiteral(const Json::Value &literal, std::vector<panda::pandasm:
     switch (tagValue) {
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::BOOL): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::BOOL;
-            valueLiteral.value_ = literal["value"].asBool();
+            valueLiteral.value_ = literal["v"].asBool();
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::INTEGER): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::INTEGER;
-            valueLiteral.value_ = static_cast<uint32_t>(literal["value"].asInt());
+            valueLiteral.value_ = static_cast<uint32_t>(literal["v"].asInt());
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::DOUBLE): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::DOUBLE;
-            valueLiteral.value_ = literal["value"].asDouble();
+            valueLiteral.value_ = literal["v"].asDouble();
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::STRING): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::STRING;
-            valueLiteral.value_ = ParseString(literal["value"].asString());
+            valueLiteral.value_ = ParseString(literal["v"].asString());
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::METHOD): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::METHOD;
-            valueLiteral.value_ = ParseString(literal["value"].asString());
+            valueLiteral.value_ = ParseString(literal["v"].asString());
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::GENERATORMETHOD): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::GENERATORMETHOD;
-            valueLiteral.value_ = ParseString(literal["value"].asString());
+            valueLiteral.value_ = ParseString(literal["v"].asString());
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::ACCESSOR): {
@@ -265,7 +265,7 @@ static void ParseLiteral(const Json::Value &literal, std::vector<panda::pandasm:
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::METHODAFFILIATE): {
             valueLiteral.tag_ = panda::panda_file::LiteralTag::METHODAFFILIATE;
-            valueLiteral.value_ = static_cast<uint16_t>(literal["value"].asUInt());
+            valueLiteral.value_ = static_cast<uint16_t>(literal["v"].asUInt());
             break;
         }
         case static_cast<uint8_t>(panda::panda_file::LiteralTag::NULLVALUE): {
@@ -294,12 +294,12 @@ static panda::pandasm::Record ParseRecord(const Json::Value &record)
 
     int boundLeft = -1;
     if (record.isMember("bound_left") && record["bound_left"].isInt()) {
-        boundLeft = record["bound_left"].asUInt();
+        boundLeft = record["bound_left"].asInt();
     }
 
     int boundRight = -1;
     if (record.isMember("bound_right") && record["bound_right"].isInt()) {
-        boundRight = record["bound_right"].asUInt();
+        boundRight = record["bound_right"].asInt();
     }
 
     int lineNumber = -1;
@@ -325,9 +325,8 @@ static panda::pandasm::Record ParseRecord(const Json::Value &record)
 
 static void ParseInstructionOpCode(const Json::Value &ins, panda::pandasm::Ins &pandaIns)
 {
-    // read opcode as string (can be changed in future)
-    if (ins.isMember("op") && ins["op"].isString()) {
-        std::string opcode = ins["op"].asString();
+    if (ins.isMember("o") && ins["o"].isInt()) {
+        auto opcode = ins["o"].asInt();
         if (g_opcodeMap.find(opcode) != g_opcodeMap.end()) {
             pandaIns.opcode = g_opcodeMap[opcode];
         }
@@ -336,8 +335,8 @@ static void ParseInstructionOpCode(const Json::Value &ins, panda::pandasm::Ins &
 
 static void ParseInstructionRegs(const Json::Value &ins, panda::pandasm::Ins &pandaIns)
 {
-    if (ins.isMember("regs") && ins["regs"].isArray()) {
-        auto regs = ins["regs"];
+    if (ins.isMember("r") && ins["r"].isArray()) {
+        auto regs = ins["r"];
         for (Json::ArrayIndex i = 0; i < regs.size(); ++i) {
             pandaIns.regs.emplace_back(regs[i].asUInt());
         }
@@ -346,8 +345,8 @@ static void ParseInstructionRegs(const Json::Value &ins, panda::pandasm::Ins &pa
 
 static void ParseInstructionIds(const Json::Value &ins, panda::pandasm::Ins &pandaIns)
 {
-    if (ins.isMember("ids") && ins["ids"].isArray()) {
-        auto ids = ins["ids"];
+    if (ins.isMember("id") && ins["id"].isArray()) {
+        auto ids = ins["id"];
         for (Json::ArrayIndex i = 0; i < ids.size(); ++i) {
             if (ids[i].isString()) {
                 pandaIns.ids.emplace_back(ParseString(ids[i].asString()));
@@ -358,8 +357,8 @@ static void ParseInstructionIds(const Json::Value &ins, panda::pandasm::Ins &pan
 
 static void ParseInstructionImms(const Json::Value &ins, panda::pandasm::Ins &pandaIns)
 {
-    if (ins.isMember("imms") && ins["imms"].isArray()) {
-        auto imms = ins["imms"];
+    if (ins.isMember("im") && ins["im"].isArray()) {
+        auto imms = ins["im"];
         for (Json::ArrayIndex i = 0; i < imms.size(); ++i) {
             double imsValue = imms[i].asDouble();
             Logd("imm: %lf ", imsValue);
@@ -375,8 +374,8 @@ static void ParseInstructionImms(const Json::Value &ins, panda::pandasm::Ins &pa
 
 static void ParseInstructionLabel(const Json::Value &ins, panda::pandasm::Ins &pandaIns)
 {
-    if (ins.isMember("label") && ins["label"].isString()) {
-        std::string label = ins["label"].asString();
+    if (ins.isMember("l") && ins["l"].isString()) {
+        std::string label = ins["l"].asString();
         if (label.length() != 0) {
             Logd("label:\t%s", label.c_str());
             pandaIns.set_label = true;
@@ -389,28 +388,31 @@ static void ParseInstructionLabel(const Json::Value &ins, panda::pandasm::Ins &p
 static void ParseInstructionDebugInfo(const Json::Value &ins, panda::pandasm::Ins &pandaIns)
 {
     panda::pandasm::debuginfo::Ins insDebug;
-    if (ins.isMember("debug_pos_info") && ins["debug_pos_info"].isObject()) {
-        auto debugPosInfo = ins["debug_pos_info"];
+    if (ins.isMember("d") && ins["d"].isObject()) {
+        auto debugPosInfo = ins["d"];
         if (GetDebugModeEnabled()) {
-            if (debugPosInfo.isMember("boundLeft") && debugPosInfo["boundLeft"].isInt()) {
-                insDebug.bound_left = debugPosInfo["boundLeft"].asUInt();
+            if (debugPosInfo.isMember("bl") && debugPosInfo["bl"].isInt()) {
+                insDebug.bound_left = debugPosInfo["bl"].asUInt();
             }
 
-            if (debugPosInfo.isMember("boundRight") && debugPosInfo["boundRight"].isInt()) {
-                insDebug.bound_right = debugPosInfo["boundRight"].asUInt();
+            if (debugPosInfo.isMember("br") && debugPosInfo["br"].isInt()) {
+                insDebug.bound_right = debugPosInfo["br"].asUInt();
             }
 
-            if (debugPosInfo.isMember("wholeLine") && debugPosInfo["wholeLine"].isString()) {
-                insDebug.whole_line = debugPosInfo["wholeLine"].asString();
+            // whole line
+            if (debugPosInfo.isMember("w") && debugPosInfo["w"].isString()) {
+                insDebug.whole_line = debugPosInfo["w"].asString();
             }
 
-            if (debugPosInfo.isMember("columnNum") && debugPosInfo["columnNum"].isInt()) {
-                insDebug.column_number = debugPosInfo["columnNum"].asInt();
+            // column number
+            if (debugPosInfo.isMember("c") && debugPosInfo["c"].isInt()) {
+                insDebug.column_number = debugPosInfo["c"].asInt();
             }
         }
 
-        if (debugPosInfo.isMember("lineNum") && debugPosInfo["lineNum"].isInt()) {
-            insDebug.line_number = debugPosInfo["lineNum"].asInt();
+        // line number
+        if (debugPosInfo.isMember("l") && debugPosInfo["l"].isInt()) {
+            insDebug.line_number = debugPosInfo["l"].asInt();
         }
     }
 
@@ -435,36 +437,36 @@ static int ParseVariablesDebugInfo(const Json::Value &function, panda::pandasm::
         return RETURN_SUCCESS;
     }
 
-    if (function.isMember("variables") && function["variables"].isArray()) {
-        for (Json::ArrayIndex i = 0; i < function["variables"].size(); ++i) {
-            if (!function["variables"][i].isObject()) {
+    if (function.isMember("v") && function["v"].isArray()) {
+        for (Json::ArrayIndex i = 0; i < function["v"].size(); ++i) {
+            if (!function["v"][i].isObject()) {
                 continue;
             }
 
             panda::pandasm::debuginfo::LocalVariable variableDebug;
-            auto variable = function["variables"][i];
-            if (variable.isMember("name") && variable["name"].isString()) {
-                variableDebug.name = variable["name"].asString();
+            auto variable = function["v"][i];
+            if (variable.isMember("n") && variable["n"].isString()) {
+                variableDebug.name = variable["n"].asString();  // name
             }
 
-            if (variable.isMember("signature") && variable["signature"].isString()) {
-                variableDebug.signature = variable["signature"].asString();
+            if (variable.isMember("s") && variable["s"].isString()) {
+                variableDebug.signature = variable["s"].asString();  // signature
             }
 
-            if (variable.isMember("signatureType") && variable["signatureType"].isString()) {
-                variableDebug.signature_type = variable["signatureType"].asString();
+            if (variable.isMember("st") && variable["st"].isString()) {
+                variableDebug.signature_type = variable["st"].asString();  // signature type
             }
 
-            if (variable.isMember("reg") && variable["reg"].isInt()) {
-                variableDebug.reg = variable["reg"].asInt();
+            if (variable.isMember("r") && variable["r"].isInt()) {
+                variableDebug.reg = variable["r"].asInt();  // regs
             }
 
             if (variable.isMember("start") && variable["start"].isInt()) {
-                variableDebug.start = variable["start"].asUInt();
+                variableDebug.start = variable["start"].asUInt();  // start
             }
 
-            if (variable.isMember("length") && variable["length"].isInt()) {
-                variableDebug.length = variable["length"].asUInt();
+            if (variable.isMember("len") && variable["len"].isInt()) {
+                variableDebug.length = variable["len"].asUInt();  // length
             }
 
             pandaFunc.local_variable_debug.push_back(variableDebug);
@@ -476,13 +478,13 @@ static int ParseVariablesDebugInfo(const Json::Value &function, panda::pandasm::
 
 static int ParseSourceFileDebugInfo(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
-    if (function.isMember("sourceFile") && function["sourceFile"].isString()) {
-        pandaFunc.source_file = function["sourceFile"].asString();
+    if (function.isMember("sf") && function["sf"].isString()) {
+        pandaFunc.source_file = function["sf"].asString();
     }
 
     if (GetDebugModeEnabled()) {
-        if (function.isMember("sourceCode") && function["sourceCode"].isString()) {
-            pandaFunc.source_code = function["sourceCode"].asString();
+        if (function.isMember("sc") && function["sc"].isString()) {
+            pandaFunc.source_code = function["sc"].asString();
         }
     }
 
@@ -493,20 +495,17 @@ static panda::pandasm::Function::CatchBlock ParsecatchBlock(const Json::Value &c
 {
     panda::pandasm::Function::CatchBlock pandaCatchBlock;
 
-    if (catch_block.isMember("tryBeginLabel") && catch_block["tryBeginLabel"].isString()) {
-        pandaCatchBlock.try_begin_label = catch_block["tryBeginLabel"].asString();
+    if (catch_block.isMember("tb_lab") && catch_block["tb_lab"].isString()) {
+        pandaCatchBlock.try_begin_label = catch_block["tb_lab"].asString();
     }
 
-    if (catch_block.isMember("tryEndLabel") && catch_block["tryEndLabel"].isString()) {
-        pandaCatchBlock.try_end_label = catch_block["tryEndLabel"].asString();
+    if (catch_block.isMember("te_lab") && catch_block["te_lab"].isString()) {
+        pandaCatchBlock.try_end_label = catch_block["te_lab"].asString();
     }
 
-    if (catch_block.isMember("catchBeginLabel") && catch_block["catchBeginLabel"].isString()) {
-        pandaCatchBlock.catch_begin_label = catch_block["catchBeginLabel"].asString();
-    }
-
-    if (catch_block.isMember("catchBeginLabel") && catch_block["catchBeginLabel"].isString()) {
-        pandaCatchBlock.catch_end_label = catch_block["catchBeginLabel"].asString();
+    if (catch_block.isMember("cb_lab") && catch_block["cb_lab"].isString()) {
+        pandaCatchBlock.catch_begin_label = catch_block["cb_lab"].asString();
+        pandaCatchBlock.catch_end_label = catch_block["cb_lab"].asString();
     }
 
     return pandaCatchBlock;
@@ -515,24 +514,24 @@ static panda::pandasm::Function::CatchBlock ParsecatchBlock(const Json::Value &c
 panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
 {
     std::string funcName = "";
-    if (function.isMember("name") && function["name"].isString()) {
-        funcName = function["name"].asString();
+    if (function.isMember("n") && function["n"].isString()) {
+        funcName = function["n"].asString();
     }
 
     std::string funcRetType = "";
     auto params = std::vector<panda::pandasm::Function::Parameter>();
-    if (function.isMember("signature") && function["signature"].isObject()) {
-        auto signature = function["signature"];
-        if (signature.isMember("retType") && signature["retType"].isString()) {
-            funcRetType = signature["retType"].asString();
+    if (function.isMember("s") && function["s"].isObject()) {
+        auto signature = function["s"];
+        if (signature.isMember("rt") && signature["rt"].isString()) {
+            funcRetType = signature["rt"].asString();
         } else {
             funcRetType = "any";
         }
 
         Logd("parsing function: %s return type: %s \n", funcName.c_str(), funcRetType.c_str());
 
-        if (signature.isMember("params") && signature["params"].isInt()) {
-            auto paramNum = signature["params"].asUInt();
+        if (signature.isMember("p") && signature["p"].isInt()) {
+            auto paramNum = signature["p"].asUInt();
             for (Json::ArrayIndex i = 0; i < paramNum; ++i) {
                 params.emplace_back(panda::pandasm::Type("any", 0), LANG_EXT);
             }
@@ -540,8 +539,8 @@ panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
     }
 
     uint32_t regsNum = 0;
-    if (function.isMember("regs_num") && function["regs_num"].isInt()) {
-        regsNum = function["regs_num"].asUInt();
+    if (function.isMember("r") && function["r"].isInt()) {
+        regsNum = function["r"].asUInt();
     }
 
     auto pandaFunc = MakeFuncDefintion(funcName, funcRetType);
@@ -551,23 +550,10 @@ panda::pandasm::Function GetFunctionDefintion(const Json::Value &function)
     return pandaFunc;
 }
 
-static void ParseFunctionMetadata(const Json::Value &function, panda::pandasm::Function &pandaFunc)
-{
-    if (function.isMember("metadata") && function["metadata"].isObject()) {
-        auto metadata = function["metadata"];
-        if (metadata.isMember("attribute") && metadata["attribute"].isString()) {
-            std::string fnMetadataAttribute = metadata["attribute"].asString();
-            if (fnMetadataAttribute.length() > 0) {
-                pandaFunc.metadata->SetAttribute(fnMetadataAttribute);
-            }
-        }
-    }
-}
-
 static void ParseFunctionInstructions(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
-    if (function.isMember("ins") && function["ins"].isArray()) {
-        auto ins = function["ins"];
+    if (function.isMember("i") && function["i"].isArray()) {
+        auto ins = function["i"];
         for (Json::ArrayIndex i = 0; i < ins.size(); ++i) {
             if (!ins[i].isObject()) {
                 continue;
@@ -582,8 +568,8 @@ static void ParseFunctionInstructions(const Json::Value &function, panda::pandas
 
 static void ParseFunctionLabels(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
-    if (function.isMember("labels") && function["labels"].isArray()) {
-        auto labels = function["labels"];
+    if (function.isMember("l") && function["l"].isArray()) {
+        auto labels = function["l"];
         for (Json::ArrayIndex i = 0; i < labels.size(); ++i) {
             auto labelName = labels[i].asString();
             auto pandaLabel = MakeLabel(labelName);
@@ -596,8 +582,8 @@ static void ParseFunctionLabels(const Json::Value &function, panda::pandasm::Fun
 
 static void ParseFunctionCatchTables(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
-    if (function.isMember("catchTables") && function["catchTables"].isArray()) {
-        auto catchTables = function["catchTables"];
+    if (function.isMember("ca_tab") && function["ca_tab"].isArray()) {
+        auto catchTables = function["ca_tab"];
         for (Json::ArrayIndex i = 0; i < catchTables.size(); ++i) {
             auto catchTable = catchTables[i];
             if (!catchTable.isObject()) {
@@ -612,17 +598,21 @@ static void ParseFunctionCatchTables(const Json::Value &function, panda::pandasm
 
 static void ParseFunctionCallType(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
+    if (g_debugModeEnabled) {
+        return;
+    }
+
     std::string funcName = "";
-    if (function.isMember("name") && function["name"].isString()) {
-        funcName = function["name"].asString();
+    if (function.isMember("n") && function["n"].isString()) {
+        funcName = function["n"].asString();
     }
     if (funcName == "func_main_0") {
         return ;
     }
 
     uint32_t callType = 0;
-    if (function.isMember("callType") && function["callType"].isInt()) {
-        callType = function["callType"].asUInt();
+    if (function.isMember("ct") && function["ct"].isInt()) {
+        callType = function["ct"].asUInt();
     }
     panda::pandasm::AnnotationData callTypeAnnotation("_ESCallTypeAnnotation");
     std::string annotationName = "callType";
@@ -636,28 +626,16 @@ static void ParseFunctionCallType(const Json::Value &function, panda::pandasm::F
 
 static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
-    if (function.isMember("typeInfo") && function["typeInfo"].isArray()) {
-        auto typeInfo = function["typeInfo"];
+    if (function.isMember("ti") && function["ti"].isArray()) {
+        auto typeInfo = function["ti"];
         panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
         std::vector<panda::pandasm::ScalarValue> elements;
+
         for (Json::ArrayIndex i = 0; i < typeInfo.size(); i++) {
-            auto type = typeInfo[i];
-            if (!type.isObject()) {
-                continue;
-            }
-
-            uint32_t vregNum = 0;
-            if (type.isMember("vregNum") && type["vregNum"].isInt()) {
-                vregNum = type["vregNum"].asUInt();
-            }
-
-            uint32_t typeIndex = 0;
-            if (type.isMember("typeIndex") && type["typeIndex"].isInt()) {
-                typeIndex = type["typeIndex"].asUInt();
-            }
+            auto typeIndex = typeInfo[i].asUInt();
 
             panda::pandasm::ScalarValue vNum(
-                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(vregNum));
+                panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(i));
             elements.emplace_back(std::move(vNum));
             panda::pandasm::ScalarValue tIndex(
                 panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(typeIndex));
@@ -677,15 +655,15 @@ static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::F
 static void ParseFunctionExportedType(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
     std::string funcName = "";
-    if (function.isMember("name") && function["name"].isString()) {
-        funcName = function["name"].asString();
+    if (function.isMember("n") && function["n"].isString()) {
+        funcName = function["n"].asString();
         if (funcName != "func_main_0") {
             return;
         }
     }
 
-    if (function.isMember("exportedSymbol2Types") && function["exportedSymbol2Types"].isArray()) {
-        auto exportedTypes = function["exportedSymbol2Types"];
+    if (function.isMember("es2t") && function["es2t"].isArray()) {
+        auto exportedTypes = function["es2t"];
         panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
         std::vector<panda::pandasm::ScalarValue> symbolElements;
         std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
@@ -733,15 +711,15 @@ static void ParseFunctionExportedType(const Json::Value &function, panda::pandas
 static void ParseFunctionDeclaredType(const Json::Value &function, panda::pandasm::Function &pandaFunc)
 {
     std::string funcName = "";
-    if (function.isMember("name") && function["name"].isString()) {
-        funcName = function["name"].asString();
+    if (function.isMember("n") && function["n"].isString()) {
+        funcName = function["n"].asString();
         if (funcName != "func_main_0") {
             return;
         }
     }
 
-    if (function.isMember("declaredSymbol2Types") && function["declaredSymbol2Types"].isArray()) {
-        auto declaredTypes = function["declaredSymbol2Types"];
+    if (function.isMember("ds2t") && function["ds2t"].isArray()) {
+        auto declaredTypes = function["ds2t"];
         panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
         std::vector<panda::pandasm::ScalarValue> symbolElements;
         std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
@@ -789,7 +767,6 @@ static void ParseFunctionDeclaredType(const Json::Value &function, panda::pandas
 static panda::pandasm::Function ParseFunction(const Json::Value &function)
 {
     auto pandaFunc = GetFunctionDefintion(function);
-    ParseFunctionMetadata(function, pandaFunc);
     ParseFunctionInstructions(function, pandaFunc);
     ParseVariablesDebugInfo(function, pandaFunc);
     ParseSourceFileDebugInfo(function, pandaFunc);
@@ -924,26 +901,29 @@ static void ParseOptions(const Json::Value &rootValue, panda::pandasm::Program &
 
 static void ParseSingleFunc(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
-    auto function = ParseFunction(rootValue["func_body"]);
+    auto function = ParseFunction(rootValue["fb"]);
     prog.function_table.emplace(function.name.c_str(), std::move(function));
 }
 
 static void ParseSingleRec(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
-    auto record = ParseRecord(rootValue["rec_body"]);
+    auto record = ParseRecord(rootValue["rb"]);
     prog.record_table.emplace(record.name.c_str(), std::move(record));
 }
 
 static void ParseSingleStr(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
-    prog.strings.insert(ParseString(rootValue["string"].asString()));
+    auto strArr = rootValue["s"];
+    for (Json::ArrayIndex i = 0; i < strArr.size(); ++i) {
+        prog.strings.insert(ParseString(strArr[i].asString()));
+    }
 }
 
 static void ParseSingleLiteralBuf(const Json::Value &rootValue, panda::pandasm::Program &prog)
 {
     std::vector<panda::pandasm::LiteralArray::Literal> literalArray;
-    auto literalBuffer = rootValue["literalArray"];
-    auto literals = literalBuffer["literalBuffer"];
+    auto literalBuffer = rootValue["lit_arr"];
+    auto literals = literalBuffer["lb"];
     for (Json::ArrayIndex i = 0; i < literals.size(); ++i) {
         ParseLiteral(literals[i], literalArray);
     }
@@ -960,30 +940,30 @@ static int ParseSmallPieceJson(const std::string &subJson, panda::pandasm::Progr
         return RETURN_FAILED;
     }
     int type = -1;
-    if (rootValue.isMember("type") && rootValue["type"].isInt()) {
-        type = rootValue["type"].asInt();
+    if (rootValue.isMember("t") && rootValue["t"].isInt()) {
+        type = rootValue["t"].asInt();
     }
     switch (type) {
         case static_cast<int>(JsonType::FUNCTION): {
-            if (rootValue.isMember("func_body") && rootValue["func_body"].isObject()) {
+            if (rootValue.isMember("fb") && rootValue["fb"].isObject()) {
                 ParseSingleFunc(rootValue, prog);
             }
             break;
         }
         case static_cast<int>(JsonType::RECORD): {
-            if (rootValue.isMember("rec_body") && rootValue["rec_body"].isObject()) {
+            if (rootValue.isMember("rb") && rootValue["rb"].isObject()) {
                 ParseSingleRec(rootValue, prog);
             }
             break;
         }
         case static_cast<int>(JsonType::STRING): {
-            if (rootValue.isMember("string") && rootValue["string"].isString()) {
+            if (rootValue.isMember("s") && rootValue["s"].isArray()) {
                 ParseSingleStr(rootValue, prog);
             }
             break;
         }
         case static_cast<int>(JsonType::LITERALBUFFER): {
-            if (rootValue.isMember("literalArray") && rootValue["literalArray"].isObject()) {
+            if (rootValue.isMember("lit_arr") && rootValue["lit_arr"].isObject()) {
                 ParseSingleLiteralBuf(rootValue, prog);
             }
             break;
@@ -1031,13 +1011,99 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-bool GenerateProgram(const std::string &data, std::string output, int optLevel, std::string optLogLevel)
+static bool IsStartOrEndPosition(int idx, char *buff, std::string &data)
+{
+    if (buff[idx] != '$') {
+        return false;
+    }
+
+    if (idx == 0 && (data.empty() || data.back() != '#')) {
+        return true;
+    }
+
+    if (idx != 0 && buff[idx - 1] != '#') {
+        return true;
+    }
+
+    return false;
+}
+
+static bool HandleBuffer(int &ret, bool &isStartDollar, char *buff, std::string &data, panda::pandasm::Program &prog)
+{
+    uint32_t startPos = 0;
+    for (int idx = 0; idx < ret; idx++) {
+        if (IsStartOrEndPosition(idx, buff, data)) {
+            if (isStartDollar) {
+                startPos = idx + 1;
+                isStartDollar = false;
+                continue;
+            }
+
+            std::string substr(buff + startPos, buff + idx);
+            data += substr;
+            ReplaceAllDistinct(data, "#$", "$");
+            if (ParseSmallPieceJson(data, prog)) {
+                std::cerr << "fail to parse stringify json" << std::endl;
+                return false;
+            }
+            isStartDollar = true;
+            // clear data after parsing
+            data.clear();
+        }
+    }
+
+    if (!isStartDollar) {
+        std::string substr(buff + startPos, buff + ret);
+        data += substr;
+    }
+
+    return true;
+}
+
+static bool ReadFromPipe(panda::pandasm::Program &prog)
+{
+    std::string data;
+    bool isStartDollar = true;
+    const size_t bufSize = 4096;
+    // the parent process open a pipe to this child process with fd of 3
+    const size_t fd = 3;
+
+    char buff[bufSize + 1];
+    int ret = 0;
+
+    while ((ret = read(fd, buff, bufSize)) != 0) {
+        if (ret < 0) {
+            std::cerr << "Read pipe error" << std::endl;
+            return false;
+        }
+        buff[ret] = '\0';
+
+        if (!HandleBuffer(ret, isStartDollar, buff, data, prog)) {
+            std::cerr << "fail to handle buffer" << std::endl;
+            return false;
+        }
+    }
+
+    Logd("finish parsing from pipe");
+    return true;
+}
+
+bool GenerateProgram([[maybe_unused]] const std::string &data, std::string output, bool isParsingFromPipe,
+                     int optLevel, std::string optLogLevel)
 {
     panda::pandasm::Program prog = panda::pandasm::Program();
     prog.lang = panda::pandasm::extensions::Language::ECMASCRIPT;
-    if (!ParseData(data, prog)) {
-        std::cerr << "fail to parse Data!" << std::endl;
-        return false;
+
+    if (isParsingFromPipe) {
+        if (!ReadFromPipe(prog)) {
+            std::cerr << "fail to parse Pipe!" << std::endl;
+            return false;
+        }
+    } else {
+        if (!ParseData(data, prog)) {
+            std::cerr << "fail to parse Data!" << std::endl;
+            return false;
+        }
     }
 
     Logd("parsing done, calling pandasm\n");
@@ -1070,7 +1136,7 @@ bool GenerateProgram(const std::string &data, std::string output, int optLevel, 
 #endif
 
     if (!panda::pandasm::AsmEmitter::Emit(output.c_str(), prog, nullptr)) {
-        std::cerr << "Failed to emit binary data" << std::endl;
+        std::cerr << "Failed to emit binary data: " << panda::pandasm::AsmEmitter::GetLastError() << std::endl;
         return false;
     }
 
@@ -1113,32 +1179,5 @@ bool HandleJsonFile(const std::string &input, std::string &data)
     Logd(data.c_str());
     Logd("----------------------------------");
 
-    return true;
-}
-
-bool ReadFromPipe(std::string &data)
-{
-    const size_t bufSize = 4096;
-    // the parent process open a pipe to this child process with fd of 3
-    const size_t fd = 3;
-
-    char buff[bufSize + 1];
-    int ret = 0;
-
-    while ((ret = read(fd, buff, bufSize)) != 0) {
-        if (ret < 0) {
-            std::cerr << "Read pipe error" << std::endl;
-            return false;
-        }
-        buff[ret] = '\0';
-        data += buff;
-    }
-
-    if (data.empty()) {
-        std::cerr << "Nothing has been read from pipe" << std::endl;
-        return false;
-    }
-
-    Logd("finish reading from pipe");
     return true;
 }

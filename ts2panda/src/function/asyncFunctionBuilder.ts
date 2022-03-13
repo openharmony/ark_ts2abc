@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ts from "typescript";
+import * as ts from "typescript";
 import { CacheList, getVregisterCache } from "../base/vregisterCache";
 import { NodeKind } from "../debuginfo";
 import {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@ import {
     setVariableExported
 } from "./base/util";
 import { CacheList, getVregisterCache } from "./base/vregisterCache";
+import { CmdOptions } from "./cmdOptions";
 import { CompilerDriver } from "./compilerDriver";
 import { DebugInfo, NodeKind } from "./debuginfo";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
@@ -85,7 +86,6 @@ import {
 import {
     checkValidUseSuperBeforeSuper,
     compileClassDeclaration,
-    compileConstructor,
     compileDefaultConstructor,
     compileDefaultInitClassMembers,
     compileReturnThis4Ctor,
@@ -148,7 +148,7 @@ export class Compiler {
 
         // spare v3 to save the currrent lexcial env
         getVregisterCache(this.pandaGen, CacheList.LexEnv);
-        this.envUnion.push(getVregisterCache(this.pandaGen, CacheList.LexEnv))
+        this.envUnion.push(getVregisterCache(this.pandaGen, CacheList.LexEnv));
 
         this.pandaGen.loadAccFromArgs(this.rootNode);
     }
@@ -177,11 +177,15 @@ export class Compiler {
     }
 
     private callOpt() {
+        if (CmdOptions.isDebugMode()) {
+            return;
+        }
         let CallMap: Map<String, number> = new Map([
             ["this", 1],
             ["4newTarget", 2],
             ["0newTarget", 2],
-            ["argumentsOrRestargs", 4]
+            ["argumentsOrRestargs", 4],
+            ["4funcObj", 8]
         ]);
         let callType = 0;
         let scope = this.pandaGen.getScope();
@@ -205,6 +209,7 @@ export class Compiler {
                 tempLocals.push(this.pandaGen.getLocals()[i]);
             }
             let name2variable = scope.getName2variable();
+            // @ts-ignore
             name2variable.forEach((value, key) => {
                 if (tempNames.has(key)) {
                     name2variable.delete(key)
@@ -254,18 +259,25 @@ export class Compiler {
     private storeSpecialArg2LexEnv(arg: string) {
         let variableInfo = this.scope.find(arg);
         let v = variableInfo.v;
+        let pandaGen = this.pandaGen;
 
-        if (v && v.isLexVar) {
-            if ((arg === "this" || arg === "4newTarget") && variableInfo.scope instanceof FunctionScope) {
-                variableInfo.scope.setCallOpt(arg);
+        if (CmdOptions.isDebugMode()) {
+            variableInfo.scope!.setLexVar(v!, this.scope);
+            pandaGen.storeLexicalVar(this.rootNode, variableInfo.level,
+                                     (<Variable>variableInfo.v).idxLex,
+                                     pandaGen.getVregForVariable(<Variable>variableInfo.v));
+        } else {
+            if (v && v.isLexVar) {
+                if ((arg === "this" || arg === "4newTarget") && variableInfo.scope instanceof FunctionScope) {
+                    variableInfo.scope.setCallOpt(arg);
+                }
+                if (arg === "arguments" && variableInfo.scope instanceof FunctionScope) {
+                    variableInfo.scope.setArgumentsOrRestargs();
+                }
+                let vreg = "4funcObj" === arg ? getVregisterCache(pandaGen, CacheList.FUNC) :
+                                                pandaGen.getVregForVariable(<Variable>variableInfo.v);
+                pandaGen.storeLexicalVar(this.rootNode, variableInfo.level, v.idxLex, vreg);
             }
-            if (arg === "arguments" && variableInfo.scope instanceof FunctionScope) {
-                variableInfo.scope.setArgumentsOrRestargs();
-            }
-            let pandaGen = this.pandaGen;
-            let vreg = "4funcObj" === arg ? getVregisterCache(pandaGen, CacheList.FUNC) : pandaGen.getVregForVariable(<Variable>variableInfo.v);
-            let slot = (<Variable>variableInfo.v).idxLex;
-            pandaGen.storeLexicalVar(this.rootNode, variableInfo.level, slot, vreg);
         }
     }
 
@@ -293,9 +305,9 @@ export class Compiler {
         if (!unreachableFlag) { // exit GlobalScopefunction or Function Block return
             if (this.funcBuilder instanceof AsyncFunctionBuilder) {
                 this.funcBuilder.resolve(NodeKind.Invalid, getVregisterCache(pandaGen, CacheList.undefined));
-                pandaGen.return(DebugInfo.getLastNode());
+                pandaGen.return(NodeKind.Invalid);
             } else {
-                pandaGen.returnUndefined(DebugInfo.getLastNode());
+                pandaGen.returnUndefined(NodeKind.Invalid);
             }
         }
     }
@@ -624,6 +636,7 @@ export class Compiler {
     compileFinallyBeforeCFC(endTry: TryStatement | undefined, cfc: ControlFlowChange, continueTargetLabel: Label | undefined) {// compile finally before control flow change
         let startTry = TryStatement.getCurrentTryStatement();
         let originTry = startTry;
+        let currentScope = this.scope;
         for (; startTry != endTry; startTry = startTry?.getOuterTryStatement()) {
 
             if (startTry && startTry.trybuilder) {
@@ -643,6 +656,7 @@ export class Compiler {
                 updateCatchTables(originTry, startTry, inlinedLabelPair);
             }
         }
+        this.scope = currentScope;
     }
 
     constructTry(node: ts.Node, tryBuilder: TryBuilderBase, endLabel?: Label) {
@@ -1497,7 +1511,7 @@ export class Compiler {
                 }
             }
 
-            if (variable.scope && variable.level >= 0) { // inner most function will load outer env instead of new a lex env
+            if (variable.scope && variable.level >= 0) { // leaf function will load outer env instead of new a lex env
                 let scope = this.scope;
                 let needSetLexVar: boolean = false;
                 while (scope != variable.scope) {

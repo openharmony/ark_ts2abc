@@ -17,7 +17,7 @@ import * as ts from "typescript";
 import { CmdOptions } from "./cmdOptions";
 import { DiagnosticCode, DiagnosticError } from "./diagnostic";
 import { findInnerExprOfParenthesis } from "./expression/parenthesizedExpression";
-import jshelpers from "./jshelpers";
+import * as jshelpers from "./jshelpers";
 import { checkStrictModeStatementList } from "./strictMode";
 import {
     isAssignmentOperator,

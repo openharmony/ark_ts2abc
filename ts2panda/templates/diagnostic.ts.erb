@@ -84,6 +84,7 @@ export function createDiagnostic(file:ts.SourceFile | undefined, location: ts.No
   return diagnostic
 }
 
+// @ts-ignore
 function diag(code:number, category:ts.DiagnosticCategory, key:string, message:string, reportsUnnecessary?:{},elidedInCompatabilityPyramid?:{}):ts.DiagnosticMessage {
    return { code: code, category: category, key: key, message: message, reportsUnnecessary: reportsUnnecessary };
 }

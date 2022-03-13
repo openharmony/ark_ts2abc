@@ -45,15 +45,15 @@ describe("TryCatch", function () {
         let catchEndLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             tryBeginLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             tryEndLabel,
             new Jmp(catchEndLabel),
             catchBeginLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaTrystglobalbyname('a'),
             catchEndLabel,
             new EcmaReturnundefined()
@@ -74,16 +74,16 @@ describe("TryCatch", function () {
         let err = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             tryBeginLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             tryEndLabel,
             new Jmp(catchEndLabel),
             catchBeginLabel,
             new StaDyn(err),
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaTrystglobalbyname('a'),
             catchEndLabel,
             new EcmaReturnundefined()
@@ -104,18 +104,18 @@ describe("TryCatch", function () {
         let exceptionVreg = new VReg();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             tryBeginLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             tryEndLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(catchEndLabel),
             catchBeginLabel,
             new StaDyn(exceptionVreg),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaTrystglobalbyname('a'),
             new LdaDyn(exceptionVreg),
             new EcmaThrowdyn(),
@@ -143,25 +143,25 @@ describe("TryCatch", function () {
         let catchEndLabel = new Label();
 
         let expected = [
-            new LdaiDyn(new Imm(ResultType.Int, 0)),
+            new LdaiDyn(new Imm(0)),
             new EcmaStlettoglobalrecord('a'),
             tryBeginLabel,
             nestedTryBeginLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 1)),
+            new LdaiDyn(new Imm(1)),
             new EcmaTrystglobalbyname('a'),
             nestedTryEndLabel,
             new Jmp(tryEndLabel),
             nestedCatchBeginLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 2)),
+            new LdaiDyn(new Imm(2)),
             new EcmaTrystglobalbyname('a'),
             nestedCatchEndLabel,
             tryEndLabel,
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaTrystglobalbyname('a'),
             new Jmp(catchEndLabel),
             catchBeginLabel,
             new StaDyn(exceptionVreg),
-            new LdaiDyn(new Imm(ResultType.Int, 3)),
+            new LdaiDyn(new Imm(3)),
             new EcmaTrystglobalbyname('a'),
             new LdaDyn(exceptionVreg),
             new EcmaThrowdyn(),

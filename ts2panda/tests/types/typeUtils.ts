@@ -20,7 +20,6 @@ import {
     SnippetCompiler
 } from "../utils/base";
 import { Pass } from "../../src/pass";
-import { ICPass } from "../../src/pass/ICPass";
 import { RegAlloc } from "../../src/regAllocator";
 import { TypeChecker } from "../../src/typeChecker";
 import { CmdOptions } from "../../src/cmdOptions";
@@ -52,7 +51,6 @@ export function compileTsWithType(fileName: string) {
     typeChecker.setTypeChecker(program.getTypeChecker());
     let passes: Pass[] = [
         new CacheExpander(),
-        new ICPass(),
         new RegAlloc()
     ];
     let snippetCompiler = new SnippetCompiler();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,12 +57,16 @@ import {
     EcmaLdsuperbyname,
     EcmaLdsuperbyvalue,
     EcmaNewlexenvdyn,
+    EcmaNewlexenvwithnamedyn,
     EcmaNewobjdynrange,
     EcmaPoplexenvdyn,
     EcmaReturnundefined,
     EcmaSetobjectwithproto,
     EcmaStarrayspread,
+    EcmaStclasstoglobalrecord,
+    EcmaStconsttoglobalrecord,
     EcmaStglobalvar,
+    EcmaStlettoglobalrecord,
     EcmaStlexvardyn,
     EcmaStmodulevar,
     EcmaStobjbyindex,
@@ -70,8 +74,8 @@ import {
     EcmaStobjbyvalue,
     EcmaStownbyindex,
     EcmaStownbyname,
-    EcmaStownbyvalue,
     EcmaStownbynamewithnameset,
+    EcmaStownbyvalue,
     EcmaStownbyvaluewithnameset,
     EcmaStsuperbyname,
     EcmaStsuperbyvalue,
@@ -96,21 +100,17 @@ import {
     LdaiDyn,
     LdaStr,
     MovDyn,
-    ResultType,
     StaDyn,
-    EcmaStclasstoglobalrecord,
-    EcmaStconsttoglobalrecord,
-    EcmaStlettoglobalrecord,
     EcmaLdbigint,
     VReg
 } from "../irnodes";
 
 export function loadAccumulatorInt(value: number): IRNode {
-    return new LdaiDyn(new Imm(ResultType.Int, value));
+    return new LdaiDyn(new Imm(value));
 }
 
 export function loadAccumulatorFloat(value: number): IRNode {
-    return new FldaiDyn(new Imm(ResultType.Float, value));
+    return new FldaiDyn(new Imm(value));
 }
 
 export function loadAccumulatorString(value: string): IRNode {
@@ -161,8 +161,11 @@ export function throwDeleteSuperProperty() {
     return new EcmaThrowdeletesuperproperty();
 }
 
-export function newLexicalEnv(numVars: number) {
-    return new EcmaNewlexenvdyn(new Imm(ResultType.Int, numVars));
+export function newLexicalEnv(numVars: number, scopeInfoIdx: number | undefined) {
+    if (scopeInfoIdx == undefined) {
+        return new EcmaNewlexenvdyn(new Imm(numVars));
+    }
+    return new EcmaNewlexenvwithnamedyn(new Imm(numVars), new Imm(scopeInfoIdx));
 }
 
 export function loadLexicalEnv() {
@@ -174,11 +177,11 @@ export function popLexicalEnv() {
 }
 
 export function loadLexicalVar(level: number, slot: number) {
-    return new EcmaLdlexvardyn(new Imm(ResultType.Int, level), new Imm(ResultType.Int, slot));
+    return new EcmaLdlexvardyn(new Imm(level), new Imm(slot));
 }
 
 export function storeLexicalVar(level: number, slot: number, value: VReg) {
-    return new EcmaStlexvardyn(new Imm(ResultType.Int, level), new Imm(ResultType.Int, slot), value);
+    return new EcmaStlexvardyn(new Imm(level), new Imm(slot), value);
 }
 
 export function tryLoadGlobalByName(key: string) {
@@ -206,11 +209,11 @@ export function storeObjByName(obj: VReg, key: string) {
 }
 
 export function loadObjByIndex(obj: VReg, index: number) {
-    return new EcmaLdobjbyindex(obj, new Imm(ResultType.Int, index));
+    return new EcmaLdobjbyindex(obj, new Imm(index));
 }
 
 export function storeObjByIndex(obj: VReg, index: number) {
-    return new EcmaStobjbyindex(obj, new Imm(ResultType.Int, index));
+    return new EcmaStobjbyindex(obj, new Imm(index));
 }
 
 export function loadObjByValue(obj: VReg, prop: VReg): IRNode {
@@ -226,7 +229,7 @@ export function storeOwnByName(obj: VReg, key: string, nameSetting: boolean): IR
 }
 
 export function storeOwnByIndex(obj: VReg, index: number) {
-    return new EcmaStownbyindex(obj, new Imm(ResultType.Int, index));
+    return new EcmaStownbyindex(obj, new Imm(index));
 }
 
 export function storeOwnByValue(obj: VReg, value: VReg, nameSetting: boolean) {
@@ -234,7 +237,7 @@ export function storeOwnByValue(obj: VReg, value: VReg, nameSetting: boolean) {
 }
 
 export function throwIfSuperNotCorrectCall(num: number) {
-    return new EcmaThrowifsupernotcorrectcall(new Imm(ResultType.Int, num));
+    return new EcmaThrowifsupernotcorrectcall(new Imm(num));
 }
 
 export function call(args: VReg[], passThis: boolean) {
@@ -255,17 +258,17 @@ export function call(args: VReg[], passThis: boolean) {
                 insn = new EcmaCallargs3dyn(args[0], args[1], args[2], args[3]);
                 break;
             default:
-                insn = new EcmaCallirangedyn(new Imm(ResultType.Int, length - 1), args);
+                insn = new EcmaCallirangedyn(new Imm(length - 1), args);
         }
     } else {
-        insn = new EcmaCallithisrangedyn(new Imm(ResultType.Int, length - 1), args);
+        insn = new EcmaCallithisrangedyn(new Imm(length - 1), args);
     }
 
     return insn;
 }
 
 export function newObject(args: VReg[]) {
-    return new EcmaNewobjdynrange(new Imm(ResultType.Int, args.length), args);
+    return new EcmaNewobjdynrange(new Imm(args.length), args);
 }
 
 export function getPropIterator() {
@@ -285,11 +288,11 @@ export function createEmptyObject() {
 }
 
 export function createObjectHavingMethod(idx: number) {
-    return new EcmaCreateobjecthavingmethod(new Imm(ResultType.Int, idx));
+    return new EcmaCreateobjecthavingmethod(new Imm(idx));
 }
 
 export function createObjectWithBuffer(idx: number) {
-    return new EcmaCreateobjectwithbuffer(new Imm(ResultType.Int, idx));
+    return new EcmaCreateobjectwithbuffer(new Imm(idx));
 }
 
 export function setObjectWithProto(proto: VReg, object: VReg) {
@@ -309,7 +312,7 @@ export function createEmptyArray() {
 }
 
 export function createArrayWithBuffer(idx: number) {
-    return new EcmaCreatearraywithbuffer(new Imm(ResultType.Int, idx));
+    return new EcmaCreatearraywithbuffer(new Imm(idx));
 }
 
 export function storeArraySpread(array: VReg, index: VReg) {
@@ -317,11 +320,11 @@ export function storeArraySpread(array: VReg, index: VReg) {
 }
 
 export function defineClassWithBuffer(id: string, idx: number, parameterLength: number, env: VReg, base: VReg) {
-    return new EcmaDefineclasswithbuffer(id, new Imm(ResultType.Int, idx), new Imm(ResultType.Int, parameterLength), env, base);
+    return new EcmaDefineclasswithbuffer(id, new Imm(idx), new Imm(parameterLength), env, base);
 }
 
 export function createObjectWithExcludedKeys(obj: VReg, args: VReg[]) {
-    return new EcmaCreateobjectwithexcludedkeys(new Imm(ResultType.Int, args.length - 1), obj, args);
+    return new EcmaCreateobjectwithexcludedkeys(new Imm(args.length - 1), obj, args);
 }
 
 export function throwObjectNonCoercible() {
@@ -345,7 +348,7 @@ export function closeIterator(iter: VReg) {
 }
 
 export function superCall(num: number, start: VReg) {
-    return new EcmaSupercall(new Imm(ResultType.Int, num), start);
+    return new EcmaSupercall(new Imm(num), start);
 }
 
 export function superCallSpread(vs: VReg) {
@@ -389,23 +392,23 @@ export function loadHomeObject() {
 }
 
 export function defineFunc(name: string, env: VReg, paramLength: number) {
-    return new EcmaDefinefuncdyn(name, new Imm(ResultType.Int, paramLength), env);
+    return new EcmaDefinefuncdyn(name, new Imm(paramLength), env);
 }
 
 export function defineAsyncFunc(name: string, env: VReg, paramLength: number) {
-    return new EcmaDefineasyncfunc(name, new Imm(ResultType.Int, paramLength), env);
+    return new EcmaDefineasyncfunc(name, new Imm(paramLength), env);
 }
 
 export function defineGeneratorFunc(name: string, env: VReg, paramLength: number) {
-    return new EcmaDefinegeneratorfunc(name, new Imm(ResultType.Int, paramLength), env);
+    return new EcmaDefinegeneratorfunc(name, new Imm(paramLength), env);
 }
 
 export function defineNCFunc(name: string, env: VReg, paramLength: number) {
-    return new EcmaDefinencfuncdyn(name, new Imm(ResultType.Int, paramLength), env);
+    return new EcmaDefinencfuncdyn(name, new Imm(paramLength), env);
 }
 
 export function defineMethod(name: string, env: VReg, paramLength: number) {
-    return new EcmaDefinemethod(name, new Imm(ResultType.Int, paramLength), env);
+    return new EcmaDefinemethod(name, new Imm(paramLength), env);
 }
 
 export function isTrue() {
@@ -417,7 +420,7 @@ export function isFalse() {
 }
 
 export function createRegExpWithLiteral(pattern: string, flags: number) {
-    return new EcmaCreateregexpwithliteral(pattern, new Imm(ResultType.Int, flags));
+    return new EcmaCreateregexpwithliteral(pattern, new Imm(flags));
 }
 
 export function stLetToGlobalRecord (name: string) {

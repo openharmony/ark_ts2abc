@@ -14,15 +14,16 @@
  */
 
 import * as ts from "typescript";
+import { isMemberExpression } from "../base/util";
 import { CacheList, getVregisterCache } from "../base/vregisterCache";
 import { Compiler } from "../compiler";
 import { VReg } from "../irnodes";
 import { compileSuperCall, compileSuperProperty } from "../statement/classStatement";
 import { createArrayFromElements } from "./arrayLiteralExpression";
 import { getObjAndProp } from "./memberAccessExpression";
-import { isMemberExpression } from "../base/util";
 
 
+// @ts-ignore
 export function compileCallExpression(expr: ts.CallExpression, compiler: Compiler, inTailPos?: boolean) {
     let pandaGen = compiler.getPandaGen();
     // import call should be supported further
@@ -58,6 +59,7 @@ export function getHiddenParameters(expr: ts.Expression, compiler: Compiler) {
         passThis = true;
         let thisReg = pandaGen.getTemp();
         let propReg = pandaGen.getTemp();
+        // @ts-ignore
         let { obj: obj, prop: prop } = getObjAndProp(<ts.PropertyAccessExpression | ts.ElementAccessExpression>expr, thisReg, propReg, compiler);
 
         if ((<ts.PropertyAccessExpression | ts.ElementAccessExpression>expr).expression.kind == ts.SyntaxKind.SuperKeyword) {
