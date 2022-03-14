@@ -244,6 +244,7 @@ export class CompilerDriver {
     }
 
     compileUnitTest(node: ts.SourceFile, literalBufferArray?: Array<LiteralBuffer>): void {
+        CompilerDriver.isTsFile = CompilerDriver.isTypeScriptSourceFile(node);
         let recorder = this.compilePrologue(node, true);
 
         for (let i = 0; i < this.pendingCompilationUnits.length; i++) {
