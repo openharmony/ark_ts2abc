@@ -30,7 +30,6 @@ import {
     EcmaEqdyn,
     EcmaGetresumemode,
     EcmaLdlexenvdyn,
-    EcmaLdfunction,
     EcmaResumegenerator,
     EcmaReturnundefined,
     EcmaSuspendgenerator,
@@ -40,7 +39,6 @@ import {
     Label,
     LdaDyn,
     LdaiDyn,
-    ResultType,
     ReturnDyn,
     StaDyn,
     VReg
@@ -60,8 +58,6 @@ describe("compileFunctionExpression", function () {
 
         let expected_func = [
             new EcmaLdlexenvdyn(),
-            new StaDyn(new VReg()),
-            new EcmaLdfunction(),
             new StaDyn(new VReg()),
             new LdaDyn(new VReg()),
             new StaDyn(new VReg()),

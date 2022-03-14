@@ -345,6 +345,8 @@ export abstract class Intrinsic extends IRNode {
 }
 
 export class VReg {
+  private typeIndex: number | undefined;
+  private variableName: string | undefined;
   num: number = -1;
   
   toString(): string {
@@ -355,19 +357,19 @@ export class VReg {
   }
 
   getTypeIndex() {
-    return 0;
+    return this.typeIndex;
   }
 
-  // @ts-ignore
   setTypeIndex(typeIndex: number) {
+    this.typeIndex = typeIndex;
   }
 
   getVariableName() {
-    return '';
+    return this.variableName;
   }
 
-  // @ts-ignore
   setVariableName(variableName: string) {
+    this.variableName = variableName;
   }
 }
 
