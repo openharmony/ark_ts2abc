@@ -354,7 +354,6 @@ export class DebugInfo {
         }
     }
 
-
     public static copyDebugInfo(insn: IRNode, expansion: IRNode[]) {
         expansion.forEach(irNode => irNode.debugPosInfo = insn.debugPosInfo);
     }
