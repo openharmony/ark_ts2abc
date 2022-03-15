@@ -243,10 +243,8 @@ ohos_copy("copy_ts2abc_tests") {
 }
 
 group("ts2abc_unittests") {
-  testonly = true
-  deps = [ "tests:ts2abc_tests(${buildtool_linux})" ]
-
-  # if (host_os == "linux") {
-  #   deps += [ "${ts2abc_root}/ts2abc/tests:unittest" ]
-  # }
+  if (host_os == "linux") {
+    testonly = true
+    deps = [ "tests:ts2abc_tests(${buildtool_linux})" ]
+  }
 }
