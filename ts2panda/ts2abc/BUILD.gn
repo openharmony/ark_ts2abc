@@ -53,7 +53,11 @@ ohos_executable("ts2abc") {
 
   configs = [ ":ts2abc_config" ]
 
-  cflags = [ "-Wno-c++20-designator" ]
+  cflags = [
+    "-Wno-c++20-designator",
+    "-Wno-c99-dextensions",
+    "-Wno-unkonwn-warning-option",
+  ]
 
   deps = [ sdk_libc_secshared_dep ]
 
