@@ -243,24 +243,8 @@ ohos_copy("copy_ts2abc_tests") {
 }
 
 group("ts2abc_unittests") {
-  testonly = true
-  deps = [ "tests:ts2abc_tests(${buildtool_linux})" ]
-
-  # if (host_os == "linux") {
-  #   deps += [ "${ts2abc_root}/ts2abc/tests:unittest" ]
-  # }
-}
-
-# Workaround for dev brach. Should be about to remove shortly
-group("src_linux") {
-}
-group("src_win") {
-}
-group("src_mac") {
-}
-group("ts2abc_linux") {
-}
-group("ts2abc_win") {
-}
-group("ts2abc_mac") {
+  if (host_os == "linux") {
+    testonly = true
+    deps = [ "tests:ts2abc_tests(${buildtool_linux})" ]
+  }
 }
