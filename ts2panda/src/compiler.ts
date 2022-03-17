@@ -304,9 +304,9 @@ export class Compiler {
         if (!unreachableFlag) { // exit GlobalScopefunction or Function Block return
             if (this.funcBuilder instanceof AsyncFunctionBuilder) {
                 this.funcBuilder.resolve(NodeKind.Invalid, getVregisterCache(pandaGen, CacheList.undefined));
-                pandaGen.return(DebugInfo.getLastNode());
+                pandaGen.return(NodeKind.Invalid);
             } else {
-                pandaGen.returnUndefined(DebugInfo.getLastNode());
+                pandaGen.returnUndefined(NodeKind.Invalid);
             }
         }
     }
