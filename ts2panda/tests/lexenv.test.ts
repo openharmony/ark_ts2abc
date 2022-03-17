@@ -118,7 +118,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let sourceFile = creatAstFromSnippet(source);
         let compilerDriver = new CompilerDriver('UnitTest');
         let globalScope = new GlobalScope(sourceFile);
-        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false);
+        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false, true);
         recorder.record();
 
         expect(globalScope, "root is null!").to.not.equal(null);
@@ -146,7 +146,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let sourceFile = creatAstFromSnippet(source);
         let compilerDriver = new CompilerDriver('UnitTest');
         let globalScope = new GlobalScope(sourceFile);
-        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false);
+        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false, true);
         recorder.record();
 
         let children = globalScope.getChildVariableScope();
@@ -194,7 +194,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let compilerDriver = new CompilerDriver('UnitTest');
         let globalScope = new GlobalScope(sourceFile);
 
-        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false);
+        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false, true);
         recorder.record();
         let postOrderVariableScopes = compilerDriver.postOrderAnalysis(globalScope);
 
@@ -218,7 +218,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let compilerDriver = new CompilerDriver('UnitTest');
         let globalScope = new GlobalScope(sourceFile);
 
-        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false);
+        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false, true);
         recorder.record();
         let postOrderVariableScopes = compilerDriver.postOrderAnalysis(globalScope);
 
@@ -272,7 +272,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let compilerDriver = new CompilerDriver('UnitTest');
         let globalScope = new GlobalScope(sourceFile);
 
-        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false);
+        let recorder = new Recorder(sourceFile, globalScope, compilerDriver, false, false, true);
         recorder.record();
         let postOrderVariableScopes = compilerDriver.postOrderAnalysis(globalScope);
 
