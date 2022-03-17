@@ -13,10 +13,6 @@
 
 .record _ESTypeAnnotation <external>
 
-.record _ESModuleMode {
-	u8 isModule
-}
-
 .record _ESCallTypeAnnotation <external>
 
 # ====================
