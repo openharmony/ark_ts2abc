@@ -147,7 +147,7 @@ export class CompilerDriver {
     }
 
     compileForSyntaxCheck(node: ts.SourceFile): void {
-       let recorder = this.compilePrologue(node, false);
+       let recorder = this.compilePrologue(node, false, true);
        checkDuplicateDeclaration(recorder);
        checkExportEntries(recorder);
     }
@@ -165,7 +165,7 @@ export class CompilerDriver {
             });
         }
 
-        let recorder = this.compilePrologue(node, true);
+        let recorder = this.compilePrologue(node, true, false);
 
         // initiate ts2abc
         if (!CmdOptions.isAssemblyMode()) {
@@ -247,7 +247,7 @@ export class CompilerDriver {
     }
 
     compileUnitTest(node: ts.SourceFile, literalBufferArray?: Array<LiteralBuffer>): void {
-        let recorder = this.compilePrologue(node, true);
+        let recorder = this.compilePrologue(node, true, true);
 
         for (let i = 0; i < this.pendingCompilationUnits.length; i++) {
             let unit: PendingCompilationUnit = this.pendingCompilationUnits[i];
@@ -287,7 +287,7 @@ export class CompilerDriver {
         }
     }
 
-    private compilePrologue(node: ts.SourceFile, recordType: boolean) {
+    private compilePrologue(node: ts.SourceFile, recordType: boolean, syntaxCheckStatus: boolean) {
         let topLevelScope: GlobalScope | ModuleScope;
         if (CmdOptions.isModules()) {
             topLevelScope = new ModuleScope(node);
@@ -299,7 +299,7 @@ export class CompilerDriver {
         if (enableTypeRecord) {
             TypeRecorder.createInstance();
         }
-        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, CompilerDriver.isTsFile);
+        let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, CompilerDriver.isTsFile, syntaxCheckStatus);
         recorder.record();
   
         addVariableToScope(recorder, enableTypeRecord);
