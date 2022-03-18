@@ -72,8 +72,9 @@ export class Recorder {
     // [delete it when type system adapts for ESM]
     private importStmts: Array<ModuleStmt> = [];
     private exportStmts: Array<ModuleStmt> = [];
+    private syntaxCheckStatus: boolean;
 
-    constructor(node: ts.Node, scope: Scope, compilerDriver: CompilerDriver, recordType: boolean, isTsFile: boolean) {
+    constructor(node: ts.Node, scope: Scope, compilerDriver: CompilerDriver, recordType: boolean, isTsFile: boolean, syntaxCheckStatus: boolean) {
         this.node = node;
         this.scope = scope;
         this.compilerDriver = compilerDriver;
@@ -81,6 +82,7 @@ export class Recorder {
         this.funcNameMap = new Map<string, number>();
         this.funcNameMap.set("main", 1);
         this.isTsFile = isTsFile;
+        this.syntaxCheckStatus = syntaxCheckStatus;
     }
 
     record() {
@@ -121,7 +123,7 @@ export class Recorder {
 
     private recordInfo(node: ts.Node, scope: Scope) {
         node.forEachChild(childNode => {
-            if (!this.recordType) {
+            if (this.syntaxCheckStatus) {
                 checkSyntaxError(childNode, scope);
             }
             switch (childNode.kind) {
