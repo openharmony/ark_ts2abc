@@ -1310,8 +1310,6 @@ bool HandleJsonFile(const std::string &input, std::string &data)
     data = buf.data();
     buf.clear();
     file.close();
-    Logd(data.c_str());
-    Logd("----------------------------------");
 
     return true;
 }
