@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -183,7 +183,7 @@ export class VariableAcessStore extends VariableAccessBase {
                 /**
                  * check TDZ first
                  * If acc == hole -> throw reference error
-                 * else -> excute the next insn
+                 * else -> execute the next insn
                 */
                 insns.push(loadLexicalVar(this.level, slot));
                 insns.push(storeAccumulator(holeReg));
