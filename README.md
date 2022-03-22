@@ -11,7 +11,7 @@
 
 ts2abc is a front-end tool in the ARK Runtime Subsystem. It converts JavaScript(JS) files into ARK bytecode files.
 
-For more infomation, see: [ARK Runtime Subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/ARK-Runtime-Subsystem.md).
+For more information, see: [ARK Runtime Subsystem](https://gitee.com/openharmony/docs/blob/master/en/readme/ARK-Runtime-Subsystem.md).
 
 ## Directory Structure<a name="section161941989596"></a>
 
@@ -31,7 +31,7 @@ For more infomation, see: [ARK Runtime Subsystem](https://gitee.com/openharmony/
 
 ## Build<a name="section0446154755015"></a>
 
-ts2abc uses the command line interaction mode and converts JS code into ARK bytecode files that can be run on an ARK runtime system. ts2abc supports Windows, Linux, and macOS. Front-end tools, converting JS source code into ARK bytecode, can be built by specifing the `--build-target` with `ark_ts2abc` on Linux.
+ts2abc uses the command line interaction mode and converts JS code into ARK bytecode files that can be run on an ARK runtime system. ts2abc supports Windows, Linux, and macOS. Front-end tools, converting JS source code into ARK bytecode, can be built by specifying the `--build-target` with `ark_ts2abc` on Linux.
 
 ```
 $ ./build.sh --product-name Hi3516DV300 --build-target ark_ts2abc_build
@@ -255,7 +255,7 @@ If no parameter is specified for  **\[options\]**, an ARK binary file is generat
 </table>
 
 
-For more infomation, please see: [ARK-Runtime-Usage-Guide](https://gitee.com/openharmony/ark_js_runtime/blob/master/docs/ARK-Runtime-Usage-Guide.md).
+For more information, please see: [ARK-Runtime-Usage-Guide](https://gitee.com/openharmony/ark_js_runtime/blob/master/docs/ARK-Runtime-Usage-Guide.md).
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
