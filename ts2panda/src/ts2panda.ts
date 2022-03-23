@@ -86,7 +86,7 @@ export class Ts2Panda {
                 insLabel = Ts2Panda.labelPrefix + insn.id;
                 labels.push(insLabel);
             } else if (isRangeInst(insn)) {
-                // For DynRange insn we only pass the first vreg of continous vreg array
+                // For DynRange insn we only pass the first vreg of continuous vreg array
                 let operands = insn.operands;
                 insImms.push((<Imm>operands[0]).value);
                 insRegs.push((<VReg>operands[1]).num);

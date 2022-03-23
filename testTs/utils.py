@@ -24,35 +24,28 @@ import subprocess
 import json
 
 
-#执行终端命令
 def command_os(order):
     subprocess.run(order,shell=True)
 
-#创建文件夹   
 def mk_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
     
-#切换分支(git_brash:分支)
 def git_checkout(git_brash):
     command_os(f'git checkout {git_brash}')
 
-#删除文件夹(空文件夹与非空文件夹)
 def remove_dir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
 
-#删除文件
 def remove_file(path):
     if os.path.exists(path):
         os.remove(path)
 
-#清空文件内容（path：文件路径）
 def clean_file(path):
     with open(path,'w') as f:
         f.write('')
 
-#读取文件内容(全部)
 def read_file(path):
     content = []
     with open(path,'r') as f:
@@ -60,12 +53,10 @@ def read_file(path):
     
     return content
 
-#写入文件，覆盖之前内容
 def write_file(path,content):
     with open(path,'w') as f:
         f.write(content)
 
-#追加写入文件（path：文件路径，content：写入内容）
 def write_append(path,content):
     with open(path,'a+') as f:
         f.write(content)
@@ -94,7 +85,6 @@ def git_clean(cwd):
     cmd = ['git', 'checkout', '--', '.']
     run_cmd_cwd(cmd, cwd)
 
-#输出当前时间(可用于计算程序运行时长)
 def current_time():
     return datetime.datetime.now()
 
@@ -131,8 +121,3 @@ def npm_install(cwd):
         os.chdir(WORK_PATH)
     except Exception as e:
         print(e)
-
-
-    
-
-    
