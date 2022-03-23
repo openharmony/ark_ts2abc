@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -202,7 +202,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         expect(postOrderVariableScopes[0]).to.be.deep.equal(globalScope);
     });
 
-    it("test CompilerDriver.postorderanalysis-with-embeded-function", function () {
+    it("test CompilerDriver.postorderanalysis-with-embedded-function", function () {
         let source: string = `
       {
       function outer() {
@@ -287,7 +287,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         expect(postOrderVariableScopes[5]).to.be.deep.equal(globalScope);
     });
 
-    it("test loadAccFromLexEnv with loacal variable", function () {
+    it("test loadAccFromLexEnv with local variable", function () {
         let globalScope = new GlobalScope();
         let pandaGen = new PandaGen("lexVarPassPandaGen", 1, globalScope);
         let var1 = globalScope.add("var1", VarDeclarationKind.LET);
@@ -520,7 +520,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
             new EcmaIncdyn(new VReg()),
             new StaDyn(new VReg()),
             ...MicroStoreLexVar(1, 0),
-            new EcmaTonumber(new VReg()), // this is reduntant load varialbe
+            new EcmaTonumber(new VReg()), // this is redundant load varialbe
             ...MicroLoadLexVar(1, 0),
             new StaDyn(new VReg),
             ...MicroLoadLexVar(1, 1),
@@ -556,7 +556,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
         let globalA = globalScope!.findLocal("a");
         expect(globalA instanceof GlobalVariable, "globalA is GlobalVariable").to.be.true;
 
-        expect(checkInstructions(anonymousPg!.getInsns(), expect_anonymous), "check annonymous func ins").to.be.true;
+        expect(checkInstructions(anonymousPg!.getInsns(), expect_anonymous), "check anonymous func ins").to.be.true;
         expect(checkInstructions(outerPg!.getInsns(), expect_outer), "check outer func ins").to.be.true;
     });
 });

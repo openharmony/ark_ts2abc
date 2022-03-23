@@ -28,68 +28,76 @@ import json
 from utils import *
 from config import *
 
-class MyException(Exception):  # 继承异常类
+
+class MyException(Exception):
     def __init__(self, name):
         self.name = name
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', metavar='DIR', help="Directory to test")
     parser.add_argument('--file', metavar='FILE', help="File to test")
-    parser.add_argument('--ark_frontend_tool', help="ark frontend conversion tool")
+    parser.add_argument(
+        '--ark_frontend_tool',
+        help="ark frontend conversion tool")
     arguments = parser.parse_args()
     return arguments
 
 
-def skip(filepath,flag = False):
-    with open(SKIP_FILE_PATH,'r') as f:
+def skip(filepath, flag=False):
+    with open(SKIP_FILE_PATH, 'r') as f:
         content = f.read()
         test_list = []
-        import_list =[]
+        import_list = []
         skip_test = json.loads(content)
-        skip_test_list = skip_test['error.txt'] + skip_test['no2015'] + skip_test['tsc_error'] + skip_test['import_skip'] + skip_test['code_rule'] + skip_test['no_case']
+        skip_test_list = skip_test['error.txt'] + skip_test['no2015'] + skip_test['tsc_error'] + \
+            skip_test['import_skip'] + \
+            skip_test['code_rule'] + skip_test['no_case']
         if os.path.isfile(filepath):
             if '.ts' in filepath:
                 if filepath not in skip_test_list:
                     return True
                 else:
                     if flag:
-                        print(f'This file is outside the scope of validation : {filepath}\n')
+                        print(
+                            f'This file is outside the scope of validation : {filepath}\n')
                     return False
+
 
 def abc_judge(filepath):
     if not os.path.getsize(filepath):
         print(f'Error : {filepath} 文件为空')
 
-#使用机器转换（path：ts文件路径，out_file：输出内容写入文件路径,tools:工具选择，默认为'ohos-arm-release/clang_x64/ark/ark/build/src/index.js'）
-def run_test(file, tool,flag = False):
+
+def run_test(file, tool, flag=False):
     path_list = file.split(os.sep)
     if path_list[0] != '.':
         file = "." + os.sep + file
-    out_file_path = file.replace(TEST_PATH,OUT_PATH).replace(TS_EXT,TXT_EXT)
-    temp_out_file_path = file.replace(TS_EXT,TXT_EXT)
-    temp_abc_file_path = file.replace(TS_EXT,ABC_EXT)
+    out_file_path = file.replace(TEST_PATH, OUT_PATH).replace(TS_EXT, TXT_EXT)
+    temp_out_file_path = file.replace(TS_EXT, TXT_EXT)
+    temp_abc_file_path = file.replace(TS_EXT, ABC_EXT)
     ts_list = temp_out_file_path.split(os.sep)
     ts_list.pop(-1)
     ts_dir_path = os.sep.join(ts_list)
     path_list = out_file_path.split(os.sep)
     path_list.pop(-1)
     out_dir_path = os.sep.join(path_list)
-    if not os.path.exists(out_dir_path):  
+    if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
     try:
         command_os(f'node --expose-gc {tool} -m {file} --output-type')
-    except:
+    except BaseException:
         e = str(e)
     if flag:
-        for root,dirs,files in os.walk(ts_dir_path):
-            for fi in files:  
-                ts_file =  f'{root}/{fi}'     
+        for root, dirs, files in os.walk(ts_dir_path):
+            for fi in files:
+                ts_file = f'{root}/{fi}'
                 if ABC_EXT in ts_file:
                     remove_file(ts_file)
-                elif TXT_EXT in ts_file:                
-                    sj_path =ts_file.replace(TEST_PATH,OUT_PATH)                     
-                    move_file(ts_file,sj_path)
+                elif TXT_EXT in ts_file:
+                    sj_path = ts_file.replace(TEST_PATH, OUT_PATH)
+                    move_file(ts_file, sj_path)
     else:
         if os.path.exists(temp_abc_file_path):
             abc_judge(temp_abc_file_path)
@@ -103,49 +111,49 @@ def run_test_machine(args):
     result_path = []
     if args.ark_frontend_tool:
         ark_frontend_tool = args.ark_frontend_tool
-    
 
     if args.file:
-        if skip(args.file,True):
+        if skip(args.file, True):
             if args.file in IMPORT_TEST['import']:
-                run_test(args.file, ark_frontend_tool,True)
-                result = compare(args.file,True)
+                run_test(args.file, ark_frontend_tool, True)
+                result = compare(args.file, True)
                 result_path.append(result)
             else:
                 run_test(args.file, ark_frontend_tool)
                 result = compare(args.file)
                 result_path.append(result)
-            
+
     elif args.dir:
-        for root,dirs,files in os.walk(args.dir):
+        for root, dirs, files in os.walk(args.dir):
             for file in files:
                 test_path = f'{root}/{file}'
-                if skip(test_path,True):
+                if skip(test_path, True):
                     if test_path in IMPORT_TEST['import']:
-                        run_test(test_path, ark_frontend_tool,True)
-                        result = compare(test_path,True)
+                        run_test(test_path, ark_frontend_tool, True)
+                        result = compare(test_path, True)
                         result_path.append(result)
                     else:
                         run_test(test_path, ark_frontend_tool)
                         result = compare(test_path)
                         result_path.append(result)
-            
-    elif args.file == None and args.dir == None:   
-        for root,dirs,files in os.walk(TS_CASES_DIR):
+
+    elif args.file is None and args.dir is None:
+        for root, dirs, files in os.walk(TS_CASES_DIR):
             for file in files:
                 test_path = f'{root}/{file}'
                 if skip(test_path):
                     if test_path in IMPORT_TEST['import']:
-                        run_test(test_path, ark_frontend_tool,True)
-                        result = compare(test_path,True)
+                        run_test(test_path, ark_frontend_tool, True)
+                        result = compare(test_path, True)
                         result_path.append(result)
                     else:
                         run_test(test_path, ark_frontend_tool)
                         result = compare(test_path)
                         result_path.append(result)
-    with open(OUT_RESULT_FILE,'w') as f:
+    with open(OUT_RESULT_FILE, 'w') as f:
         f.writelines(result_path)
-    
+
+
 def read_out_file(file_path):
     with open(file_path, 'r') as f:
         content = f.read()
@@ -153,7 +161,7 @@ def read_out_file(file_path):
         if '}\n{' in content:
             out_list = content.split('}\n{')
         else:
-            out_list =[]
+            out_list = []
             out_list.append(''.join(content.split('\n')))
     else:
         out_list = []
@@ -162,10 +170,14 @@ def read_out_file(file_path):
         for i in range(len(out_list)):
             if i == 0:
                 out_do = ''.join(out_list[i].split('\n')).strip(' ') + '}'
-            elif i == (len(out_list)-1):
+            elif i == (len(out_list) - 1):
                 out_do = '{' + ''.join(out_list[i].split('\n')).strip(' ')
             else:
-                out_do = ('{' + ''.join(out_list[i].split('\n')).strip(' ') + '}')
+                out_do = (
+                    '{' +
+                    ''.join(
+                        out_list[i].split('\n')).strip(' ') +
+                    '}')
             out_txt = json.loads(out_do)
             out_text_list.append(out_txt)
     else:
@@ -174,24 +186,25 @@ def read_out_file(file_path):
             out_text_list.append(c)
     return out_text_list
 
-def compare(file,flag = False):
+
+def compare(file, flag=False):
     result = ""
     path_list = file.split(os.sep)
     if path_list[0] != '.':
-        file = "." + os.sep + file        
-    out_path = file.replace(TEST_PATH, OUT_PATH).replace(TS_EXT,TXT_EXT)
-    expect_path = file.replace(TEST_PATH, EXPECT_PATH).replace(TS_EXT,TXT_EXT)
+        file = "." + os.sep + file
+    out_path = file.replace(TEST_PATH, OUT_PATH).replace(TS_EXT, TXT_EXT)
+    expect_path = file.replace(TEST_PATH, EXPECT_PATH).replace(TS_EXT, TXT_EXT)
     if flag:
         path_list = out_path.split(os.sep)
         del path_list[-1]
         out_dir_path = os.sep.join(path_list)
-        for root,dirs,files in os.walk(out_dir_path):
+        for root, dirs, files in os.walk(out_dir_path):
             for fi in files:
                 fi = f'{root}/{fi}'
                 if fi != out_path:
-                    with open(fi,'r') as f:
+                    with open(fi, 'r') as f:
                         el_file_txt = f.read()
-                        write_append(out_path,el_file_txt)
+                        write_append(out_path, el_file_txt)
                         remove_file(fi)
     if (not os.path.exists(out_path) or not os.path.exists(expect_path)):
         print("There are no expected files or validation file generation: %s", file)
@@ -201,7 +214,7 @@ def compare(file,flag = False):
         expectcont = read_file(expect_path)
         expectcontlist = []
         for i in expectcont:
-            i = json.loads(i.replace("'",'"').replace('\n',''))
+            i = json.loads(i.replace("'", '"').replace('\n', ''))
             expectcontlist.append(i)
         if outcont == expectcontlist:
             result = f'PASS {file}\n'
@@ -209,7 +222,7 @@ def compare(file,flag = False):
             result = f'FAIL {file}\n'
     print(result)
     return result
-  
+
 
 def summary():
     if not os.path.exists(OUT_RESULT_FILE):
@@ -225,10 +238,10 @@ def summary():
 
     print("\n      Regression summary")
     print("===============================")
-    print("     Total         %5d         " %(count))
+    print("     Total         %5d         " % (count))
     print("-------------------------------")
-    print("     Passed tests: %5d         " %(count-fail_count))
-    print("     Failed tests: %5d         " %(fail_count))
+    print("     Passed tests: %5d         " % (count - fail_count))
+    print("     Failed tests: %5d         " % (fail_count))
     print("===============================")
 
 
@@ -236,7 +249,7 @@ def init_path():
     remove_dir(OUT_TEST_DIR)
     mk_dir(OUT_TEST_DIR)
 
-#拉取用例和ts测试文件
+
 def prepare_ts_code():
     if (os.path.exists(TS_CASES_DIR)):
         return
@@ -250,14 +263,16 @@ def prepare_ts_code():
         command_os(f'git pull --depth 1 origin {TS_TAG}')
         if not os.path.exists("./tests/cases/conformance/"):
             remove_dir(TS_CASES_DIR)
-            raise MyException("Pull TypeScript Code Fail, Please Check The Network Request")
+            raise MyException(
+                "Pull TypeScript Code Fail, Please Check The Network Request")
         command_os(f'git apply ../test-case.patch')
         command_os(f'cp -r tests/cases/conformance/* ./')
         command_os(f'rm -rf ./tests')
         command_os('rm -rf .git')
         os.chdir('../../')
-    except:
+    except BaseException:
         print("pull test code fail")
+
 
 def main(args):
     try:
@@ -266,8 +281,9 @@ def main(args):
         prepare_ts_code()
         run_test_machine(args)
         summary()
-    except:
+    except BaseException:
         print("Run Python Script Fail")
+
 
 if __name__ == "__main__":
     sys.exit(main(parse_args()))
