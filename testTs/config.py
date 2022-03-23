@@ -25,7 +25,7 @@ OUT_DIR = os.path.join("out")
 OUT_TEST_DIR = os.path.join("out", "testTs")
 OUT_RESULT_FILE = os.path.join("out", "testTs", "result.txt")
 TEST_DIR = os.path.join("testTs")
-TS_CASES_DIR = os.path.join(".","testTs", "test")
+TS_CASES_DIR = os.path.join(".", "testTs", "test")
 SKIP_FILE_PATH = os.path.join("testTs", "skip_tests.json")
 IMPORT_FILE_PATH = os.path.join("testTs", "import_tests.json")
 CUR_FILE_DIR = os.path.dirname(__file__)
@@ -42,6 +42,6 @@ TS_EXT = ".ts"
 TXT_EXT = ".txt"
 ABC_EXT = ".abc"
 IMPORT_TEST = ""
-with open(IMPORT_FILE_PATH,'r') as f:
+with open(IMPORT_FILE_PATH, 'r') as f:
     content = f.read()
     IMPORT_TEST = json.loads(content)
