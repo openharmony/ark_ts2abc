@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 """
 Copyright (c) 2022 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +29,7 @@ from utils import *
 from config import *
 
 
-class MyException(Exception):  # 继承异常类
+class MyException(Exception):
     def __init__(self, name):
         self.name = name
 
@@ -65,8 +68,6 @@ def skip(filepath, flag=False):
 def abc_judge(filepath):
     if not os.path.getsize(filepath):
         print(f'Error : {filepath} 文件为空')
-
-# 使用机器转换（path：ts文件路径，out_file：输出内容写入文件路径,tools:工具选择，默认为'ohos-arm-release/clang_x64/ark/ark/build/src/index.js'）
 
 
 def run_test(file, tool, flag=False):
@@ -247,8 +248,6 @@ def summary():
 def init_path():
     remove_dir(OUT_TEST_DIR)
     mk_dir(OUT_TEST_DIR)
-
-# 拉取用例和ts测试文件
 
 
 def prepare_ts_code():
