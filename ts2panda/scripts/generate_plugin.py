@@ -105,7 +105,7 @@ def gen_java_method(input_arguments):
         # write method: getJsCode
         with open(js_src_file, "r") as input_src:
             lines = input_src.readlines()
-            # seperate lines into blocks
+            # separate lines into blocks
             single_block_len = 1024
             total_len = len(lines)
             for index, line in enumerate(lines):
@@ -140,14 +140,14 @@ def gen_java_method(input_arguments):
 
         # write method: getJsBytecode
         with open(js_bin_file, "rb") as input_bin:
-            # seperate bytecode list
+            # separate bytecode list
             buf = bytearray(os.path.getsize(js_bin_file))
             input_bin.readinto(buf)
             hex_str = [hex(i) for i in buf]
             byte_str = ["(byte)" + i for i in hex_str]
             seperate_array = split_array_by_n(byte_str, ARRAY_MAX)
 
-            # generate seperate methods for js bytecode with ARRAY_MAX
+            # generate separate methods for js bytecode with ARRAY_MAX
             method_idx = 0
             method_len_list = []
             for array in seperate_array:
@@ -160,7 +160,7 @@ def gen_java_method(input_arguments):
                 method_idx = method_idx + 1
                 method_len_list.append(len(array))
 
-            # generate a method collect all seperated arrays
+            # generate a method collect all separated arrays
             cur_pos = 0
             output.write("    public static byte[] getJsByteCode() {%s"
                          % os.linesep)
