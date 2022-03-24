@@ -145,12 +145,12 @@ def gen_java_method(input_arguments):
             input_bin.readinto(buf)
             hex_str = [hex(i) for i in buf]
             byte_str = ["(byte){}".format(i) for i in hex_str]
-            seperate_array = split_array_by_n(byte_str, ARRAY_MAX)
+            separate_array = split_array_by_n(byte_str, ARRAY_MAX)
 
             # generate separate methods for js bytecode with ARRAY_MAX
             method_idx = 0
             method_len_list = []
-            for array in seperate_array:
+            for array in separate_array:
                 output.write("    private static byte[] getJsByteCode_%s() {%s"
                              % (method_idx, os.linesep))
                 output.write("        return new byte[] {")

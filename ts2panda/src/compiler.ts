@@ -18,8 +18,8 @@
  * The compiler traverses TypeScript's AST, splits operations into sinmple ones
  * and asks Pandagen to generate bytecode.
  *
- * This file shold not contain import from irnodes.ts.
- * The interface of PandaGen shold be enough.
+ * This file should not contain import from irnodes.ts.
+ * The interface of PandaGen should be enough.
  */
 
 import * as ts from "typescript";
@@ -203,7 +203,7 @@ export class Compiler {
                     count++;
                 }
             }
-            // acutal parameters
+            // actual parameters
             for (let i = 3; i < this.pandaGen.getLocals().length; i++) {
                 tempLocals.push(this.pandaGen.getLocals()[i]);
             }
@@ -610,7 +610,7 @@ export class Compiler {
             this.pandaGen.label(stmt, blockEndLabel);
         }
 
-        // because the scope of the label is just in labeled statment, we need to delete it.
+        // because the scope of the label is just in labeled statement, we need to delete it.
         LabelTarget.deleteName2LabelTarget(labelName);
         this.popScope();
     }
@@ -1192,9 +1192,9 @@ export class Compiler {
                 // left -> acc -> lhs
                 this.compileExpression(expr.left);
                 pandaGen.storeAccumulator(expr, lhs);
-                // eqaulity comparasion between lhs and null, if true, load right
+                // equality comparasion between lhs and null, if true, load right
                 pandaGen.condition(expr, ts.SyntaxKind.ExclamationEqualsEqualsToken, getVregisterCache(pandaGen, CacheList.Null), leftNullishLabel);
-                // eqaulity comparasion between lhs and undefined, if true, load right
+                // equality comparasion between lhs and undefined, if true, load right
                 pandaGen.loadAccumulator(expr.left, lhs);
                 pandaGen.condition(expr, ts.SyntaxKind.ExclamationEqualsEqualsToken, getVregisterCache(pandaGen, CacheList.undefined), leftNullishLabel);
                 // lhs is either null or undefined, load left
