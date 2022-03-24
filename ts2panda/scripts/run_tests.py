@@ -115,7 +115,7 @@ class Ts2abcTests():
                    'tests/tsconfig.mac.json']
             ret = run_command(cmd, self.dist_dir)
         if ret:
-            raise RuntimeError("Run [" + " ".join(cmd) + "] failed !")
+            raise RuntimeError("Run [{}] failed !".format(" ".join(cmd)))
 
     def run_tests(self):
         os.chdir(self.dist_dir)
@@ -144,9 +144,9 @@ class Ts2abcTests():
             cmd = [mocha, f'build-mac/{tests_args}']
             ret = run_command(cmd, self.dist_dir)
         if ret:
-            raise RuntimeError("Run [" + " ".join(cmd) + "] failed !")
+            raise RuntimeError("Run [{}] failed !".format(" ".join(cmd)))
         else:
-            print("Run [" + " ".join(cmd) + "] success!")
+            print("Run [{}] success!".format(" ".join(cmd)))
         print("used: %.5f seconds" % (time.time() - start_time))
 
 

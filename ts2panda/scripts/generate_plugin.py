@@ -144,7 +144,7 @@ def gen_java_method(input_arguments):
             buf = bytearray(os.path.getsize(js_bin_file))
             input_bin.readinto(buf)
             hex_str = [hex(i) for i in buf]
-            byte_str = ["(byte)" + i for i in hex_str]
+            byte_str = ["(byte){}".format(i) for i in hex_str]
             seperate_array = split_array_by_n(byte_str, ARRAY_MAX)
 
             # generate separate methods for js bytecode with ARRAY_MAX
