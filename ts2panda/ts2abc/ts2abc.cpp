@@ -55,7 +55,7 @@ namespace {
     };
 }
 
-// pandasm hellpers
+// pandasm helpers
 static panda::pandasm::Record MakeRecordDefinition(const std::string &name, const std::string &wholeLine,
     size_t boundLeft, size_t boundRight, size_t lineNumber)
 {

@@ -48,4 +48,4 @@ namespace ARK::Ts2Abc::Ts2Abc {
         std::string output = ParseString(input);
         EXPECT_EQ(output, expected);
     }
-}
+} // namespace ARK::Ts2Abc::Ts2Abc
