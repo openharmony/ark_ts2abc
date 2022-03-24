@@ -48,4 +48,4 @@ namespace ARK::Ts2Abc::Ts2Abc {
         ParseLogEnable(rootValue);
         ASSERT_TRUE(GetDebugLog() == false);
     }
-}
+} // namespace ARK::Ts2Abc::Ts2Abc
