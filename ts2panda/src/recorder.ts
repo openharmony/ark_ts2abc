@@ -134,7 +134,7 @@ export class Recorder {
                 case ts.SyntaxKind.SetAccessor:
                 case ts.SyntaxKind.ArrowFunction: {
                     let functionScope = this.buildVariableScope(scope, <ts.FunctionLikeDeclaration>childNode);
-                    this.recordFuncInfo(<ts.FunctionLikeDeclaration>childNode);
+                    this.recordOtherFunc(<ts.FunctionLikeDeclaration>childNode, functionScope);
                     this.recordInfo(childNode, functionScope);
                     break;
                 }
@@ -640,6 +640,19 @@ export class Recorder {
             }
         } else {
             LOGD("Function declaration", " in function is collected in its body block");
+        }
+    }
+
+    private recordOtherFunc(node: ts.FunctionLikeDeclaration, scope: Scope) { // functionlikedecalration except function declaration
+        this.recordFuncInfo(node);
+        if (!ts.isFunctionExpression(node) && !ts.isMethodDeclaration(node)) {
+            return;
+        }
+
+        if (node.name && ts.isIdentifier(node.name)) {
+            let funcName = jshelpers.getTextOfIdentifierOrLiteral(node.name);
+            let funcDecl = new FuncDecl(funcName, node, ModuleVarKind.NOT);
+            scope.setDecls(funcDecl);
         }
     }
 
