@@ -20,6 +20,7 @@ Description: Generate interface to get java plugin's js code and binary
 import os
 import subprocess
 import argparse
+import stat
 
 JAVA_FILE_SUFFIX = "JsCode"
 JS_BIN_EXT = ".abc"
@@ -92,7 +93,10 @@ def gen_java_method(input_arguments):
     (out_dir, _) = os.path.split(input_arguments.generated_file)
     js_bin_file = os.path.join(out_dir, file_name_pre + JS_BIN_EXT)
 
-    with open(out_file, "w") as output:
+    flags = os.O_WRONLY | os.O_CREAT | os.EXCL
+    modes = stat.S_IWUSR | stat.S_IRUSR
+
+    with (os.fdopen(out_file, flags, modes), "w") as output: 
         output.write("/*%s * Generated from Java and JavaScript plugins by ts2abc.%s */%s%s"
                      % (os.linesep, os.linesep, os.linesep, os.linesep))
 
@@ -144,13 +148,13 @@ def gen_java_method(input_arguments):
             buf = bytearray(os.path.getsize(js_bin_file))
             input_bin.readinto(buf)
             hex_str = [hex(i) for i in buf]
-            byte_str = ["(byte)" + i for i in hex_str]
-            seperate_array = split_array_by_n(byte_str, ARRAY_MAX)
+            byte_str = ["(byte){}".format(i) for i in hex_str]
+            separate_array = split_array_by_n(byte_str, ARRAY_MAX)
 
             # generate separate methods for js bytecode with ARRAY_MAX
             method_idx = 0
             method_len_list = []
-            for array in seperate_array:
+            for array in separate_array:
                 output.write("    private static byte[] getJsByteCode_%s() {%s"
                              % (method_idx, os.linesep))
                 output.write("        return new byte[] {")

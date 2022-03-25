@@ -62,7 +62,7 @@ if (host_toolchain == buildtool_mac) {
 # plugin_name -- name of js file, ex: BatteryPlugin.js
 # generat_file -- name of generated file
 # package_name -- name of generated file's package
-# extra_dependencies -- a list of files that should be considered as dependencies, must be lable
+# extra_dependencies -- a list of files that should be considered as dependencies, must be label
 # out_puts
 template("ts2abc_gen_file") {
   assert(defined(invoker.plugin_path), "plugin_path is required!")

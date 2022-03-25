@@ -57,4 +57,4 @@ namespace ARK::Ts2Abc::Ts2Abc {
         EXPECT_EQ(pandaFunc.params.size(), signature["params"].asUInt());
         EXPECT_EQ(pandaFunc.regs_num, function["regs_num"].asUInt());
     }
-}
+} // namespace ARK::Ts2Abc::Ts2Abc
