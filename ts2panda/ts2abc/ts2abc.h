@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TS2ABC_GEN_H_
-#define PANDA_TS2ABC_GEN_H_
+#ifndef TS2PANDA_TS2ABC_TS2ABC_H_
+#define TS2PANDA_TS2ABC_TS2ABC_H_
 
 #include <codecvt>
 #include <cstdarg>
@@ -57,4 +57,4 @@ std::string ParseString(const std::string &data);
 int ParseJson(const std::string &data, Json::Value &rootValue);
 panda::pandasm::Function GetFunctionDefintion(const Json::Value &function);
 
-#endif // PANDA_TS2ABC_GEN_H_
+#endif // TS2PANDA_TS2ABC_TS2ABC_H_
