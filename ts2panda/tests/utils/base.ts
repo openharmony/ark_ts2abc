@@ -170,6 +170,36 @@ export function compileMainSnippet(snippet: string, pandaGen?: PandaGen, scope?:
     return compileUnits[0].getInsns();
 }
 
+export function compileAfterSnippet(snippet: string, name:string) {
+    let compileUnits = null;
+    ts.transpileModule(
+        snippet,
+        {
+        compilerOptions : {
+            "target": ts.ScriptTarget.ES2015
+        },
+        fileName : name,
+        transformers : {
+            after : [
+                (ctx: ts.TransformationContext) => {
+                    return (sourceFile: ts.SourceFile) => {
+                        jshelpers.bindSourceFile(sourceFile, {});
+                        setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(sourceFile, compileOptions));
+                        let compilerDriver = new CompilerDriver('UnitTest');
+                        compilerDriver.setCustomPasses([]);
+                        compilerDriver.compileUnitTest(sourceFile, []);
+                        compileUnits = compilerDriver.getCompilationUnits();   
+                        return sourceFile;
+                    }
+                }
+            ]
+        }
+        }
+    );
+
+    return compileUnits;
+}
+
 export function getCompileOptions(): ts.CompilerOptions {
     return compileOptions;
 }
@@ -178,6 +208,11 @@ export class SnippetCompiler {
     pandaGens: PandaGen[] = [];
     compile(snippet: string, passes?: Pass[], literalBufferArray?: Array<LiteralBuffer>) {
         this.pandaGens = compileAllSnippet(snippet, passes, literalBufferArray);
+        return this.pandaGens;
+    }
+
+    compileAfter(snippet: string, name: string, passes?: Pass[], literalBufferArray?: Array<LiteralBuffer>) {
+        this.pandaGens = compileAfterSnippet(snippet, name);
         return this.pandaGens;
     }
 
