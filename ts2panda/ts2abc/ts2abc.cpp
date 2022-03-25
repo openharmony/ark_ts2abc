@@ -134,7 +134,7 @@ static void Logd(const char *format, ...)
         va_list valist;
         va_start(valist, format);
         char logMsg[logBufferSize];
-        int ret = vsnprintf_s(logMsg, sizeof(logMsg) - 1, sizeof(logMsg) - 1, format, valist);
+        int ret = vsnprintf_s(logMsg, sizeof(logMsg), sizeof(logMsg) - 1, format, valist);
         if (ret == -1) {
             va_end(valist);
             return;
