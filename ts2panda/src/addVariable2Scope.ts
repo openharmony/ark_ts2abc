@@ -135,7 +135,13 @@ export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean
             } else if (decl instanceof ConstDecl) {
                 v = scope.add(decl.name, VarDeclarationKind.CONST, InitStatus.UNINITIALIZED);
             } else if (decl instanceof FuncDecl) {
-                v = scope.add(decl.name, VarDeclarationKind.FUNCTION);
+                let funcNode = decl.node;
+                if (ts.isFunctionDeclaration(funcNode)) {
+                    v = scope.add(decl.name, VarDeclarationKind.FUNCTION);
+                } else {
+                    let functionScope = <Scope>recorder.getScopeOfNode(funcNode);
+                    v = functionScope.add(decl.name, VarDeclarationKind.FUNCTION);
+                }
             } else if (decl instanceof CatchParameter) {
                 v = scope.add(decl.name, VarDeclarationKind.LET);
             } else if (decl instanceof ClassDecl) {
