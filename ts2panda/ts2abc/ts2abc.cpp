@@ -820,10 +820,9 @@ int ParseJson(const std::string &data, Json::Value &rootValue)
 {
     JSONCPP_STRING errs;
     Json::CharReaderBuilder readerBuilder;
-    bool res;
 
     std::unique_ptr<Json::CharReader> const jsonReader(readerBuilder.newCharReader());
-    res = jsonReader->parse(data.c_str(), data.c_str() + data.length(), &rootValue, &errs);
+    bool res = jsonReader->parse(data.c_str(), data.c_str() + data.length(), &rootValue, &errs);
     if (!res || !errs.empty()) {
         std::cerr << "ParseJson err. " << errs.c_str() << std::endl;
         return RETURN_FAILED;
