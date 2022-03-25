@@ -91,7 +91,7 @@ describe("RegAllocator", function () {
 
     it("make spill for CalliDynRange", function () {
         /* since the bitwidth for CalliDynRange source register is 16 now, we do not need to make spill at all.
-           but later 16 might be changed to 8, then spill operation will be needed in some cases. this testcase is designed
+           but in case later 16 might be changed to 8, then spill operation will be needed in some cases. this testcase is designed
            for 8bits constraints.
         */
         let string = "";

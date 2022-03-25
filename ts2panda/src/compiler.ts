@@ -240,18 +240,18 @@ export class Compiler {
                     hasAFChild = true;
                 }
             });
-
-            if (hasAFChild) {
-                this.storeSpecialArg2LexEnv("4newTarget");
-                this.storeSpecialArg2LexEnv("arguments");
-
-                if (ts.isConstructorDeclaration(rootNode) && rootNode.parent.heritageClauses) {
-                    this.storeSpecialArg2LexEnv("4funcObj");
-                    return;
-                }
-
-                this.storeSpecialArg2LexEnv("this");
+            if (!hasAFChild) {
+                return ;
             }
+            this.storeSpecialArg2LexEnv("4newTarget");
+            this.storeSpecialArg2LexEnv("arguments");
+
+            if (ts.isConstructorDeclaration(rootNode) && rootNode.parent.heritageClauses) {
+                this.storeSpecialArg2LexEnv("4funcObj");
+                return;
+            }
+
+            this.storeSpecialArg2LexEnv("this");
         }
     }
 
@@ -300,14 +300,15 @@ export class Compiler {
             compileReturnThis4Ctor(this, body.parent, unreachableFlag);
             return;
         }
-
-        if (!unreachableFlag) { // exit GlobalScopefunction or Function Block return
-            if (this.funcBuilder instanceof AsyncFunctionBuilder) {
-                this.funcBuilder.resolve(NodeKind.Invalid, getVregisterCache(pandaGen, CacheList.undefined));
-                pandaGen.return(NodeKind.Invalid);
-            } else {
-                pandaGen.returnUndefined(NodeKind.Invalid);
-            }
+        if (unreachableFlag) {
+            return ;
+        }
+        // exit GlobalScopefunction or Function Block return
+        if (this.funcBuilder instanceof AsyncFunctionBuilder) {
+            this.funcBuilder.resolve(NodeKind.Invalid, getVregisterCache(pandaGen, CacheList.undefined));
+            pandaGen.return(NodeKind.Invalid);
+        } else {
+            pandaGen.returnUndefined(NodeKind.Invalid);
         }
     }
 
