@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TS2ABC_OPTIONS_GEN_H_
-#define PANDA_TS2ABC_OPTIONS_GEN_H_
+#ifndef TS2PANDA_TS2ABC_TS2ABC_OPTIONS_H_
+#define TS2PANDA_TS2ABC_TS2ABC_OPTIONS_H_
 
 #include "utils/pandargs.h"
 
@@ -215,4 +215,4 @@ namespace panda::ts2abc {
     };
 } // namespace panda::ts2abc
 
-#endif // PANDA_TS2ABC_OPTIONS_GEN_H_
+#endif // TS2PANDA_TS2ABC_TS2ABC_OPTIONS_H_

@@ -48,4 +48,4 @@ namespace ARK::Ts2Abc::Ts2Abc {
         ParseDebugMode(rootValue);
         ASSERT_TRUE(GetDebugModeEnabled() == false);
     }
-}
+} // namespace ARK::Ts2Abc::Ts2Abc

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,7 +91,7 @@ describe("RegAllocator", function () {
 
     it("make spill for CalliDynRange", function () {
         /* since the bitwidth for CalliDynRange source register is 16 now, we do not need to make spill at all.
-           but later 16 might be changed to 8, then spill operation will be needed in some cases. this testcase is designed
+           but in case later 16 might be changed to 8, then spill operation will be needed in some cases. this testcase is designed
            for 8bits constraints.
         */
         let string = "";

@@ -55,7 +55,7 @@ namespace {
     };
 }
 
-// pandasm hellpers
+// pandasm helpers
 static panda::pandasm::Record MakeRecordDefinition(const std::string &name, const std::string &wholeLine,
     size_t boundLeft, size_t boundRight, size_t lineNumber)
 {
@@ -134,7 +134,7 @@ static void Logd(const char *format, ...)
         va_list valist;
         va_start(valist, format);
         char logMsg[logBufferSize];
-        int ret = vsnprintf_s(logMsg, sizeof(logMsg) - 1, sizeof(logMsg) - 1, format, valist);
+        int ret = vsnprintf_s(logMsg, sizeof(logMsg), sizeof(logMsg) - 1, format, valist);
         if (ret == -1) {
             va_end(valist);
             return;
@@ -820,10 +820,9 @@ int ParseJson(const std::string &data, Json::Value &rootValue)
 {
     JSONCPP_STRING errs;
     Json::CharReaderBuilder readerBuilder;
-    bool res;
 
     std::unique_ptr<Json::CharReader> const jsonReader(readerBuilder.newCharReader());
-    res = jsonReader->parse(data.c_str(), data.c_str() + data.length(), &rootValue, &errs);
+    bool res = jsonReader->parse(data.c_str(), data.c_str() + data.length(), &rootValue, &errs);
     if (!res || !errs.empty()) {
         std::cerr << "ParseJson err. " << errs.c_str() << std::endl;
         return RETURN_FAILED;

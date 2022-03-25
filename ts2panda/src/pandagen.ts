@@ -14,7 +14,7 @@
  */
 
 /**
- * Imlementation of bytecode generator.
+ * Implementation of bytecode generator.
  * The PandaGen works with IR and provides an API
  * to the compiler.
  *

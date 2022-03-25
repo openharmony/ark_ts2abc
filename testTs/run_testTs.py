@@ -48,14 +48,12 @@ def parse_args():
 def skip(filepath, flag=False):
     with open(SKIP_FILE_PATH, 'r') as f:
         content = f.read()
-        test_list = []
-        import_list = []
         skip_test = json.loads(content)
         skip_test_list = skip_test['error.txt'] + skip_test['no2015'] + skip_test['tsc_error'] + \
             skip_test['import_skip'] + \
             skip_test['code_rule'] + skip_test['no_case']
         if os.path.isfile(filepath):
-            if '.ts' in filepath:
+            if filepath.endswith('.ts'):
                 if filepath not in skip_test_list:
                     return True
                 else:
@@ -67,7 +65,7 @@ def skip(filepath, flag=False):
 
 def abc_judge(filepath):
     if not os.path.getsize(filepath):
-        print(f'Error : {filepath} 文件为空')
+        print(f'Error : {filepath}.The file is empty')
 
 
 def run_test(file, tool, flag=False):
