@@ -157,6 +157,7 @@ export class Compiler {
     }
 
     compile() {
+        this.storeFuncObj2LexEnvIfNeeded();
         this.compileLexicalBindingForArrowFunction();
 
         if (this.rootNode.kind == ts.SyntaxKind.SourceFile) {
@@ -227,6 +228,22 @@ export class Compiler {
             }
 
             this.pandaGen.setCallType(callType);
+        }
+    }
+
+    private storeFuncObj2LexEnvIfNeeded() {
+        let rootNode = this.rootNode;
+        if (!ts.isFunctionExpression(rootNode) && !ts.isMethodDeclaration(rootNode)) {
+            return;
+        }
+        let functionScope = this.recorder.getScopeOfNode(rootNode);
+        if ((<ts.FunctionLikeDeclaration>rootNode).name) {
+            let funcName = jshelpers.getTextOfIdentifierOrLiteral((<ts.FunctionLikeDeclaration>rootNode).name);
+            let v = functionScope.find(funcName);
+            if (v.scope == functionScope) {
+                this.pandaGen.loadAccumulator(rootNode, getVregisterCache(this.pandaGen, CacheList.FUNC));
+                this.pandaGen.storeAccToLexEnv(rootNode, v.scope, v.level, v.v, true);
+            }
         }
     }
 
