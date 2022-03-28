@@ -28,7 +28,7 @@ import json
 from utils import *
 from config import *
 
-class MyException(Exception):  # 继承异常类
+class MyException(Exception):
     def __init__(self, name):
         self.name = name
 
@@ -59,9 +59,9 @@ def skip(filepath,flag = False):
 
 def abc_judge(filepath):
     if not os.path.getsize(filepath):
-        print(f'Error : {filepath} 文件为空')
+        print(f'Error : {filepath} ,The file is empty')
 
-#使用机器转换（path：ts文件路径，out_file：输出内容写入文件路径,tools:工具选择，默认为'ohos-arm-release/clang_x64/ark/ark/build/src/index.js'）
+#Using machine translation (out_file: output content is written to the file path, tools:tool selection)
 def run_test(file, tool,flag = False):
     path_list = file.split(os.sep)
     if path_list[0] != '.':
@@ -236,7 +236,7 @@ def init_path():
     remove_dir(OUT_TEST_DIR)
     mk_dir(OUT_TEST_DIR)
 
-#拉取用例和ts测试文件
+#Pull use cases and TS test files
 def prepare_ts_code():
     if (os.path.exists(TS_CASES_DIR)):
         return

@@ -1,21 +1,19 @@
 # testTs
 
-### 文件简介
-1.skip_tests.json:进行代码文件的规避执行，能对文件中存放的ts文件进行不执行操作。<br>
-2.import_tests.json:存放import的ts代码文件路径，对import类型文件进行添加。<br>
+### File info
+1. skip_tests.json:avoids code files and does not perform operations on TS files stored in the file.
+2. import_tests.json:Is the path to the TS code file where import files are stored to add import files.
 
-### 环境准备
-1.在鸿蒙系统代码根目录下编译ts2abc仓。先删除out目录，然后执行./build.sh --product-name Hi3516DV300 --build-target ark_ts2abc命令进行编译。<br>
-2.进入out文件中的工具build目录 cd out/hi3516dv300/clang_x64/ark/ark/build，使用npm install命令进行环境搭建<br>
-3.搭建完环境，进入到鸿蒙系统ark/ts2abc目录下<br>
+### Environment to prepare
+1. Compile TS2ABC warehouse in hongmeng system code root directory. Delete the out directory and run the './build.sh --product-name Hi3516DV300 --build-target ark_ts2abc' command.
+2. Go to the tool build directory 'cd out/hi3516DV300/clang_x64/ark/ark/build' in the out file and run the 'npm install' command to set up the environment
+3. After setting up the environment, enter the ark/ts2abc directory of Hongmeng system
 
-
-### 执行测试框架
-1.执行选项<br>
-1.1 执行全量测试<br>
+### Execute test framework
+1. Execute options  <br>
+1.1 Performing a Full Test <br>
 python3 ./testTs/run_testTs.py  <br>
-1.2 执行目录测试<br>
-python3 ./testTs/run_testTs.py --dir  文件目录，例如（./testTs/test/ambient）<br>
-1.3 执行单个文件测试<br>
-python3 ./testTs/run_testTs.py --file  文件路径，例如（./testTs/test/ambient/1.ts）<br>
-
+1.2 Performing directory Tests <br>
+python3 ./testTs/run_testTs.py --dir  File directory, for example（./testTs/test/ambient）<br>
+1.3 Performing a Single file Test<br>
+python3 ./testTs/run_testTs.py --file  File path, for example (./testTs/test/ambient/1.ts）<br>
