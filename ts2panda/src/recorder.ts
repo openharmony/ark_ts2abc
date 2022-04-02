@@ -444,18 +444,21 @@ export class Recorder {
         }
         let funcName = jshelpers.getTextOfIdentifierOrLiteral(funcId);
         let funcDecl = new FuncDecl(funcName, node);
-        scope.setDecls(funcDecl);
         let hoistScope = scope;
+        let need2AddDecls: boolean = true;
         if (scope instanceof GlobalScope || scope instanceof ModuleScope) {
             this.collectHoistDecls(node, <GlobalScope | ModuleScope>hoistScope, funcDecl);
         } else if (scope instanceof LocalScope) {
             hoistScope = <Scope>scope.getNearestVariableScope();
             let expectHoistScope = this.getScopeOfNode(node.parent.parent);
             if ((hoistScope == expectHoistScope) && (hoistScope instanceof FunctionScope)) {
-                this.collectHoistDecls(node, hoistScope, funcDecl);
+                need2AddDecls = this.collectHoistDecls(node, hoistScope, funcDecl);
             }
         } else {
             LOGD("Function declaration", " in function is collected in its body block");
+        }
+        if (need2AddDecls) {
+            scope.setDecls(funcDecl);
         }
     }
 
@@ -578,20 +581,17 @@ export class Recorder {
         return parameter.dotDotDotToken ? true : false;
     }
 
-    private collectHoistDecls(node: ts.Node, scope: VariableScope, decl: Decl) {
+    private collectHoistDecls(node: ts.Node, scope: VariableScope, decl: Decl): boolean {
         let declName = decl.name;
 
         // if variable share a same name with the parameter of its contained function, it should not be hoisted
         if (scope instanceof FunctionScope) {
             let nearestFunc = jshelpers.getContainingFunctionDeclaration(node);
-            if (!nearestFunc) {
-                return;
-            }
             let functionParameters = this.getParametersOfFunction(<ts.FunctionLikeDeclaration>nearestFunc);
             if (functionParameters) {
                 for (let i = 0; i < functionParameters.length; i++) {
                     if (functionParameters[i].name == declName) {
-                        return;
+                        return false;
                     }
                 }
             }
@@ -599,10 +599,11 @@ export class Recorder {
 
         // Variable named of global identifier should not be hoisted.
         if (isGlobalIdentifier(declName) && (scope instanceof GlobalScope)) {
-            return;
+            return true;
         }
 
         this.setHoistMap(scope, decl);
+        return false;
     }
 
     setScopeMap(node: ts.Node, scope: Scope) {
