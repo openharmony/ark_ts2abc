@@ -240,8 +240,8 @@ export class Compiler {
             let funcName = jshelpers.getTextOfIdentifierOrLiteral((<ts.FunctionLikeDeclaration>rootNode).name);
             let v = functionScope.find(funcName);
             if (v.scope == functionScope) {
-                this.pandaGen.loadAccumulator(rootNode, getVregisterCache(this.pandaGen, CacheList.FUNC));
-                this.pandaGen.storeAccToLexEnv(rootNode, v.scope, v.level, v.v, true);
+                this.pandaGen.loadAccumulator(NodeKind.FirstNodeOfFunction, getVregisterCache(this.pandaGen, CacheList.FUNC));
+                this.pandaGen.storeAccToLexEnv(NodeKind.FirstNodeOfFunction, v.scope, v.level, v.v, true);
             }
         }
     }
