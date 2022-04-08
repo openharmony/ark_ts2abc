@@ -370,7 +370,7 @@ export class CompilerDriver {
                 throw new Error("the function name is missing from the name map");
             }
 
-            if (name.lastIndexOf(".") != -1) {
+            if (name.lastIndexOf(".") != -1 || name.lastIndexOf("\\") != -1) {
                 name = `#${this.getFuncId(funcNode)}#`
             }
         }
