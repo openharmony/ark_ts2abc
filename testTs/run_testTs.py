@@ -46,9 +46,9 @@ def parse_args():
 
 
 def skip(filepath, flag=False):
-    with open(SKIP_FILE_PATH, 'r') as f:
-        content = f.read()
-        skip_test = json.loads(content)
+    with open(SKIP_FILE_PATH, 'r') as read_skip:
+        sk_content = read_skip.read()
+        skip_test = json.loads(sk_content)
         skip_test_list = skip_test['error.txt'] + skip_test['no2015'] + skip_test['tsc_error'] + \
             skip_test['import_skip'] + \
             skip_test['code_rule'] + skip_test['no_case']
@@ -84,9 +84,9 @@ def run_test(file, tool, flag=False):
     if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
     try:
-        command_os(f'node --expose-gc {tool} -m {file} --output-type')
-    except BaseException:
-        e = str(e)
+        command_os(['node', '--expose-gc', tool, '-m', file, '--output-type'])
+    except BaseException as e:
+        print(e)
     if flag:
         for root, dirs, files in os.walk(ts_dir_path):
             for fi in files:
@@ -148,19 +148,19 @@ def run_test_machine(args):
                         run_test(test_path, ark_frontend_tool)
                         result = compare(test_path)
                         result_path.append(result)
-    with open(OUT_RESULT_FILE, 'w') as f:
-        f.writelines(result_path)
+    with open(OUT_RESULT_FILE, 'w') as read_out_result:
+        read_out_result.writelines(result_path)
 
 
 def read_out_file(file_path):
-    with open(file_path, 'r') as f:
-        content = f.read()
-    if content:
-        if '}\n{' in content:
-            out_list = content.split('}\n{')
+    with open(file_path, 'r') as read_file_path:
+        out_content = read_file_path.read()
+    if out_content:
+        if '}\n{' in out_content:
+            out_list = out_content.split('}\n{')
         else:
             out_list = []
-            out_list.append(''.join(content.split('\n')))
+            out_list.append(''.join(out_content.split('\n')))
     else:
         out_list = []
     out_text_list = []
@@ -200,8 +200,8 @@ def compare(file, flag=False):
             for fi in files:
                 fi = f'{root}/{fi}'
                 if fi != out_path:
-                    with open(fi, 'r') as f:
-                        el_file_txt = f.read()
+                    with open(fi, 'r') as read_out_txt:
+                        el_file_txt = read_out_txt.read()
                         write_append(out_path, el_file_txt)
                         remove_file(fi)
     if (not os.path.exists(out_path) or not os.path.exists(expect_path)):
@@ -227,8 +227,8 @@ def summary():
         return
     count = -1
     fail_count = 0
-    with open(OUT_RESULT_FILE, 'r') as f:
-        for count, line in enumerate(f):
+    with open(OUT_RESULT_FILE, 'r') as read_outfile:
+        for count, line in enumerate(read_outfile):
             if line.startswith("FAIL"):
                 fail_count += 1
             pass
@@ -254,19 +254,20 @@ def prepare_ts_code():
     try:
         mk_dir(TS_CASES_DIR)
         os.chdir('./testTs/test')
-        command_os('git init')
-        command_os(f'git remote add origin {TS_GIT_PATH}')
-        command_os('git config core.sparsecheckout true')
-        command_os('echo "tests/cases/conformance/" >> .git/info/sparse-checkout')
-        command_os(f'git pull --depth 1 origin {TS_TAG}')
+        command_os(['git', 'init'])
+        command_os(['git', 'remote', 'add', 'origin', TS_GIT_PATH])
+        command_os(['git', 'config', 'core.sparsecheckout', 'true'])
+        with os.fdopen(os.open('.git/info/sparse-checkout', os.O_APPEND|os.O_CREAT|os.O_WRONLY)) as outf:
+            subprocess.Popen(['echo', "tests/cases/conformance/"], stdout=outf)
+        command_os(['git', 'pull', '--depth', '1', 'origin', TS_TAG])
         if not os.path.exists("./tests/cases/conformance/"):
             remove_dir(TS_CASES_DIR)
             raise MyException(
                 "Pull TypeScript Code Fail, Please Check The Network Request")
-        command_os(f'git apply ../test-case.patch')
-        command_os(f'cp -r tests/cases/conformance/* ./')
-        command_os(f'rm -rf ./tests')
-        command_os('rm -rf .git')
+        command_os(['git', 'apply', '../test-case.patch'])
+        command_os(['cp', '-r', './tests/cases/conformance/.', './'])
+        command_os(['rm', '-rf', './tests'])
+        command_os(['rm', '-rf', '.git'])
         os.chdir('../../')
     except BaseException:
         print("pull test code fail")

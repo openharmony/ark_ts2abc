@@ -28,99 +28,72 @@ import json
 
 
 def command_os(order):
-    subprocess.run(order,shell=True)
+    subprocess.run(order)
+
 
 def mk_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-    
-def git_checkout(git_brash):
-    command_os(f'git checkout {git_brash}')
+
 
 def remove_dir(path):
     if os.path.exists(path):
         shutil.rmtree(path)
 
+
 def remove_file(path):
     if os.path.exists(path):
         os.remove(path)
 
+
 def clean_file(path):
-    with open(path,'w') as f:
-        f.write('')
+    with open(path, "w") as utils_clean:
+        utils_clean.write("")
+
 
 def read_file(path):
-    content = []
-    with open(path,'r') as f:
-        content = f.readlines()
-    
-    return content
+    util_read_content = []
+    with open(path, "r") as utils_read:
+        util_read_content = utils_read.readlines()
 
-def write_file(path,content):
-    with open(path,'w') as f:
-        f.write(content)
+    return util_read_content
 
-def write_append(path,content):
-    with open(path,'a+') as f:
-        f.write(content)
+
+def write_file(path, write_content):
+    with open(path, "w") as utils_write:
+        utils_write.write(write_content)
+
+
+def write_append(path, content):
+    fd = os.open(path, os.O_APPEND|os.O_CREAT|os.O_WRONLY)
+    with os.fdopen(fd, 'a+') as utils_append:
+        utils_append.write(content)
+
 
 def move_file(srcfile, dstfile):
     subprocess.getstatusoutput("mv %s %s" % (srcfile, dstfile))
 
-def git_clone(git_url, code_dir):
-    cmd = ['git', 'clone', git_url, code_dir]
-    ret = run_cmd_cwd(cmd)
-    assert not ret, f"\n error: Cloning '{git_url}' failed."
-
-def git_checkout(git_bash, cwd):
-    cmd = ['git', 'checkout', git_bash]
-    ret = run_cmd_cwd(cmd, cwd)
-    assert not ret, f"\n error: git checkout '{git_bash}' failed."
-
-
-def git_apply(patch_file, cwd):
-    cmd = ['git', 'apply', patch_file]
-    ret = run_cmd_cwd(cmd, cwd)
-    assert not ret, f"\n error: Failed to apply '{patch_file}'"
-
-
-def git_clean(cwd):
-    cmd = ['git', 'checkout', '--', '.']
-    run_cmd_cwd(cmd, cwd)
 
 def current_time():
     return datetime.datetime.now()
 
-class Command():
-    def __init__(self, cmd):
-        self.cmd = cmd
-
-    def run(self):
-        LOGGING.debug("command: " + self.cmd)
-        out = os.popen(self.cmd).read()
-        LOGGING.info(out)
-        return out
-
-def run_cmd(command):
-    cmd = Command(command)
-    return cmd.run()
 
 def excuting_npm_install(args):
     ark_frontend_tool = os.path.join(DEFAULT_ARK_FRONTEND_TOOL)
     if args.ark_frontend_tool:
         ark_frontend_tool = os.path.join(args.ark_frontend_tool)
 
-    ts2abc_build_dir = os.path.join(os.path.dirname(
-        os.path.realpath(ark_frontend_tool)), "..")
+    ts2abc_build_dir = os.path.join(os.path.dirname(os.path.realpath(ark_frontend_tool)), "..")
     if os.path.exists(os.path.join(ts2abc_build_dir, "package.json")):
         npm_install(ts2abc_build_dir)
     elif os.path.exists(os.path.join(ts2abc_build_dir, "..", "package.json")):
         npm_install(os.path.join(ts2abc_build_dir, ".."))
-        
+
+
 def npm_install(cwd):
     try:
         os.chdir(cwd)
-        command_os('npm install')
+        command_os(["npm", "install"])
         os.chdir(WORK_PATH)
-    except Exception as e:
+    except BaseException as e:
         print(e)
