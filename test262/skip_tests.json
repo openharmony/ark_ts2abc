@@ -1056,7 +1056,17 @@
             "built-ins/TypedArray/prototype/fill/coerced-start-detach.js",
             "built-ins/TypedArray/prototype/fill/coerced-value-detach.js",
             "built-ins/TypedArray/prototype/find/predicate-may-detach-buffer.js",
-            "built-ins/TypedArray/prototype/findIndex/predicate-may-detach-buffer.js"
+            "built-ins/TypedArray/prototype/findIndex/predicate-may-detach-buffer.js",
+            "built-ins/DataView/prototype/getBigUint64/detached-buffer-after-toindex-byteoffset.js",
+            "built-ins/DataView/prototype/getBigUint64/detached-buffer-before-outofrange-byteoffset.js",
+            "built-ins/DataView/prototype/getBigUint64/detached-buffer.js",
+            "built-ins/DataView/prototype/getBigInt64/detached-buffer-after-toindex-byteoffset.js",
+            "built-ins/DataView/prototype/getBigInt64/detached-buffer-before-outofrange-byteoffset.js",
+            "built-ins/DataView/prototype/getBigInt64/detached-buffer.js",
+            "built-ins/DataView/prototype/setBigInt64/detached-buffer-after-toindex-byteoffset.js",
+            "built-ins/DataView/prototype/setBigInt64/detached-buffer-before-outofrange-byteoffset.js",
+            "built-ins/DataView/prototype/setBigInt64/detached-buffer.js",
+            "built-ins/DataView/prototype/setBigInt64/detached-buffer-after-bigint-value.js"
         ]
     },
     {
