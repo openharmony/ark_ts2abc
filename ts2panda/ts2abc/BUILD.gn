@@ -45,13 +45,13 @@ config("ts2abc_config") {
   }
 }
 
-ohos_executable("ts2abc") {
+source_set("ts2abc_static") {
   sources = [
     "main.cpp",
     "ts2abc.cpp",
   ]
 
-  configs = [ ":ts2abc_config" ]
+  public_configs = [ ":ts2abc_config" ]
 
   cflags = [
     "-Wno-c++20-designator",
@@ -98,24 +98,37 @@ ohos_executable("ts2abc") {
       libs = [ libcpp_static_lib ]
     }
   }
+}
+
+ohos_executable("ts2abc") {
+  deps = [ ":ts2abc_static" ]
 
   output_name = "js2abc"
   install_enable = true
   subsystem_name = "ark"
 }
 
-ohos_static_library("jsoncpp_static") {
+config("flag_config") {
+  cflags_cc = [ "-fexceptions" ]
+}
+
+source_set("jsoncpp_set_static") {
   sources = [
     "//third_party/jsoncpp/src/lib_json/json_reader.cpp",
     "//third_party/jsoncpp/src/lib_json/json_value.cpp",
     "//third_party/jsoncpp/src/lib_json/json_writer.cpp",
   ]
-  use_exceptions = true
-  configs = [ "$jsoncpp_root:jsoncpp_config" ]
+  public_configs = [ "$jsoncpp_root:jsoncpp_config" ]
+  public_configs += [ ":flag_config" ]
   include_dirs = [
     "$jsoncpp_root/include",
     "$jsoncpp_root/include/json/",
   ]
+}
+
+ohos_static_library("jsoncpp_static") {
+  deps = [ ":jsoncpp_set_static" ]
+  use_exceptions = true
   subsystem_name = "ark"
   part_name = "ark_frontend_tool"
 }
