@@ -1059,6 +1059,30 @@ static void ParseSingleModule(const Json::Value &rootValue, panda::pandasm::Prog
     prog.literalarray_table.emplace(std::to_string(g_literalArrayCount++), std::move(moduleLiteralarrayInstance));
 }
 
+static void ParseSingleTypeInfo(const Json::Value &rootValue, panda::pandasm::Program &prog)
+{
+    auto typeInfoRecord = rootValue["ti"];
+    auto typeFlag = typeInfoRecord["tf"].asBool();
+    auto typeSummaryIndex = typeInfoRecord["tsi"].asUInt();
+    auto ecmaTypeInfoRecord = panda::pandasm::Record("_ESTypeInfoRecord", LANG_EXT);
+    ecmaTypeInfoRecord.metadata->SetAccessFlags(panda::ACC_PUBLIC);
+
+    auto typeFlagField = panda::pandasm::Field(LANG_EXT);
+    typeFlagField.name = "typeFlag";
+    typeFlagField.type = panda::pandasm::Type("u8", 0);
+    typeFlagField.metadata->SetValue(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U8>(
+    static_cast<uint8_t>(typeFlag)));
+    ecmaTypeInfoRecord.field_list.emplace_back(std::move(typeFlagField));
+    auto typeSummaryIndexField = panda::pandasm::Field(LANG_EXT);
+    typeSummaryIndexField.name = "typeSummaryIndex";
+    typeSummaryIndexField.type = panda::pandasm::Type("u32", 0);
+    typeSummaryIndexField.metadata->SetValue(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U32>(
+    static_cast<uint32_t>(typeSummaryIndex)));
+    ecmaTypeInfoRecord.field_list.emplace_back(std::move(typeSummaryIndexField));
+
+    prog.record_table.emplace(ecmaTypeInfoRecord.name, std::move(ecmaTypeInfoRecord));
+}
+
 static int ParseSmallPieceJson(const std::string &subJson, panda::pandasm::Program &prog)
 {
     Json::Value rootValue;
@@ -1103,6 +1127,12 @@ static int ParseSmallPieceJson(const std::string &subJson, panda::pandasm::Progr
         }
         case static_cast<int>(JsonType::OPTIONS): {
             ParseOptions(rootValue, prog);
+            break;
+        }
+        case static_cast<int>(JsonType::TYPEINFO): {
+            if (rootValue.isMember("ti") && rootValue["ti"].isObject()) {
+                ParseSingleTypeInfo(rootValue, prog);
+            }
             break;
         }
         default: {

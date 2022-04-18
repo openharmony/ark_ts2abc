@@ -26,6 +26,8 @@ import {
 import * as jshelpers from "../jshelpers";
 import { LOGD } from "../log";
 import { isFunctionLikeDeclaration } from "../syntaxCheckHelper";
+import { CmdOptions } from "../cmdOptions";
+import { CompilerDriver } from "../compilerDriver";
 
 export function containSpreadElement(args?: ts.NodeArray<ts.Expression>): boolean {
     if (!args) {
@@ -292,4 +294,8 @@ export function setPos(node: ts.Node) {
         setPos(childNode);
     });
     return node;
+}
+
+export function getRecordTypeFlag(recordType: boolean) {
+    return recordType && CmdOptions.needRecordType() && CompilerDriver.isTsFile;
 }
