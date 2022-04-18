@@ -129,6 +129,10 @@ export class TypeSummary extends BaseType {
         this.setTypeArrayBuffer(this, this.preservedIndex);
     }
 
+    public getPreservedIndex() {
+        return this.preservedIndex;
+    }
+
     transfer2LiteralBuffer(): LiteralBuffer {
         let countBuf = new LiteralBuffer();
         let summaryLiterals: Array<Literal> = new Array<Literal>();
