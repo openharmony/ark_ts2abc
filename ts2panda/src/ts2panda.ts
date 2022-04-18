@@ -47,6 +47,9 @@ import {
 import { LiteralBuffer } from "./base/literal";
 import { CompilerDriver } from "./compilerDriver";
 import { ModuleScope } from "./scope";
+import { getRecordTypeFlag } from "./base/util";
+import { TypeSummary } from "./base/typeSystem";
+import { TypeRecorder } from "./typeRecorder";
 
 const dollarSign: RegExp = /\$/g;
 
@@ -56,7 +59,8 @@ const JsonType = {
     "string": 2,
     "literal_arr": 3,
     "module": 4,
-    "options": 5
+    "options": 5,
+    'type_info': 6
 };
 export class Ts2Panda {
     static strings: Set<string> = new Set();
@@ -319,6 +323,28 @@ export class Ts2Panda {
             }
             ts2abc.stdio[3].write(jsonModuleUnicode + '\n');
         });
+    }
+
+    static dumpTypeInfoRecord(ts2abc: any, recordType: boolean): void {
+        let enableTypeRecord = getRecordTypeFlag(recordType);
+        let typeSummaryIndex = 0;
+        if (enableTypeRecord) {
+            typeSummaryIndex = TypeRecorder.getInstance().getTypeSummaryIndex();
+        }
+        let typeInfo = {
+            'tf': enableTypeRecord,
+            'tsi': typeSummaryIndex
+        }
+        let typeInfoObject = {
+            't': JsonType.type_info,
+            'ti': typeInfo
+        };
+        let jsonModuleUnicode = escapeUnicode(JSON.stringify(typeInfoObject, null, 2));
+        jsonModuleUnicode = "$" + jsonModuleUnicode.replace(dollarSign, '#$') + "$";
+        if (CmdOptions.isEnableDebugLog()) {
+            Ts2Panda.jsonString += jsonModuleUnicode;
+        }
+        ts2abc.stdio[3].write(jsonModuleUnicode + '\n');
     }
 
     static clearDumpData() {
