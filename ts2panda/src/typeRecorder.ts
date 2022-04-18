@@ -53,6 +53,10 @@ export class TypeRecorder {
         this.typeSummary.setInfo(this.countUserDefinedTypeSet(), this.anonymousReExport);
     }
 
+    public getTypeSummaryIndex() {
+        return this.typeSummary.getPreservedIndex();
+    }
+
     public addUserDefinedTypeSet(index: number) {
         this.userDefinedTypeSet.add(index);
     }

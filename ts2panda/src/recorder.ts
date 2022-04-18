@@ -89,14 +89,6 @@ export class Recorder {
         this.setParent(this.node);
         this.setScopeMap(this.node, this.scope);
         this.recordInfo(this.node, this.scope);
-        if (this.recordType) {
-            TypeRecorder.getInstance().setTypeSummary();
-            if (CmdOptions.enableTypeLog()) {
-                TypeRecorder.getInstance().getLog();
-            }
-        } else {
-            PandaGen.clearLiteralArrayBuffer();
-        }
         return this.node;
     }
 

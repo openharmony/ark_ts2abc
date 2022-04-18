@@ -17,7 +17,7 @@ import { writeFileSync } from "fs";
 import * as ts from "typescript";
 import { addVariableToScope } from "./addVariable2Scope";
 import { AssemblyDumper } from "./assemblyDumper";
-import { hasDefaultKeywordModifier, hasExportKeywordModifier, initiateTs2abc, listenChildExit, listenErrorEvent, terminateWritePipe } from "./base/util";
+import { hasDefaultKeywordModifier, hasExportKeywordModifier, initiateTs2abc, listenChildExit, listenErrorEvent, terminateWritePipe, getRecordTypeFlag } from "./base/util";
 import { CmdOptions } from "./cmdOptions";
 import {
     Compiler
@@ -185,6 +185,7 @@ export class CompilerDriver {
                 Ts2Panda.dumpStringsArray(ts2abcProc);
                 Ts2Panda.dumpConstantPool(ts2abcProc);
                 Ts2Panda.dumpModuleRecords(ts2abcProc);
+                Ts2Panda.dumpTypeInfoRecord(ts2abcProc, true)
 
                 terminateWritePipe(ts2abcProc);
                 if (CmdOptions.isEnableDebugLog()) {
@@ -289,12 +290,11 @@ export class CompilerDriver {
             topLevelScope = new GlobalScope(node);
         }
 
-        let enableTypeRecord = recordType && CmdOptions.needRecordType() && CompilerDriver.isTsFile;
-        if (enableTypeRecord) {
-            TypeRecorder.createInstance();
-        }
+        let enableTypeRecord = getRecordTypeFlag(recordType);
+        this.setTypeInfoBeforeRecord(enableTypeRecord);
         let recorder = new Recorder(node, topLevelScope, this, enableTypeRecord, CompilerDriver.isTsFile, syntaxCheckStatus);
         recorder.record();
+        this.setTypeInfoAfterRecord(enableTypeRecord);
         if (topLevelScope instanceof ModuleScope) {
             topLevelScope.module().setModuleEnvironment(topLevelScope);
         }
@@ -405,5 +405,23 @@ export class CompilerDriver {
         let decl = <ts.FunctionLikeDeclaration>node;
         parametersCount += decl.parameters.length;
         return parametersCount;
+    }
+
+    private setTypeInfoBeforeRecord(enableTypeRecord: boolean) {
+        if (enableTypeRecord) {
+            TypeRecorder.createInstance();
+        }
+    }
+
+    private setTypeInfoAfterRecord(enableTypeRecord: boolean) {
+        if (enableTypeRecord) {
+            TypeRecorder.getInstance().setTypeSummary();
+            if (CmdOptions.enableTypeLog()) {
+                TypeRecorder.getInstance().getLog();
+            }
+        } else {
+            PandaGen.clearLiteralArrayBuffer();
+        }
+
     }
 }
