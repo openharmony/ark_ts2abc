@@ -709,8 +709,6 @@
         "reason": "Not support sharedArrayBuffer and detacheArraybuffer",
         "files": [
             "built-ins/ArrayBuffer/prototype/byteLength/detached-buffer.js",
-            "built-ins/ArrayBuffer/prototype/byteLength/this-is-sharedarraybuffer.js",
-            "built-ins/ArrayBuffer/prototype/slice/this-is-sharedarraybuffer.js",
             "built-ins/DataView/buffer-does-not-have-arraybuffer-data-throws-sab.js",
             "built-ins/DataView/buffer-reference-sab.js",
             "built-ins/DataView/byteoffset-is-negative-throws-sab.js",
