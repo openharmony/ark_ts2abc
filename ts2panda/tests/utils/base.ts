@@ -31,6 +31,7 @@ import {
 import { setGlobalStrict } from "../../src/strictMode";
 import { creatAstFromSnippet } from "./asthelper";
 import { LiteralBuffer } from "../../src/base/literal";
+import { CmdOptions } from "../../src/cmdOptions";
 
 const compileOptions = {
     outDir: "../tmp/build",
@@ -142,7 +143,8 @@ export function checkInstructions(actual: IRNode[], expected: IRNode[], checkFn?
 export function compileAllSnippet(snippet: string, passes?: Pass[], literalBufferArray?: Array<LiteralBuffer>): PandaGen[] {
     let sourceFile = creatAstFromSnippet(snippet);
     jshelpers.bindSourceFile(sourceFile, {});
-    setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(sourceFile, compileOptions));
+    CmdOptions.isWatchMode() ? setGlobalStrict(true)
+                            : setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(sourceFile, compileOptions));
     let compilerDriver = new CompilerDriver('UnitTest');
 
     if (!passes) {
@@ -188,7 +190,7 @@ export function compileAfterSnippet(snippet: string, name:string) {
                         let compilerDriver = new CompilerDriver('UnitTest');
                         compilerDriver.setCustomPasses([]);
                         compilerDriver.compileUnitTest(sourceFile, []);
-                        compileUnits = compilerDriver.getCompilationUnits();   
+                        compileUnits = compilerDriver.getCompilationUnits();
                         return sourceFile;
                     }
                 }
