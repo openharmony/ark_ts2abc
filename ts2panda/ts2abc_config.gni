@@ -28,12 +28,11 @@ declare_args() {
   ts2abc_build_path = ""
 }
 
+node_modules = "//prebuilts/build-tools/common/ts2abc/node_modules"
 if (build_public_version) {
   nodejs_dir = "//prebuilts/build-tools/common/nodejs"
-  node_modules = "//prebuilts/build-tools/common/ts2abc/node_modules"
 } else {
   nodejs_dir = "//prebuilts/ace-toolkit/nodejs"
-  node_modules = "//prebuilts/ace-toolkit/ace-loader/panda/node_modules"
 }
 
 if (host_toolchain == buildtool_mac) {
