@@ -614,17 +614,42 @@ export class PandaGen {
         this.add(node, storeOwnByValue(obj, value, nameSetting));
     }
 
+    loadByNameViaDebugger(node: ts.Node, string_id: string, boolVal: CacheList) {
+        this.loadObjProperty(node, getVregisterCache(this, CacheList.Global), "debuggerGetValue");
+        let getValueReg = this.getTemp();
+        this.storeAccumulator(node, getValueReg);
+        let variableReg = this.getTemp();
+        this.loadAccumulatorString(node, string_id);
+        this.storeAccumulator(node, variableReg);
+        let trueValueReg = this.getTemp();
+        this.moveVreg(node, trueValueReg, getVregisterCache(this, boolVal));
+        this.call(node, [getValueReg, variableReg, trueValueReg], false);
+        this.freeTemps(getValueReg, variableReg, trueValueReg);
+    }
+
     // eg. print
     tryLoadGlobalByName(node: ts.Node, string_id: string) {
-        this.add(
-            node,
-            tryLoadGlobalByName(string_id));
+        CmdOptions.isWatchMode() ? this.loadByNameViaDebugger(node, string_id, CacheList.True)
+                                : this.add(node, tryLoadGlobalByName(string_id));
+    }
+
+    storeByNameViaDebugger(node: ts.Node, string_id: string) {
+        let valueReg = this.getTemp();
+        this.storeAccumulator(node, valueReg);
+        this.loadObjProperty(node, getVregisterCache(this, CacheList.Global), "debuggerSetValue");
+        let setValueReg = this.getTemp();
+        this.storeAccumulator(node, setValueReg);
+        let variableReg = this.getTemp();
+        this.loadAccumulatorString(node, string_id);
+        this.storeAccumulator(node, variableReg);
+        this.call(node, [setValueReg, variableReg, valueReg], false);
+        this.freeTemps(valueReg, setValueReg, variableReg);
     }
 
     // eg. a = 1
     tryStoreGlobalByName(node: ts.Node, string_id: string) {
-        this.add(node,
-            tryStoreGlobalByName(string_id));
+        CmdOptions.isWatchMode() ? this.storeByNameViaDebugger(node, string_id)
+                                : this.add(node, tryStoreGlobalByName(string_id));
     }
 
     // eg. var n; n;
@@ -1257,7 +1282,7 @@ export class PandaGen {
             node,
             stClassToGlobalRecord(string_id));
     }
-    
+
     loadAccumulatorBigInt(node: ts.Node | NodeKind, str: string) {
         this.add(
             node,
