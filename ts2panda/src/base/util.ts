@@ -299,3 +299,10 @@ export function setPos(node: ts.Node) {
 export function getRecordTypeFlag(recordType: boolean) {
     return recordType && CmdOptions.needRecordType() && CompilerDriver.isTsFile;
 }
+
+export function isBase64Str(input: string): boolean {
+    if (input == '' || input.trim() == '') {
+        return false;
+    }
+    return Buffer.from(Buffer.from(input, 'base64').toString()).toString('base64') == input;
+}

@@ -23,7 +23,7 @@ import * as jshelpers from "./jshelpers";
 import { LOGE } from "./log";
 import { setGlobalDeclare, setGlobalStrict } from "./strictMode";
 import { TypeChecker } from "./typeChecker";
-import { setPos } from "./base/util";
+import { setPos, isBase64Str } from "./base/util";
 
 function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
     for (let statement of sourceFile.statements) {
@@ -154,6 +154,33 @@ function getDtsFiles(libDir: string): string[] {
     return dtsFiles;
 }
 
+function parseWatch(files: string[]): string {
+    let watchArgs = CmdOptions.getAddWatchArgs();
+    let ideIputStr = watchArgs[0];
+    if (watchArgs.length != 2 || !isBase64Str(ideIputStr)) {
+        throw new Error("Incorrect args' format or not enter base64 string in watch mode.");
+    }
+    let fragmentSep = "\\n";
+    let originExpre = Buffer.from(ideIputStr, 'base64').toString();
+    let expressiones = originExpre.split(fragmentSep);
+    let jsFileName = watchArgs[1] + path.sep + "watch_expres.js";
+    let abcFileName = watchArgs[1] + path.sep + "watch_expres.abc";
+    let writeFlag: Boolean = false;
+    for (let index = 0; index < expressiones.length; index++) {
+        let expreLine = expressiones[index].trim();
+        if (expreLine != "") {
+            if (!writeFlag) {
+                fs.writeFileSync(jsFileName, expreLine + "\n");
+                writeFlag = true;
+            } else {
+                fs.appendFileSync(jsFileName, expreLine + "\n");
+            }
+        }
+    }
+    files.unshift(jsFileName);
+    return abcFileName;
+}
+
 namespace Compiler {
     export namespace Options {
         export let Default: ts.CompilerOptions = {
@@ -184,7 +211,18 @@ function run(args: string[], options?: ts.CompilerOptions): void {
     }
     try {
         let files: string[] = parsed.fileNames;
+        let abcFileName: string = '';
+        if (CmdOptions.isWatchMode()) {
+            abcFileName = parseWatch(files);
+        }
         main(files.concat(CmdOptions.getIncludedFiles()), parsed.options);
+        if (CmdOptions.isWatchMode() && !CmdOptions.isAssemblyMode()) {
+            process.on('exit', () => {
+                let base64data = fs.readFileSync(abcFileName);
+                let watchResStr = Buffer.from(base64data).toString('base64');
+                console.log(watchResStr);
+            });
+        }
     } catch (err) {
         if (err instanceof diag.DiagnosticError) {
             let diagnostic = diag.getDiagnostic(err.code);
