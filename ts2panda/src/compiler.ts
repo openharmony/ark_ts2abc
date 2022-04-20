@@ -327,7 +327,8 @@ export class Compiler {
                 this.funcBuilder.resolve(NodeKind.Invalid, getVregisterCache(pandaGen, CacheList.undefined));
                 pandaGen.return(NodeKind.Invalid);
             } else {
-                pandaGen.returnUndefined(NodeKind.Invalid);
+                CmdOptions.isWatchMode() ? pandaGen.return(NodeKind.Invalid)
+                                        : pandaGen.returnUndefined(NodeKind.Invalid);
             }
         }
     }
@@ -950,8 +951,8 @@ export class Compiler {
                 // typeof an undeclared variable will return undefined instead of throwing reference error
                 let parent = findOuterNodeOfParenthesis(id);
                 if ((parent.kind == ts.SyntaxKind.TypeOfExpression)) {
-                    let obj = getVregisterCache(pandaGen, CacheList.Global);
-                    pandaGen.loadObjProperty(id, obj, name);
+                    CmdOptions.isWatchMode() ? pandaGen.loadByNameViaDebugger(id, name, CacheList.False)
+                                    : pandaGen.loadObjProperty(id, getVregisterCache(pandaGen, CacheList.Global), name);
                 } else {
                     pandaGen.tryLoadGlobalByName(id, name);
                 }
@@ -1555,8 +1556,9 @@ export class Compiler {
             if (variable.v.isNone()) {
                 let parent = findOuterNodeOfParenthesis(node);
                 if ((parent.kind == ts.SyntaxKind.TypeOfExpression)) {
-                    let obj = getVregisterCache(this.pandaGen, CacheList.Global);
-                    this.pandaGen.loadObjProperty(node, obj, variable.v.getName());
+                    CmdOptions.isWatchMode() ? this.pandaGen.loadByNameViaDebugger(node, variable.v.getName(),
+                            CacheList.False) : this.pandaGen.loadObjProperty(node, getVregisterCache(this.pandaGen,
+                            CacheList.Global), variable.v.getName());
                 } else {
                     this.pandaGen.tryLoadGlobalByName(node, variable.v.getName());
                 }
