@@ -26,6 +26,7 @@ const ts2pandaOptions = [
     { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log and generate the json file."},
     { name: 'dump-assembly', alias: 'a', type: Boolean, defaultValue: false, description: "dump assembly to file." },
     { name: 'debug', alias: 'd', type: Boolean, defaultValue: false, description: "compile with debug info." },
+    { name: 'debug-add-watch', alias: 'w', type: String, lazyMultiple: true, defaultValue: [], description: "watch expression and abc file path in debug mode." },
     { name: 'show-statistics', alias: 's', type: String, lazyMultiple: true, defaultValue: "", description: "show compile statistics(ast, histogram, hoisting, all)." },
     { name: 'output', alias: 'o', type: String, defaultValue: "", description: "set output file." },
     { name: 'timeout', alias: 't', type: Number, defaultValue: 0, description: "js to abc timeout threshold(unit: seconds)." },
@@ -69,6 +70,24 @@ export class CmdOptions {
             return false;
         }
         return this.options["debug"];
+    }
+
+    static getAddWatchArgs(): string[] {
+        if (!this.options) {
+            return [];
+        }
+        return this.options["debug-add-watch"];
+    }
+
+    static isWatchMode(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["debug-add-watch"].length != 0;
+    }
+
+    static setWatchArgs(watchArgs: string[]) {
+        this.options["debug-add-watch"] = watchArgs;
     }
 
     static isModules(): boolean {
