@@ -66,7 +66,6 @@ def parse_args():
     return arguments
 
 
-ARK_ARGS = "--gc-type=epsilon"
 ICU_PATH = f"--icu-data-path={CODE_ROOT}/third_party/icu/ohos_icu4j/data"
 ARK_TOOL = DEFAULT_ARK_TOOL
 ARK_FRONTEND_TOOL = DEFAULT_ARK_FRONTEND_TOOL
@@ -197,17 +196,17 @@ class ArkProgram():
             qemu_arg1 = "-L"
             qemu_arg2 = self.arch_root
             cmd_args = [qemu_tool, qemu_arg1, qemu_arg2, self.ark_tool,
-                        ARK_ARGS, ICU_PATH,
+                        ICU_PATH,
                         f'{file_name_pre}.abc']
         elif self.arch == ARK_ARCH_LIST[2]:
             qemu_tool = "qemu-arm"
             qemu_arg1 = "-L"
             qemu_arg2 =  self.arch_root
             cmd_args = [qemu_tool, qemu_arg1, qemu_arg2, self.ark_tool,
-                        ARK_ARGS, ICU_PATH,
+                        ICU_PATH,
                         f'{file_name_pre}.abc']
         elif self.arch == ARK_ARCH_LIST[0]:
-            cmd_args = [self.ark_tool, ARK_ARGS, ICU_PATH,
+            cmd_args = [self.ark_tool, ICU_PATH,
                         f'{file_name_pre}.abc']
 
         retcode = exec_command(cmd_args)
