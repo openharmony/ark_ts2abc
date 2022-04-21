@@ -11,15 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
-import("//build/test.gni")
+if (!defined(ark_flag)) {
+  import("//build/ohos.gni")
+  import("//build/test.gni")
+  ts2abc_root = "//ark/ts2abc/ts2panda"
+} else {
+  import("//build/ark.gni")
+  ts2abc_root = "//ts2abc/ts2panda"
+}
 
 declare_args() {
   buildtool_linux = "//build/toolchain/linux:clang_x64"
   buildtool_mac = "//build/toolchain/mac:clang_x64"
   buildtool_win = "//build/toolchain/mingw:mingw_x86_64"
 
-  ts2abc_root = "//ark/ts2abc/ts2panda"
   nodejs_dir = ""
   node_path = ""
   node_modules = ""
@@ -38,18 +43,18 @@ if (build_public_version) {
 if (host_toolchain == buildtool_mac) {
   ts2abc_build_deps = [ "$ts2abc_root:ts2abc_build_mac($buildtool_mac)" ]
   ts2abc_build_path =
-      get_label_info("//ark/ts2abc/ts2panda:ts2abc_build_mac($buildtool_mac)",
+      get_label_info("$ts2abc_root:ts2abc_build_mac($buildtool_mac)",
                      "root_out_dir") + "/obj/ark/ts2abc/ts2panda/build-mac"
   node_path = "${nodejs_dir}/node-v12.18.4-darwin-x64/bin/"
 } else if (host_toolchain == buildtool_win) {
   ts2abc_build_deps = [ "$ts2abc_root:ts2abc_build_win($buildtool_win)" ]
   ts2abc_build_path =
-      get_label_info("//ark/ts2abc/ts2panda:ts2abc_build_win($buildtool_win)",
+      get_label_info("$ts2abc_root:ts2abc_build_win($buildtool_win)",
                      "root_out_dir") + "/obj/ark/ts2abc/ts2panda/build_win"
 } else {
   ts2abc_build_deps = [ "$ts2abc_root:ts2abc_build($buildtool_linux)" ]
   ts2abc_build_path =
-      get_label_info("//ark/ts2abc/ts2panda:ts2abc_build($buildtool_linux)",
+      get_label_info("$ts2abc_root:ts2abc_build($buildtool_linux)",
                      "root_out_dir") + "/obj/ark/ts2abc/ts2panda/build"
   node_path = "${nodejs_dir}/node-v12.18.4-linux-x64/bin/"
 }
