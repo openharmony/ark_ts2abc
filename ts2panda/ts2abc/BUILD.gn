@@ -11,10 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//ark/runtime_core/ark_config.gni")
-import("//build/ohos.gni")
+if (!defined(ark_flag)) {
+  import("//ark/runtime_core/ark_config.gni")
+  import("//build/ohos.gni")
+} else {
+  import("//build/ark.gni")
+  import("//runtime_core/ark_config.gni")
+}
 
-jsoncpp_root = "//third_party/jsoncpp"
+jsoncpp_root = "$ark_third_party_root/jsoncpp"
 
 config("ts2abc_config") {
   visibility = [ ":*" ]
@@ -100,23 +105,15 @@ source_set("ts2abc_static") {
   }
 }
 
-ohos_executable("ts2abc") {
-  deps = [ ":ts2abc_static" ]
-
-  output_name = "js2abc"
-  install_enable = true
-  subsystem_name = "ark"
-}
-
 config("flag_config") {
   cflags_cc = [ "-fexceptions" ]
 }
 
 source_set("jsoncpp_set_static") {
   sources = [
-    "//third_party/jsoncpp/src/lib_json/json_reader.cpp",
-    "//third_party/jsoncpp/src/lib_json/json_value.cpp",
-    "//third_party/jsoncpp/src/lib_json/json_writer.cpp",
+    "$ark_third_party_root/jsoncpp/src/lib_json/json_reader.cpp",
+    "$ark_third_party_root/jsoncpp/src/lib_json/json_value.cpp",
+    "$ark_third_party_root/jsoncpp/src/lib_json/json_writer.cpp",
   ]
   public_configs = [ "$jsoncpp_root:jsoncpp_config" ]
   public_configs += [ ":flag_config" ]
@@ -126,9 +123,23 @@ source_set("jsoncpp_set_static") {
   ]
 }
 
-ohos_static_library("jsoncpp_static") {
-  deps = [ ":jsoncpp_set_static" ]
-  use_exceptions = true
-  subsystem_name = "ark"
-  part_name = "ark_frontend_tool"
+if (!defined(ark_flag)) {
+  ohos_static_library("jsoncpp_static") {
+    deps = [ ":jsoncpp_set_static" ]
+    use_exceptions = true
+    subsystem_name = "ark"
+    part_name = "ark_frontend_tool"
+  }
+
+  ohos_executable("ts2abc") {
+    deps = [ ":ts2abc_static" ]
+
+    output_name = "js2abc"
+    install_enable = true
+    subsystem_name = "ark"
+  }
+} else {
+  ark_static_library("jsoncpp_static") {
+    deps = [ ":jsoncpp_set_static" ]
+  }
 }
