@@ -48,8 +48,8 @@ export class AsyncFunctionBuilder {
     prepare(node: ts.Node): void {
         let pandaGen = this.pandaGen;
 
-        pandaGen.asyncFunctionEnter(node);
-        pandaGen.storeAccumulator(node, this.asyncObj);
+        pandaGen.asyncFunctionEnter(NodeKind.Invalid);
+        pandaGen.storeAccumulator(NodeKind.Invalid, this.asyncObj);
 
         pandaGen.label(node, this.beginLabel);
     }
