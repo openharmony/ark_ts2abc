@@ -13,7 +13,7 @@
 
 if (!defined(ark_independent_build)) {
   import("//ark/runtime_core/ark_config.gni")
-  import("$build_root/ohos.gni")
+  import("//build/ohos.gni")
 } else {
   import("//runtime_core/ark_config.gni")
   import("$build_root/ark.gni")
