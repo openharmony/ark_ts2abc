@@ -12,8 +12,9 @@
 # limitations under the License.
 
 if (!defined(ark_independent_build)) {
-  import("$build_root/ohos.gni")
-  import("$build_root/test.gni")
+  import("//build/ohos.gni")
+  import("//build/test.gni")
+  build_root = "//build"
   ts2abc_root = "//ark/ts2abc/ts2panda"
 } else {
   import("$build_root/ark.gni")
