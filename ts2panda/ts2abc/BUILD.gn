@@ -15,8 +15,8 @@ if (!defined(ark_independent_build)) {
   import("//ark/runtime_core/ark_config.gni")
   import("$build_root/ohos.gni")
 } else {
-  import("$build_root/ark.gni")
   import("//runtime_core/ark_config.gni")
+  import("$build_root/ark.gni")
 }
 
 jsoncpp_root = "$ark_third_party_root/jsoncpp"
