@@ -50,61 +50,6 @@ config("ts2abc_config") {
   }
 }
 
-source_set("ts2abc_static") {
-  sources = [
-    "main.cpp",
-    "ts2abc.cpp",
-  ]
-
-  public_configs = [ ":ts2abc_config" ]
-
-  cflags = [
-    "-Wno-c++20-designator",
-    "-Wno-c99-extensions",
-    "-Wno-unknown-warning-option",
-  ]
-
-  deps = [ sdk_libc_secshared_dep ]
-
-  if (is_linux || is_mingw || is_mac) {
-    deps += [
-      ":jsoncpp_static",
-      "$ark_root/assembler:libarkassembler_frontend_static",
-      "$ark_root/libpandabase:libarkbase_frontend_static",
-      "$ark_root/libpandafile:libarkfile_frontend_static",
-      "$ark_root/libziparchive:libarkziparchive_frontend_static",
-    ]
-    if (enable_bytecode_optimizer) {
-      deps += [
-        "$ark_root/bytecode_optimizer:libarkbytecodeopt_frontend_static",
-        "$ark_root/compiler:libarkcompiler_frontend_static",
-      ]
-    }
-  } else {
-    deps += [
-      "$ark_root/assembler:libarkassembler",
-      "$ark_root/libpandabase:libarkbase",
-      "$ark_root/libpandafile:libarkfile",
-      "$ark_root/libziparchive:libarkziparchive",
-      "$jsoncpp_root:jsoncpp",
-    ]
-    if (enable_bytecode_optimizer) {
-      deps += [
-        "$ark_root/bytecode_optimizer:libarkbytecodeopt",
-        "$ark_root/compiler:libarkcompiler",
-      ]
-    }
-  }
-
-  if (is_linux) {
-    if (build_public_version) {
-      ldflags = [ "-static-libstdc++" ]
-    } else {
-      libs = [ libcpp_static_lib ]
-    }
-  }
-}
-
 config("flag_config") {
   cflags_cc = [ "-fexceptions" ]
 }
@@ -132,7 +77,58 @@ if (!defined(ark_flag)) {
   }
 
   ohos_executable("ts2abc") {
-    deps = [ ":ts2abc_static" ]
+    sources = [
+      "main.cpp",
+      "ts2abc.cpp",
+    ]
+
+    configs = [ ":ts2abc_config" ]
+
+    cflags = [
+      "-Wno-c++20-designator",
+      "-Wno-c99-extensions",
+      "-Wno-unknown-warning-option",
+    ]
+
+    deps = [ sdk_libc_secshared_dep ]
+
+    if (is_linux || is_mingw || is_mac) {
+      deps += [
+        ":jsoncpp_static",
+        "$ark_root/assembler:libarkassembler_frontend_static",
+        "$ark_root/libpandabase:libarkbase_frontend_static",
+        "$ark_root/libpandafile:libarkfile_frontend_static",
+        "$ark_root/libziparchive:libarkziparchive_frontend_static",
+      ]
+      if (enable_bytecode_optimizer) {
+        deps += [
+          "$ark_root/bytecode_optimizer:libarkbytecodeopt_frontend_static",
+          "$ark_root/compiler:libarkcompiler_frontend_static",
+        ]
+      }
+    } else {
+      deps += [
+        "$ark_root/assembler:libarkassembler",
+        "$ark_root/libpandabase:libarkbase",
+        "$ark_root/libpandafile:libarkfile",
+        "$ark_root/libziparchive:libarkziparchive",
+        "$jsoncpp_root:jsoncpp",
+      ]
+      if (enable_bytecode_optimizer) {
+        deps += [
+          "$ark_root/bytecode_optimizer:libarkbytecodeopt",
+          "$ark_root/compiler:libarkcompiler",
+        ]
+      }
+    }
+
+    if (is_linux) {
+      if (build_public_version) {
+        ldflags = [ "-static-libstdc++" ]
+      } else {
+        libs = [ libcpp_static_lib ]
+      }
+    }
 
     output_name = "js2abc"
     install_enable = true
