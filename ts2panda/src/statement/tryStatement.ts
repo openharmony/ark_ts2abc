@@ -111,6 +111,7 @@ export class TryStatement {
     private outer: TryStatement | undefined;
     private stmt: ts.Statement;
     private catchTable: CatchTable;
+    private loopEnvLevel: number = 0;
     trybuilder: TryBuilderBase | undefined;
 
     constructor(stmt: ts.Statement, catchTable: CatchTable, trybuilder?: TryBuilderBase) {
@@ -152,6 +153,18 @@ export class TryStatement {
 
     getCatchTable() {
         return this.catchTable;
+    }
+
+    getLoopEnvLevel() {
+        return this.loopEnvLevel;
+    }
+
+    increaseLoopEnvLevel() {
+        this.loopEnvLevel += 1;
+    }
+
+    decreaseLoopEnvLevel() {
+        this.loopEnvLevel -= 1;
     }
 }
 
@@ -254,25 +267,12 @@ export class TryBuilderWithForOf extends TryBuilderBase {
         let isDeclaration: boolean = false;
 
         let loopScope = <LoopScope>compiler.getRecorder().getScopeOfNode(stmt);
-        let createLoopEnvAtBegining: boolean = false;
-
-        if (ts.isVariableDeclarationList(stmt.initializer)) {
-            isDeclaration = true;
-
-            if (this.hasLoopEnv) {
-                let decl = stmt.initializer.declarations[0];
-                let declKind = astutils.getVarDeclarationKind(decl);
-                if (declKind == VarDeclarationKind.LET || declKind == VarDeclarationKind.CONST) {
-                    createLoopEnvAtBegining = true;
-                }
-            }
-        }
 
         pandaGen.loadAccumulator(stmt, getVregisterCache(pandaGen, CacheList.True));
         pandaGen.storeAccumulator(stmt, this.doneReg);
 
         pandaGen.label(stmt, this.labelTarget.getContinueTargetLabel()!);
-        if (this.hasLoopEnv && createLoopEnvAtBegining) {
+        if (this.hasLoopEnv) {
             pandaGen.createLexEnv(stmt, <VReg>this.loopEnv, loopScope);
             compiler.pushEnv(<VReg>this.loopEnv);
         }
@@ -292,10 +292,6 @@ export class TryBuilderWithForOf extends TryBuilderBase {
         pandaGen.loadAccumulator(stmt, resultReg);
         lref.setValue();
 
-        if (this.hasLoopEnv && !createLoopEnvAtBegining) {
-            pandaGen.createLexEnv(stmt, <VReg>this.loopEnv, loopScope);
-            compiler.pushEnv(<VReg>this.loopEnv);
-        }
         this.compiler.compileStatement(stmt.statement);
         this.tryStatement.destroy();
         pandaGen.freeTemps(resultReg);
