@@ -22,13 +22,19 @@ import { Label } from "../irnodes";
 export class LabelTarget {
     private static name2LabelTarget: Map<string, LabelTarget> = new Map<string, LabelTarget>();
     private static labelTargetStack: LabelTarget[] = [];
+    private node: ts.Node;
     private breakTargetLabel: Label;
     private continueTargetLabel: Label | undefined;
+    private hasLoopEnv: boolean;
+    private loopEnvLevel: number;
     private tryStatement: TryStatement | undefined;
 
-    constructor(breakTargetLabel: Label, continueTargetLabel: Label | undefined) {
+    constructor(node: ts.Node, breakTargetLabel: Label, continueTargetLabel: Label | undefined, hasLoopEnv: boolean = false) {
+        this.node = node;
         this.breakTargetLabel = breakTargetLabel;
         this.continueTargetLabel = continueTargetLabel;
+        this.hasLoopEnv = hasLoopEnv;
+        this.loopEnvLevel = hasLoopEnv ? 1 : 0;
         this.tryStatement = TryStatement.getCurrentTryStatement();
     }
 
@@ -40,8 +46,24 @@ export class LabelTarget {
         return this.continueTargetLabel;
     }
 
+    getLoopEnvLevel() {
+        return this.loopEnvLevel;
+    }
+
     getTryStatement() {
         return this.tryStatement;
+    }
+
+    getCorrespondingNode() {
+        return this.node;
+    }
+
+    private increaseLoopEnvLevel() {
+        this.loopEnvLevel += 1;
+    }
+
+    private decreaseLoopEnvLevel() {
+        this.loopEnvLevel -= 1;
     }
 
     private static isLabelTargetsEmpty(): boolean {
@@ -68,11 +90,22 @@ export class LabelTarget {
     }
 
     static pushLabelTarget(labelTarget: LabelTarget) {
+        if (labelTarget.hasLoopEnv) {
+            if (TryStatement.getCurrentTryStatement()) {
+                TryStatement.getCurrentTryStatement().increaseLoopEnvLevel();
+            }
+            LabelTarget.labelTargetStack.forEach(lt => lt.increaseLoopEnvLevel());
+        }
         LabelTarget.labelTargetStack.push(labelTarget);
     }
 
     static popLabelTarget() {
-        LabelTarget.labelTargetStack.pop();
+        if (!LabelTarget.isLabelTargetsEmpty() && LabelTarget.labelTargetStack.pop().hasLoopEnv) {
+            if (TryStatement.getCurrentTryStatement()) {
+                TryStatement.getCurrentTryStatement().decreaseLoopEnvLevel();
+            }
+            LabelTarget.labelTargetStack.forEach(lt => lt.decreaseLoopEnvLevel());
+        }
     }
 
     static updateName2LabelTarget(node: ts.Node, labelTarget: LabelTarget) {
