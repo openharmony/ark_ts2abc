@@ -20,6 +20,7 @@ Description: Execute 262 test suite configuration file
 
 
 import os
+from multiprocessing import cpu_count
 
 DATA_DIR = os.path.join("test262", "data")
 ESHOST_DIR = os.path.join("test262", "eshost")
@@ -46,7 +47,7 @@ DEFAULT_LIBS_DIR = f"{ARK_DIR}:{ICUI_DIR}:{LLVM_DIR}:{ARK_JS_RUNTIME_DIR}"
 
 DEFAULT_HOST_TYPE = "panda"
 DEFAULT_HOST_PATH = "python3"
-DEFAULT_THREADS = 8
+DEFAULT_THREADS = min(cpu_count(), 32)
 DEFAULT_OTHER_ARGS = "--saveCompiledTests"
 TEST262_RUNNER_SCRIPT = os.path.join(HARNESS_DIR, "bin", "run.js")
 DEFAULT_TIMEOUT = 60000
