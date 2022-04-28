@@ -305,3 +305,10 @@ export function setPos(node: ts.Node) {
     });
     return node;
 }
+
+export function isBase64Str(input: string): boolean {
+    if (input == '' || input.trim() == '') {
+        return false;
+    }
+    return Buffer.from(Buffer.from(input, 'base64').toString()).toString('base64') == input;
+}
