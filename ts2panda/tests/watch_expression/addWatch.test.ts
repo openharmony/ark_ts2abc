@@ -278,17 +278,22 @@ describe("WatchExpressions", function () {
     });
 
     it("watch ThisKeyword", function () {
-        let snippetCompiler = new SnippetCompiler();
-        snippetCompiler.compile("this");
-        let globalScope = snippetCompiler.getGlobalScope();
-        let insns = snippetCompiler.getGlobalInsns();
+        CmdOptions.parseUserCmd([""]);
+        CmdOptions.setWatchArgs(['','']);
+        let insns = compileMainSnippet(`
+        this
+        `);
         let expected = [
-            new LdaDyn(new VReg()),
+            new EcmaLdobjbyname('debuggerGetValue', new VReg()),
+            new StaDyn(new VReg()),
+            new LdaStr('this'),
+            new StaDyn(new VReg()),
+            new MovDyn(new VReg(), new VReg()),
+            new EcmaCallargs2dyn(new VReg(), new VReg(), new VReg()),
+
             new ReturnDyn()
         ];
         expect(checkInstructions(insns, expected)).to.be.true;
-        let thisVar = globalScope!.findLocal("this");
-        expect(thisVar instanceof LocalVariable).to.be.true;
     });
 
     it("watch MetaProperty", function () {
