@@ -1020,7 +1020,8 @@ export class Compiler {
                     scope.setLexVar(v, this.scope);
                 }
             }
-            pandaGen.loadAccFromLexEnv(node, scope!, level, v);
+            CmdOptions.isWatchMode() ? pandaGen.loadByNameViaDebugger(node, "this", CacheList.True)
+                                     : pandaGen.loadAccFromLexEnv(node, scope!, level, v);
         } else {
             throw new Error("\"this\" must be a local variable");
         }
