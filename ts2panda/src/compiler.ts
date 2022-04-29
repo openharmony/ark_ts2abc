@@ -587,6 +587,36 @@ export class Compiler {
         this.popScope();
     }
 
+    private popLoopEnv(node: ts.Node, times: number) {
+        while(times--) {
+            this.pandaGen.popLexicalEnv(node);
+        }
+    }
+
+    private popLoopEnvWhenContinueOrBreak(labelTarget: LabelTarget, isContinue: boolean) {
+        let node: ts.Node = labelTarget.getCorrespondingNode();
+        let loopEnvLevel = labelTarget.getLoopEnvLevel();
+        switch (node.kind) {
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.ForStatement: {
+                this.popLoopEnv(node, loopEnvLevel - 1);
+                break;
+            }
+            case ts.SyntaxKind.WhileStatement:
+            case ts.SyntaxKind.ForInStatement:
+            case ts.SyntaxKind.ForOfStatement: {
+                let popTimes = isContinue ? loopEnvLevel : loopEnvLevel - 1;
+                this.popLoopEnv(node, popTimes);
+                break;
+            }
+            // SwitchStatement & BlockStatement could also have break labelTarget which changes
+            // the control flow out of their inner env loop. We should pop Loop env with such cases either.
+            default: {
+                this.popLoopEnv(node, loopEnvLevel);
+            }
+        }
+    }
+
     private compileContinueStatement(stmt: ts.ContinueStatement) {
         let continueLabelTarget = LabelTarget.getLabelTarget(stmt);
 
@@ -595,6 +625,11 @@ export class Compiler {
             ControlFlowChange.Continue,
             continueLabelTarget.getContinueTargetLabel()!
         );
+
+        // before jmp out of loops, pop the loops env
+        if (continueLabelTarget.getLoopEnvLevel()) {
+            this.popLoopEnvWhenContinueOrBreak(continueLabelTarget, true);
+        }
 
         this.pandaGen.branch(stmt, continueLabelTarget.getContinueTargetLabel()!);
     }
@@ -608,6 +643,11 @@ export class Compiler {
             undefined
         );
 
+        // before jmp out of loops, pop the loops env
+        if (breakLabelTarget.getLoopEnvLevel()) {
+            this.popLoopEnvWhenContinueOrBreak(breakLabelTarget, false);
+        }
+
         this.pandaGen.branch(stmt, breakLabelTarget.getBreakTargetLabel());
     }
 
@@ -620,7 +660,7 @@ export class Compiler {
         if (stmt.statement.kind == ts.SyntaxKind.Block || stmt.statement.kind == ts.SyntaxKind.IfStatement) {
             blockEndLabel = new Label();
 
-            let labelTarget = new LabelTarget(blockEndLabel, undefined);
+            let labelTarget = new LabelTarget(stmt, blockEndLabel, undefined);
 
             LabelTarget.updateName2LabelTarget(stmt, labelTarget);
         }
@@ -643,6 +683,11 @@ export class Compiler {
         } else {
             throw new DiagnosticError(stmt, DiagnosticCode.Line_break_not_permitted_here);
         }
+
+        // before CFG, pop the loops env
+        let popTimes = TryStatement.getCurrentTryStatement() ? TryStatement.getCurrentTryStatement().getLoopEnvLevel() : 0;
+        this.popLoopEnv(stmt, popTimes);
+
         pandaGen.throw(stmt);
     }
 
