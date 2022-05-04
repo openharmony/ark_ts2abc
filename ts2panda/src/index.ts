@@ -154,17 +154,21 @@ function getDtsFiles(libDir: string): string[] {
     return dtsFiles;
 }
 
-function parseWatch(files: string[]): string {
+const stopWatchingStr = "####";
+const watchAbcFileTimeOut = 5000;
+const watchFileName = "watch_expressions";
+
+function updateWatchedFile() {
     let watchArgs = CmdOptions.getAddWatchArgs();
     let ideIputStr = watchArgs[0];
     if (watchArgs.length != 2 || !isBase64Str(ideIputStr)) {
-        throw new Error("Incorrect args' format or not enter base64 string in watch mode.");
+        throw new Error("Incorrect args' format or not enter base64 string in watch mode");
     }
     let fragmentSep = "\\n";
     let originExpre = Buffer.from(ideIputStr, 'base64').toString();
     let expressiones = originExpre.split(fragmentSep);
-    let jsFileName = watchArgs[1] + path.sep + "watch_expres.js";
-    let abcFileName = watchArgs[1] + path.sep + "watch_expres.abc";
+    let jsFileName = watchArgs[1] + path.sep + watchFileName + ".js";
+    let abcFileName = watchArgs[1] + path.sep + watchFileName + ".abc";
     let writeFlag: Boolean = false;
     for (let index = 0; index < expressiones.length; index++) {
         let expreLine = expressiones[index].trim();
@@ -177,8 +181,64 @@ function parseWatch(files: string[]): string {
             }
         }
     }
-    files.unshift(jsFileName);
-    return abcFileName;
+    if (CmdOptions.isAssemblyMode()) {
+        return;
+    }
+
+    fs.watchFile(abcFileName, { persistent: true, interval: 50 }, (curr, prev) => {
+        if (+curr.mtime <= +prev.mtime) {
+            fs.unwatchFile(jsFileName);
+            throw new Error("watched abc file has not been initialized");
+        }
+        let base64data = fs.readFileSync(abcFileName);
+        let watchResStr = Buffer.from(base64data).toString('base64');
+        console.log(watchResStr);
+        fs.unwatchFile(abcFileName);
+        process.exit();
+    });
+    setTimeout(() => {
+        fs.unwatchFile(jsFileName);
+        fs.unwatchFile(abcFileName);
+        fs.unlinkSync(jsFileName);
+        fs.unlinkSync(abcFileName);
+        throw new Error("watchFileServer has not been initialized");
+    }, watchAbcFileTimeOut);
+}
+
+function convertWatchExpression(jsfileName: string, parsed: ts.ParsedCommandLine | undefined) {
+    let files: string[] = parsed.fileNames;
+    files.unshift(jsfileName);
+    CmdOptions.setWatchArgs(['','']);
+    main(files.concat(CmdOptions.getIncludedFiles()), parsed.options);
+}
+
+function keepWatchingFiles(filePath: string, parsed: ts.ParsedCommandLine | undefined) {
+    let jsFileName = filePath + path.sep + watchFileName + ".js";
+    let abcFileName = filePath + path.sep + watchFileName + ".abc";
+    if (fs.existsSync(jsFileName)) {
+        console.log("watchFileServer has been initialized");
+        return;
+    }
+    fs.writeFileSync(jsFileName, "initJsFile\n");
+    convertWatchExpression(jsFileName, parsed);
+
+    fs.watchFile(jsFileName, { persistent: true, interval: 50 }, (curr, prev) => {
+        if (+curr.mtime <= +prev.mtime) {
+            throw new Error("watched js file has not been initialized");
+        }
+        if (fs.readFileSync(jsFileName).toString() == stopWatchingStr) {
+            fs.unwatchFile(jsFileName);
+            console.log("stopWatchingSuccess");
+            return;
+        }
+        convertWatchExpression(jsFileName, parsed);
+    });
+    console.log("startWatchingSuccess");
+
+    process.on("exit", () => {
+        fs.unlinkSync(jsFileName);
+        fs.unlinkSync(abcFileName);
+    });
 }
 
 namespace Compiler {
@@ -210,19 +270,22 @@ function run(args: string[], options?: ts.CompilerOptions): void {
         }
     }
     try {
-        let files: string[] = parsed.fileNames;
-        let abcFileName: string = '';
+        let keepWatchArgs = CmdOptions.getKeepWatchFile();
+        if (keepWatchArgs.length != 0) {
+            if (CmdOptions.isKeepWatchMode(keepWatchArgs)) {
+                keepWatchingFiles(CmdOptions.getKeepWatchFile()[1], parsed);
+            } else if (CmdOptions.isStopWatchMode(keepWatchArgs)) {
+                fs.writeFileSync(CmdOptions.getKeepWatchFile()[1] + path.sep + watchFileName + ".js", stopWatchingStr);
+            } else {
+                throw new Error("Incorrect args' format for keep watching expression mode");
+            }
+            return;
+        }
         if (CmdOptions.isWatchMode()) {
-            abcFileName = parseWatch(files);
+            updateWatchedFile();
+            return;
         }
-        main(files.concat(CmdOptions.getIncludedFiles()), parsed.options);
-        if (CmdOptions.isWatchMode() && !CmdOptions.isAssemblyMode()) {
-            process.on('exit', () => {
-                let base64data = fs.readFileSync(abcFileName);
-                let watchResStr = Buffer.from(base64data).toString('base64');
-                console.log(watchResStr);
-            });
-        }
+        main(parsed.fileNames.concat(CmdOptions.getIncludedFiles()), parsed.options);
     } catch (err) {
         if (err instanceof diag.DiagnosticError) {
             let diagnostic = diag.getDiagnostic(err.code);
