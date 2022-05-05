@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (!defined(ark_flag)) {
+if (!defined(ark_independent_build)) {
   import("//ark/runtime_core/ark_config.gni")
   import("//build/ohos.gni")
 } else {
-  import("//build/ark.gni")
   import("//runtime_core/ark_config.gni")
+  import("$build_root/ark.gni")
 }
 
 jsoncpp_root = "$ark_third_party_root/jsoncpp"
@@ -68,7 +68,7 @@ source_set("jsoncpp_set_static") {
   ]
 }
 
-if (!defined(ark_flag)) {
+if (!defined(ark_independent_build)) {
   ohos_static_library("jsoncpp_static") {
     deps = [ ":jsoncpp_set_static" ]
     use_exceptions = true
