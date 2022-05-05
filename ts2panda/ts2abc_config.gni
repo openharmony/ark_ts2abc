@@ -11,19 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (!defined(ark_flag)) {
+if (!defined(ark_independent_build)) {
   import("//build/ohos.gni")
   import("//build/test.gni")
+  build_root = "//build"
   ts2abc_root = "//ark/ts2abc/ts2panda"
 } else {
-  import("//build/ark.gni")
+  import("$build_root/ark.gni")
   ts2abc_root = "//ts2abc/ts2panda"
 }
 
 declare_args() {
-  buildtool_linux = "//build/toolchain/linux:clang_x64"
-  buildtool_mac = "//build/toolchain/mac:clang_x64"
-  buildtool_win = "//build/toolchain/mingw:mingw_x86_64"
+  buildtool_linux = "$build_root/toolchain/linux:clang_x64"
+  buildtool_mac = "$build_root/toolchain/mac:clang_x64"
+  buildtool_win = "$build_root/toolchain/mingw:mingw_x86_64"
 
   nodejs_dir = ""
   node_path = ""
