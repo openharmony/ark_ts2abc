@@ -193,6 +193,11 @@ export class DebugInfo {
         }
     }
 
+    public static setInvalidPosInfoForUninitializeIns(posInfo: DebugPosInfo, pandaGen: PandaGen) {
+        posInfo.setSourecLineNum(-1);
+        posInfo.setSourecColumnNum(-1);
+    }
+
     public static addScope(scope: Scope) {
         DebugInfo.scopeArray.push(scope);
     }
@@ -277,7 +282,7 @@ export class DebugInfo {
         // count pos offset
         for (let i = 0; i < insns.length; i++) {
             if (insns[i].debugPosInfo.getDebugPosInfoNodeState() == NodeKind.FirstNodeOfFunction) {
-                DebugInfo.setPosInfoForUninitializeIns(insns[i].debugPosInfo, pandaGen);
+                DebugInfo.setInvalidPosInfoForUninitializeIns(insns[i].debugPosInfo, pandaGen);
             }
 
             let insLength = DebugInfo.getIRNodeWholeLength(insns[i]);
