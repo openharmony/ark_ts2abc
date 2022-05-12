@@ -88,12 +88,15 @@ def gen_java_method(input_arguments):
     file_path = input_arguments.plugin_path
     out_file = input_arguments.generated_file
 
+    if os.path.exists(out_file):
+        os.remove(out_file)
+
     file_name_pre = os.path.splitext(file_name)[0]
     js_src_file = os.path.join(file_path, file_name)
     (out_dir, _) = os.path.split(input_arguments.generated_file)
     js_bin_file = os.path.join(out_dir, file_name_pre + JS_BIN_EXT)
 
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    flags = os.O_WRONLY | os.O_CREAT
     modes = stat.S_IWUSR | stat.S_IRUSR
 
     with os.fdopen(os.open(out_file, flags, modes), "w") as output:
