@@ -22,8 +22,9 @@ import * as path from "path";
 import { execute } from "./base/util";
 
 const ts2pandaOptions = [
+    { name: 'commonjs', alias: 'c', type: Boolean, defaultValue: false, description: "compile as commonJs module." },
     { name: 'modules', alias: 'm', type: Boolean, defaultValue: false, description: "compile as module." },
-    { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log and generate the json file."},
+    { name: 'debug-log', alias: 'l', type: Boolean, defaultValue: false, description: "show info debug log and generate the json file." },
     { name: 'dump-assembly', alias: 'a', type: Boolean, defaultValue: false, description: "dump assembly to file." },
     { name: 'debug', alias: 'd', type: Boolean, defaultValue: false, description: "compile with debug info." },
     { name: 'debug-add-watch', alias: 'w', type: String, lazyMultiple: true, defaultValue: [], description: "watch expression and abc file path in debug mode." },
@@ -104,6 +105,13 @@ export class CmdOptions {
 
     static isStopWatchMode(args: string[]): boolean {
         return args.length == 2 && args[0] == "stop";
+    }
+
+    static isCommonJs(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["commonjs"];
     }
 
     static isModules(): boolean {
