@@ -1586,7 +1586,7 @@ export class Compiler {
 
     loadTarget(node: ts.Node, variable: { scope: Scope | undefined, level: number, v: Variable | undefined }) {
         if (variable.v instanceof LocalVariable) {
-            if (variable.v.isLetOrConst() || variable.v.isClass()) {
+            if (!CmdOptions.isCommonJs() && (variable.v.isLetOrConst() || variable.v.isClass())) {
                 if (variable.scope instanceof GlobalScope) {
                     this.pandaGen.tryLoadGlobalByName(node, variable.v.getName());
                     return;
