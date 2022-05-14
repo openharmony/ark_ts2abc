@@ -75,7 +75,7 @@ export function getObjAndProp(node: ts.ElementAccessExpression | ts.PropertyAcce
             let expr = node.argumentExpression;
             let temp = parseFloat(jshelpers.getTextOfIdentifierOrLiteral(expr.operand));
             if (expr.operator == ts.SyntaxKind.MinusToken) {
-                prop = "-" + temp.toString();
+                prop = temp === 0 ? temp : "-" + temp.toString();
             } else {
                 if (!isValidIndex(temp)) {
                     prop = "+" + temp.toString();
