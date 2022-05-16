@@ -94,11 +94,11 @@ if (!defined(ark_independent_build)) {
 
     if (is_linux || is_mingw || is_mac) {
       deps += [
-        ":jsoncpp_static",
         "$ark_root/assembler:libarkassembler_frontend_static",
         "$ark_root/libpandabase:libarkbase_frontend_static",
         "$ark_root/libpandafile:libarkfile_frontend_static",
         "$ark_root/libziparchive:libarkziparchive_frontend_static",
+        "//third_party/jsoncpp:jsoncpp_static",
       ]
       if (enable_bytecode_optimizer) {
         deps += [
