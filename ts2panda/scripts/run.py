@@ -76,31 +76,31 @@ def node_modules(options):
         run_command(['npm', 'install'], dist_dir)
 
 
-def per_platForm_config(options, dir):
+def per_platform_config(options, inp_dir):
     dist_dir = options.dist_dir
-    if os.path.exists(os.path.join(dist_dir, dir)):
-        shutil.rmtree(os.path.join(dist_dir, dir), ignore_errors=True)
-    cmd = ['mv', 'dist', dir]
+    if os.path.exists(os.path.join(dist_dir, inp_dir)):
+        shutil.rmtree(os.path.join(dist_dir, inp_dir), ignore_errors=True)
+    cmd = ['mv', 'dist', inp_dir]
     run_command(cmd, dist_dir)
     run_command(['cp', '-f', "package.json",
-                 "./{}/package.json".format(dir)], dist_dir)
+                 "./{}/package.json".format(inp_dir)], dist_dir)
     run_command(['cp', '-f', "package-lock.json",
-                 "./{}/package-lock.json".format(dir)], dist_dir)
+                 "./{}/package-lock.json".format(inp_dir)], dist_dir)
     (js2abc_dir, _) = os.path.split(options.js2abc)
-    build_dir = os.path.join(js2abc_dir, dir)
+    build_dir = os.path.join(js2abc_dir, inp_dir)
     if os.path.exists(build_dir):
         shutil.rmtree(build_dir)
-    run_command(['cp', '-r', os.path.join(dist_dir, dir), js2abc_dir])
+    run_command(['cp', '-r', os.path.join(dist_dir, inp_dir), js2abc_dir])
     bin_dir = os.path.join(build_dir, 'bin')
     if not os.path.exists(bin_dir):
         os.mkdir(bin_dir)
     run_command(['cp', '-f', options.js2abc, bin_dir])
-    obj_bin_dir = os.path.join(dist_dir, dir, 'bin/')
+    obj_bin_dir = os.path.join(dist_dir, inp_dir, 'bin/')
     if not os.path.exists(obj_bin_dir):
         os.mkdir(obj_bin_dir)
     run_command(['cp', '-f', options.js2abc, obj_bin_dir])
     run_command(['cp', '-r', os.path.join(dist_dir,"node_modules"),
-                os.path.join(dist_dir, dir)])
+                os.path.join(dist_dir, inp_dir)])
 
 
 def npm_run_build(options):
@@ -112,19 +112,19 @@ def npm_run_build(options):
            '--env', 'buildMode={}'.format(options.buildMode)]
     run_command(cmd, options.dist_dir)
     if plat_form == "linux":
-        per_platForm_config(options, "build")
+        per_platform_config(options, "build")
     elif plat_form == "win":
-        per_platForm_config(options, "build-win")
+        per_platform_config(options, "build-win")
     elif plat_form == 'mac':
-        per_platForm_config(options, "build-mac")
+        per_platform_config(options, "build-mac")
 
 
 def main():
-    ARGS = parse_args()
-    set_env(ARGS.node)
-    if not os.path.exists(os.path.join(ARGS.dist_dir, "node_modules")):
-        node_modules(ARGS)
-    npm_run_build(ARGS)
+    args = parse_args()
+    set_env(args.node)
+    if not os.path.exists(os.path.join(args.dist_dir, "node_modules")):
+        node_modules(args)
+    npm_run_build(args)
 
 
 if __name__ == "__main__":
