@@ -801,7 +801,7 @@ static void GenerateESModuleRecord(panda::pandasm::Program &prog)
     prog.record_table.emplace(ecmaModuleRecord.name, std::move(ecmaModuleRecord));
 }
 
-static void AddModuleRecord(panda::pandasm::Program &prog, std::string &moduleName, uint32_t moduleIdx)
+static void AddModuleRecord(panda::pandasm::Program &prog, const std::string &moduleName, uint32_t moduleIdx)
 {
     auto iter = prog.record_table.find("_ESModuleRecord");
     if (iter != prog.record_table.end()) {
@@ -1174,7 +1174,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-static bool IsStartOrEndPosition(int idx, char *buff, std::string &data)
+static bool IsStartOrEndPosition(int idx, char *buff, const std::string &data)
 {
     if (buff[idx] != '$') {
         return false;
