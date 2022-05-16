@@ -1011,7 +1011,7 @@ static bool ParseData(const std::string &data, panda::pandasm::Program &prog)
     return true;
 }
 
-static bool IsStartOrEndPosition(int idx, char *buff, std::string &data)
+static bool IsStartOrEndPosition(int idx, char *buff, const std::string &data)
 {
     if (buff[idx] != '$') {
         return false;
