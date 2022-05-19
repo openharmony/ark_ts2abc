@@ -57,7 +57,8 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
 
     if (CmdOptions.needRecordDtsType()) {
         for (let sourceFile of program.getSourceFiles()) {
-            if (sourceFile.isDeclarationFile && !program.isSourceFileDefaultLibrary(sourceFile)) {
+            let originFileNames = new Set(fileNames.slice(0, fileNames.length - dtsFiles.length));
+            if (sourceFile.isDeclarationFile && !program.isSourceFileDefaultLibrary(sourceFile) && originFileNames.has(sourceFile.fileName)) {
                 setGlobalDeclare(checkIsGlobalDeclaration(sourceFile));
                 generateDTs(sourceFile, options);
             }
