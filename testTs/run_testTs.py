@@ -84,7 +84,10 @@ def run_test(file, tool, flag=False):
     if not os.path.exists(out_dir_path):
         os.makedirs(out_dir_path)
     try:
-        command_os(['node', '--expose-gc', tool, '-m', file, '--output-type'])
+        if file in IMPORT_TEST['import'] + IMPORT_TEST['m_parameter']:
+            command_os(['node', '--expose-gc', tool, '-m', file, '--output-type'])
+        else:
+            command_os(['node', '--expose-gc', tool, file, '--output-type'])
     except BaseException as e:
         print(e)
     if flag:
