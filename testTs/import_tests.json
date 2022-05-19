@@ -7,5 +7,12 @@
         "./testTs/test/externalModules/typeOnly/importDefaultNamedType/importDefaultNamedType.ts",
         "./testTs/test/moduleResolution/scopedPackages/scopedPackages.ts",
         "./testTs/test/moduleResolution/scopedPackagesClassic/scopedPackagesClassic.ts"        
+    ],
+    "m_parameter" : [
+        "./testTs/test/internalModules/DeclarationMerging/AmbientModuleAndNonAmbientFunctionWithTheSameNameAndCommonRoot.ts",
+        "./testTs/test/jsdoc/constructorTagOnClassConstructor.ts",
+        "./testTs/test/jsdoc/declarations/jsDeclarationsThisTypes.ts",
+        "./testTs/test/declarationEmit/declarationEmitWorkWithInlineComments.ts",
+        "./testTs/test/declarationEmit/exportDefaultNamespace.ts"
     ]
 }
