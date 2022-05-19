@@ -76,7 +76,7 @@ export function compileForOfStatement(stmt: ts.ForOfStatement, compiler: Compile
     pandaGen.loadAccumulator(stmt, getVregisterCache(pandaGen, CacheList.False));
     pandaGen.storeAccumulator(stmt, doneReg);
 
-    let labelTarget = new LabelTarget(endLabel, nextLabel);
+    let labelTarget = new LabelTarget(stmt, endLabel, nextLabel, needCreateLoopEnv);
     LabelTarget.pushLabelTarget(labelTarget);
     LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
 
