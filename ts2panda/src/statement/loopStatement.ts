@@ -35,16 +35,17 @@ import { LabelTarget } from "./labelTarget";
 export function compileDoStatement(stmt: ts.DoStatement, compiler: Compiler) {
     compiler.pushScope(stmt);
     let pandaGen = compiler.getPandaGen();
-    let loopStartLabel = new Label();
-    let loopEndLabel = new Label();
-    let conditionLabel = new Label();
-
-    let labelTarget = new LabelTarget(loopEndLabel, conditionLabel);
-    LabelTarget.pushLabelTarget(labelTarget);
-    LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
 
     let loopScope = <LoopScope>compiler.getRecorder().getScopeOfNode(stmt);
     let needCreateLoopEnv: boolean = loopScope.need2CreateLexEnv() ? true : false;
+
+    let loopStartLabel = new Label();
+    let loopEndLabel = new Label();
+    let conditionLabel = new Label();
+    let labelTarget = new LabelTarget(stmt, loopEndLabel, conditionLabel, needCreateLoopEnv);
+    LabelTarget.pushLabelTarget(labelTarget);
+    LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
+
     let loopEnv = pandaGen.getTemp();
 
     pandaGen.label(stmt, loopStartLabel);
@@ -77,24 +78,24 @@ export function compileDoStatement(stmt: ts.DoStatement, compiler: Compiler) {
 export function compileWhileStatement(stmt: ts.WhileStatement, compiler: Compiler) {
     compiler.pushScope(stmt);
     let pandaGen = compiler.getPandaGen();
-    let loopStartLabel = new Label();
-    let loopEndLabel = new Label();
-
-    let labelTarget = new LabelTarget(loopEndLabel, loopStartLabel);
-    LabelTarget.pushLabelTarget(labelTarget);
-    LabelTarget.updateName2LabelTarget(stmt.parent, new LabelTarget(loopEndLabel, loopStartLabel));
 
     let loopScope = <LoopScope>compiler.getRecorder().getScopeOfNode(stmt);
     let needCreateLoopEnv: boolean = loopScope.need2CreateLexEnv() ? true : false;
+
+    let loopStartLabel = new Label();
+    let loopEndLabel = new Label();
+    let labelTarget = new LabelTarget(stmt, loopEndLabel, loopStartLabel, needCreateLoopEnv);
+    LabelTarget.pushLabelTarget(labelTarget);
+    LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
+
     let loopEnv = pandaGen.getTemp();
 
     pandaGen.label(stmt, loopStartLabel);
-    compiler.compileCondition(stmt.expression, loopEndLabel);
-
     if (needCreateLoopEnv) {
         pandaGen.createLexEnv(stmt, loopEnv, loopScope);
         compiler.pushEnv(loopEnv);
     }
+    compiler.compileCondition(stmt.expression, loopEndLabel);
 
     compiler.compileStatement(stmt.statement);
 
@@ -138,8 +139,7 @@ export function compileForStatement(stmt: ts.ForStatement, compiler: Compiler) {
     let loopStartLabel = new Label();
     let loopEndLabel = new Label();
     let incLabel = new Label();
-
-    let labelTarget = new LabelTarget(loopEndLabel, incLabel);
+    let labelTarget = new LabelTarget(stmt, loopEndLabel, incLabel, needCreateLoopEnv);
     LabelTarget.pushLabelTarget(labelTarget);
     LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
 
@@ -253,25 +253,17 @@ export function compileForInStatement(stmt: ts.ForInStatement, compiler: Compile
     compiler.pushScope(stmt);
     let pandaGen = compiler.getPandaGen();
 
-    // init label info;
-    let loopStartLabel = new Label();
-    let loopEndLabel = new Label();
-    let labelTarget = new LabelTarget(loopEndLabel, loopStartLabel);
-    LabelTarget.pushLabelTarget(labelTarget);
-    LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
-
     // determine the location where env should be created
     let loopScope = <LoopScope>compiler.getRecorder().getScopeOfNode(stmt);
     let needCreateLexEnv: boolean = loopScope.need2CreateLexEnv() ? true : false;
-    let createEnvAtBegining: boolean = false;
     let loopEnv = pandaGen.getTemp();
-    if (needCreateLexEnv && ts.isVariableDeclarationList(stmt.initializer)) {
-        loopScope.getName2variable().forEach(v => {
-            if (v.isLetOrConst() && v.isLexVar) {
-                createEnvAtBegining = true;
-            }
-        });
-    }
+
+    // init label info;
+    let loopStartLabel = new Label();
+    let loopEndLabel = new Label();
+    let labelTarget = new LabelTarget(stmt, loopEndLabel, loopStartLabel, needCreateLexEnv);
+    LabelTarget.pushLabelTarget(labelTarget);
+    LabelTarget.updateName2LabelTarget(stmt.parent, labelTarget);
 
     let iterReg = pandaGen.getTemp();
     let propName = pandaGen.getTemp();
@@ -282,7 +274,7 @@ export function compileForInStatement(stmt: ts.ForInStatement, compiler: Compile
     pandaGen.storeAccumulator(stmt, iterReg);
 
     pandaGen.label(stmt, loopStartLabel);
-    if (needCreateLexEnv && createEnvAtBegining) {
+    if (needCreateLexEnv) {
         pandaGen.createLexEnv(stmt, loopEnv, loopScope);
         compiler.pushEnv(loopEnv);
     }
@@ -296,10 +288,6 @@ export function compileForInStatement(stmt: ts.ForInStatement, compiler: Compile
     pandaGen.loadAccumulator(stmt, propName);
     lref.setValue();
 
-    if (needCreateLexEnv && !createEnvAtBegining) {
-        pandaGen.createLexEnv(stmt, loopEnv, loopScope);
-        compiler.pushEnv(loopEnv);
-    }
     compiler.compileStatement(stmt.statement);
 
     if (needCreateLexEnv) {
