@@ -607,7 +607,7 @@ static void ParseFunctionCallType(const Json::Value &function, panda::pandasm::F
         funcName = function["n"].asString();
     }
     if (funcName == "func_main_0") {
-        return ;
+        return;
     }
 
     uint32_t callType = 0;
