@@ -64,10 +64,10 @@ def write_file(path, write_content):
         utils_write.write(write_content)
 
 
-def write_append(path, content):
+def write_append(path, add_content):
     fd = os.open(path, os.O_APPEND|os.O_CREAT|os.O_WRONLY)
     with os.fdopen(fd, 'a+') as utils_append:
-        utils_append.write(content)
+        utils_append.write(add_content)
 
 
 def move_file(srcfile, dstfile):
