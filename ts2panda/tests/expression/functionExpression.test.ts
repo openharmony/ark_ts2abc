@@ -40,7 +40,6 @@ import {
     Label,
     LdaDyn,
     LdaiDyn,
-    ResultType,
     ReturnDyn,
     StaDyn,
     VReg
@@ -62,6 +61,8 @@ describe("compileFunctionExpression", function () {
             new EcmaLdlexenvdyn(),
             new StaDyn(new VReg()),
             new EcmaLdfunction(),
+            new StaDyn(new VReg()),
+            new LdaDyn(new VReg()),
             new StaDyn(new VReg()),
             new LdaDyn(new VReg()),
             new StaDyn(new VReg()),
