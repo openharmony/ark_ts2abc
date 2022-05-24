@@ -355,14 +355,14 @@ function checkMetaProperty(node: ts.MetaProperty) {
                 throw new DiagnosticError(node, DiagnosticCode._0_is_not_a_valid_meta_property_for_keyword_1_Did_you_mean_2, file, args);
             }
 
-            if (!getContainingFunction(node)) {
+            let func = getContainingFunctionDeclaration(node);
+            if (!func) {
                 throw new DiagnosticError(node, DiagnosticCode.Meta_property_0_is_only_allowed_in_the_body_of_a_function_declaration_function_expression_or_constructor, file, args);
             } else {
-                let func = getContainingFunctionDeclaration(node);
-                while (getContainingFunctionDeclaration(func!)) {
-                    func = getContainingFunctionDeclaration(func!);
+                if (ts.isMethodDeclaration(func)) {
+                    throw new DiagnosticError(node, DiagnosticCode.Meta_property_0_is_only_allowed_in_the_body_of_a_function_declaration_function_expression_or_constructor, file, args);
                 }
-                if (func && ts.isArrowFunction(func)) {
+                if (ts.isArrowFunction(func) && !jshelpers.getNewTargetContainer(node)) {
                     throw new DiagnosticError(node, DiagnosticCode.Meta_property_0_is_only_allowed_in_the_body_of_a_function_declaration_function_expression_or_constructor, file, args);
                 }
             }
