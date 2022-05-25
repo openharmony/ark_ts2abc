@@ -2,7 +2,9 @@
 ```
 es5_tests.txt:  This file contains a list of ES5 test cases. If useful cases are found missing, you can add them as needed.
 es2015_tests.txt:  This file contains a full list of use cases of ES2015 except those filtered out with'es6id'. If useful cases are found missing, you can add them as needed.
+intl_tests.txt：  This file contains a list of internationalization test cases. If you find useful cases missing, you can add them as needed.
 skip_tests.json: This file contains a list of use cases that do not meet the requirements. If useful cases are found missing, you can add them according to the specified format.
+intl_skip_tests.json: This file contains a list of non-compliant internationalization use cases. If useful cases are found to be missing, they can be added in the specified format.
 ```
 
 ## 1. Compile ts2abc and ark_js_vm project
