@@ -21,7 +21,7 @@
 #include "ts2abc.h"
 
 int Preprocess(const panda::ts2abc::Options &options, const panda::PandArgParser &argParser, std::string &output,
-    std::string &data, std::string &usage)
+    std::string &data, const std::string &usage)
 {
     std::string input;
     if (!options.GetCompileByPipeArg()) {
