@@ -326,6 +326,9 @@ export class DebugInfo {
                 if (!value.hasAlreadyBinded()) {
                     return;
                 }
+                if (value.getName() == "0this" || value.getName() == "0newTarget") {
+                    return;
+                }
                 let variableInfo = new VariableDebugInfo(key, "any", "any", (value.getVreg().num));
                 variableInfo.setStart(scope.getScopeStartInsIdx());
                 variableInfo.setLength(scope.getScopeEndInsIdx() - scope.getScopeStartInsIdx());
