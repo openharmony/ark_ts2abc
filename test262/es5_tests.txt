@@ -238,17 +238,6 @@ language/expressions/unsigned-right-shift/bigint-non-primitive.js
 language/expressions/unsigned-right-shift/bigint-toprimitive.js
 language/expressions/unsigned-right-shift/bigint-wrapped-values.js
 language/expressions/unsigned-right-shift/bigint.js
-intl402/BigInt/prototype/toLocaleString/default-options-object-prototype.js
-intl402/BigInt/prototype/toLocaleString/de-DE.js
-intl402/BigInt/prototype/toLocaleString/en-US.js
-intl402/BigInt/prototype/toLocaleString/length.js
-intl402/BigInt/prototype/toLocaleString/builtin.js
-intl402/BigInt/prototype/toLocaleString/name.js
-intl402/BigInt/prototype/toLocaleString/prop-desc.js
-intl402/BigInt/prototype/toLocaleString/this-value-invalid.js
-intl402/BigInt/prototype/toLocaleString/throws-same-exceptions-as-NumberFormat.js
-intl402/BigInt/prototype/toLocaleString/taint-Intl-NumberFormat.js
-intl402/BigInt/prototype/toLocaleString/returns-same-results-as-NumberFormat.js
 built-ins/Array/15.4.5.1-5-1.js
 built-ins/Array/15.4.5.1-5-2.js
 built-ins/Array/15.4.5-1.js
