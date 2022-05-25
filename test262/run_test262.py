@@ -300,6 +300,7 @@ class TestPrepare():
         files.extend(self.get_tests_from_file(ES2015_LIST_FILE))
         if self.args.es2015 == "all":
             files.extend(self.get_tests_from_file(ES5_LIST_FILE))
+            files.extend(self.get_tests_from_file(INTL_LIST_FILE))
         return files
 
     def prepare_intl_tests(self):
