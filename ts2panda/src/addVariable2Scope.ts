@@ -138,7 +138,7 @@ export function addVariableToScope(recorder: Recorder, enableTypeRecord: boolean
                 let funcNode = decl.node;
                 if (ts.isFunctionDeclaration(funcNode)) {
                     v = scope.add(decl, VarDeclarationKind.FUNCTION);
-                } else {
+                } else if (ts.isFunctionExpression(funcNode)) {
                     let functionScope = <Scope>recorder.getScopeOfNode(funcNode);
                     v = functionScope.add(decl, VarDeclarationKind.FUNCTION);
                 }
