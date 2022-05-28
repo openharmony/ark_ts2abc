@@ -65,6 +65,8 @@ describe("compileFunctionExpression", function () {
             new StaDyn(new VReg()),
             new LdaDyn(new VReg()),
             new StaDyn(new VReg()),
+            new LdaDyn(new VReg()),
+            new StaDyn(new VReg()),
             new EcmaCallarg0dyn(new VReg()),
             new EcmaReturnundefined()
         ];
