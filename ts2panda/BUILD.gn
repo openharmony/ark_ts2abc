@@ -234,6 +234,13 @@ group("ark_ts2abc_build") {
   }
 }
 
+group("ark_ts2abc_build_win") {
+  deps = [
+    "${ts2abc_root}:ts2abc_build_win(${buildtool_win})",
+    "${ts2abc_root}:ts2abc_build_win_ets(${buildtool_win})",
+  ]
+}
+
 ohos_copy("copy_ts2abc_tests") {
   sources = [ "${ts2abc_root}/tests" ]
   deps = [ ":npm_run_build" ]
