@@ -67,6 +67,8 @@ def parse_args():
 
 
 ICU_PATH = f"--icu-data-path={CODE_ROOT}/third_party/icu/ohos_icu4j/data"
+if platform.system() == "Windows" :
+    ICU_PATH = ICU_PATH.replace("/","\\")
 ARK_TOOL = DEFAULT_ARK_TOOL
 ARK_FRONTEND_TOOL = DEFAULT_ARK_FRONTEND_TOOL
 LIBS_DIR = DEFAULT_LIBS_DIR
@@ -182,13 +184,16 @@ class ArkProgram():
 
         if file_name in self.module_list:
             cmd_args.insert(mod_opt_index, "-m")
-
         retcode = exec_command(cmd_args)
         return retcode
 
     def execute(self):
-
-        os.environ["LD_LIBRARY_PATH"] = self.libs_dir
+        if platform.system() == "Windows" :
+            os.environ["PATH"] = self.libs_dir + ";" + os.environ["PATH"]
+        elif platform.system() == "Linux" :
+            os.environ["LD_LIBRARY_PATH"] = self.libs_dir
+        else :
+            sys.exit(f" test262 on {platform.system()} not supported"); 
         file_name_pre = os.path.splitext(self.js_file)[0]
         cmd_args = []
         if self.arch == ARK_ARCH_LIST[1]:
