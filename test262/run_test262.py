@@ -49,6 +49,10 @@ def parse_args():
                         help='Run test262 - ES2015. ' +
                         'all: Contains all use cases for ES5 and ES2015' +
                         'only: Only include use cases for ES2015')
+    parser.add_argument('--intl', default=False, const='intl',
+                        nargs='?', choices=['intl'],
+                        help='Run test262 - Intltest. ' +
+                        'intl: Only include use cases for intlcsae')
     parser.add_argument('--ci-build', action='store_true',
                         help='Run test262 ES2015 filter cases for build version')
     parser.add_argument('--esnext', action='store_true',
@@ -120,8 +124,10 @@ def init(args):
     remove_dir(BASE_OUT_DIR)
     remove_dir(TEST_ES5_DIR)
     remove_dir(TEST_ES2015_DIR)
+    remove_dir(TEST_INTL_DIR)
     remove_dir(TEST_CI_DIR)
     get_all_skip_tests(SKIP_LIST_FILE)
+    get_intl_skip_tests(INTL_SKIP_LIST_FILE)
     excuting_npm_install(args)
 
 
@@ -130,6 +136,13 @@ def get_all_skip_tests(file):
         json_data = json.load(jsonfile)
         for key in json_data:
             ALL_SKIP_TESTS.extend(key["files"])
+
+
+def get_intl_skip_tests(file):
+    with open(file) as jsonfile:
+        json_data = json.load(jsonfile)
+        for key in json_data:
+            INTL_SKIP_TESTS.extend(key["files"])
 
 
 def collect_files(path):
@@ -202,18 +215,24 @@ class TestPrepare():
                 self.args.es51 = True
             elif TEST_ES2015_DIR in self.args.dir:
                 self.args.es2015 = "all"
+            elif TEST_INTL_DIR in self.args.dir:
+                self.args.intl = "intl"
 
         if self.args.file:
             if TEST_ES5_DIR in self.args.file:
                 self.args.es51 = True
             elif TEST_ES2015_DIR in self.args.file:
                 self.args.es2015 = "all"
+            elif TEST_INTL_DIR in self.args.file:
+                self.args.intl = "intl"
 
     def prepare_out_dir(self):
         if self.args.es51:
             self.out_dir = os.path.join(BASE_OUT_DIR, "test_es51")
         elif self.args.es2015:
             self.out_dir = os.path.join(BASE_OUT_DIR, "test_es2015")
+        elif self.args.intl:
+            self.out_dir = os.path.join(BASE_OUT_DIR, "test_intl")
         elif self.args.ci_build:
             self.out_dir = os.path.join(BASE_OUT_DIR, "test_CI")
         else:
@@ -227,6 +246,8 @@ class TestPrepare():
             self.args.dir = TEST_ES5_DIR
         elif self.args.es2015:
             self.args.dir = TEST_ES2015_DIR
+        elif self.args.intl:
+            self.args.dir = TEST_INTL_DIR
         elif self.args.ci_build:
             self.args.dir = TEST_CI_DIR
         else:
@@ -237,12 +258,16 @@ class TestPrepare():
         file = file.strip()
         if file in ALL_SKIP_TESTS:
             return
+        if file in INTL_SKIP_TESTS:
+            return
 
         srcdir = os.path.join(DATA_DIR, "test", file)
         if self.args.es51:
             dstdir = os.path.join(TEST_ES5_DIR, file)
         elif self.args.es2015:
             dstdir = os.path.join(TEST_ES2015_DIR, file)
+        elif self.args.intl:
+            dstdir = os.path.join(TEST_INTL_DIR, file)
         elif self.args.ci_build:
             dstdir = os.path.join(TEST_CI_DIR, file)
         subprocess.getstatusoutput("cp %s %s" % (srcdir, dstdir))
@@ -275,6 +300,14 @@ class TestPrepare():
         files.extend(self.get_tests_from_file(ES2015_LIST_FILE))
         if self.args.es2015 == "all":
             files.extend(self.get_tests_from_file(ES5_LIST_FILE))
+            files.extend(self.get_tests_from_file(INTL_LIST_FILE))
+        return files
+
+    def prepare_intl_tests(self):
+        files = []
+        files = self.collect_tests()
+        if self.args.intl:
+            files = self.get_tests_from_file(INTL_LIST_FILE)
         return files
 
     def prepare_test_suit(self):
@@ -286,6 +319,9 @@ class TestPrepare():
         elif self.args.es2015:
             test_dir = TEST_ES2015_DIR
             files = self.prepare_es2015_tests()
+        elif self.args.intl:
+            test_dir = TEST_INTL_DIR
+            files = self.prepare_intl_tests()
         elif self.args.ci_build:
             test_dir = TEST_CI_DIR
             files = self.get_tests_from_file(CI_LIST_FILE)
@@ -308,6 +344,9 @@ class TestPrepare():
         elif self.args.es2015:
             self.prepare_test_suit()
             src_dir = TEST_ES2015_DIR
+        elif self.args.intl:
+            self.prepare_test_suit()
+            src_dir = TEST_INTL_DIR
         elif self.args.ci_build:
             self.prepare_test_suit()
             src_dir = TEST_CI_DIR
