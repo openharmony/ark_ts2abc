@@ -26,6 +26,7 @@ built-ins/Array/from/iter-map-fn-args.js
 built-ins/Array/from/iter-map-fn-err.js
 built-ins/Array/from/iter-map-fn-return.js
 built-ins/Array/from/iter-map-fn-this-arg.js
+built-ins/Array/from/iter-map-fn-this-non-strict.js
 built-ins/Array/from/iter-map-fn-this-strict.js
 built-ins/Array/from/iter-set-elem-prop.js
 built-ins/Array/from/iter-set-elem-prop-err.js
@@ -150,6 +151,7 @@ built-ins/Array/prototype/concat/Array.prototype.concat_non-array.js
 built-ins/Array/prototype/concat/Array.prototype.concat_no-prototype.js
 built-ins/Array/prototype/concat/Array.prototype.concat_sloppy-arguments.js
 built-ins/Array/prototype/concat/Array.prototype.concat_sloppy-arguments-throws.js
+built-ins/Array/prototype/concat/Array.prototype.concat_sloppy-arguments-with-dupes.js
 built-ins/Array/prototype/concat/Array.prototype.concat_small-typed-array.js
 built-ins/Array/prototype/concat/Array.prototype.concat_spreadable-boolean-wrapper.js
 built-ins/Array/prototype/concat/Array.prototype.concat_spreadable-function.js
@@ -164,6 +166,8 @@ built-ins/Array/prototype/concat/create-ctor-non-object.js
 built-ins/Array/prototype/concat/create-ctor-poisoned.js
 built-ins/Array/prototype/concat/create-non-array.js
 built-ins/Array/prototype/concat/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/concat/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/concat/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/concat/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/concat/create-proxy.js
 built-ins/Array/prototype/concat/create-revoked-proxy.js
@@ -319,6 +323,7 @@ built-ins/Array/prototype/every/15.4.4.16-4-6.js
 built-ins/Array/prototype/every/15.4.4.16-4-7.js
 built-ins/Array/prototype/every/15.4.4.16-4-8.js
 built-ins/Array/prototype/every/15.4.4.16-4-9.js
+built-ins/Array/prototype/every/15.4.4.16-5-1.js
 built-ins/Array/prototype/every/15.4.4.16-5-10.js
 built-ins/Array/prototype/every/15.4.4.16-5-11.js
 built-ins/Array/prototype/every/15.4.4.16-5-12.js
@@ -329,6 +334,7 @@ built-ins/Array/prototype/every/15.4.4.16-5-16.js
 built-ins/Array/prototype/every/15.4.4.16-5-17.js
 built-ins/Array/prototype/every/15.4.4.16-5-18.js
 built-ins/Array/prototype/every/15.4.4.16-5-19.js
+built-ins/Array/prototype/every/15.4.4.16-5-1-s.js
 built-ins/Array/prototype/every/15.4.4.16-5-2.js
 built-ins/Array/prototype/every/15.4.4.16-5-21.js
 built-ins/Array/prototype/every/15.4.4.16-5-22.js
@@ -356,6 +362,7 @@ built-ins/Array/prototype/every/15.4.4.16-7-b-12.js
 built-ins/Array/prototype/every/15.4.4.16-7-b-13.js
 built-ins/Array/prototype/every/15.4.4.16-7-b-14.js
 built-ins/Array/prototype/every/15.4.4.16-7-b-15.js
+built-ins/Array/prototype/every/15.4.4.16-7-b-16.js
 built-ins/Array/prototype/every/15.4.4.16-7-b-2.js
 built-ins/Array/prototype/every/15.4.4.16-7-b-3.js
 built-ins/Array/prototype/every/15.4.4.16-7-b-4.js
@@ -553,6 +560,7 @@ built-ins/Array/prototype/filter/15.4.4.20-4-6.js
 built-ins/Array/prototype/filter/15.4.4.20-4-7.js
 built-ins/Array/prototype/filter/15.4.4.20-4-8.js
 built-ins/Array/prototype/filter/15.4.4.20-4-9.js
+built-ins/Array/prototype/filter/15.4.4.20-5-1.js
 built-ins/Array/prototype/filter/15.4.4.20-5-10.js
 built-ins/Array/prototype/filter/15.4.4.20-5-11.js
 built-ins/Array/prototype/filter/15.4.4.20-5-12.js
@@ -563,6 +571,7 @@ built-ins/Array/prototype/filter/15.4.4.20-5-16.js
 built-ins/Array/prototype/filter/15.4.4.20-5-17.js
 built-ins/Array/prototype/filter/15.4.4.20-5-18.js
 built-ins/Array/prototype/filter/15.4.4.20-5-19.js
+built-ins/Array/prototype/filter/15.4.4.20-5-1-s.js
 built-ins/Array/prototype/filter/15.4.4.20-5-2.js
 built-ins/Array/prototype/filter/15.4.4.20-5-21.js
 built-ins/Array/prototype/filter/15.4.4.20-5-22.js
@@ -572,6 +581,7 @@ built-ins/Array/prototype/filter/15.4.4.20-5-27.js
 built-ins/Array/prototype/filter/15.4.4.20-5-28.js
 built-ins/Array/prototype/filter/15.4.4.20-5-29.js
 built-ins/Array/prototype/filter/15.4.4.20-5-3.js
+built-ins/Array/prototype/filter/15.4.4.20-5-30.js
 built-ins/Array/prototype/filter/15.4.4.20-5-4.js
 built-ins/Array/prototype/filter/15.4.4.20-5-5.js
 built-ins/Array/prototype/filter/15.4.4.20-5-6.js
@@ -601,6 +611,7 @@ built-ins/Array/prototype/filter/15.4.4.20-9-b-12.js
 built-ins/Array/prototype/filter/15.4.4.20-9-b-13.js
 built-ins/Array/prototype/filter/15.4.4.20-9-b-14.js
 built-ins/Array/prototype/filter/15.4.4.20-9-b-15.js
+built-ins/Array/prototype/filter/15.4.4.20-9-b-16.js
 built-ins/Array/prototype/filter/15.4.4.20-9-b-2.js
 built-ins/Array/prototype/filter/15.4.4.20-9-b-3.js
 built-ins/Array/prototype/filter/15.4.4.20-9-b-4.js
@@ -698,6 +709,8 @@ built-ins/Array/prototype/filter/create-ctor-non-object.js
 built-ins/Array/prototype/filter/create-ctor-poisoned.js
 built-ins/Array/prototype/filter/create-non-array.js
 built-ins/Array/prototype/filter/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/filter/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/filter/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/filter/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/filter/create-proxy.js
 built-ins/Array/prototype/filter/create-revoked-proxy.js
@@ -721,6 +734,7 @@ built-ins/Array/prototype/find/name.js
 built-ins/Array/prototype/find/not-a-constructor.js
 built-ins/Array/prototype/find/predicate-called-for-each-array-property.js
 built-ins/Array/prototype/find/predicate-call-parameters.js
+built-ins/Array/prototype/find/predicate-call-this-non-strict.js
 built-ins/Array/prototype/find/predicate-call-this-strict.js
 built-ins/Array/prototype/find/predicate-is-not-callable-throws.js
 built-ins/Array/prototype/find/predicate-not-called-on-empty-array.js
@@ -739,6 +753,7 @@ built-ins/Array/prototype/findIndex/name.js
 built-ins/Array/prototype/findIndex/not-a-constructor.js
 built-ins/Array/prototype/findIndex/predicate-called-for-each-array-property.js
 built-ins/Array/prototype/findIndex/predicate-call-parameters.js
+built-ins/Array/prototype/findIndex/predicate-call-this-non-strict.js
 built-ins/Array/prototype/findIndex/predicate-call-this-strict.js
 built-ins/Array/prototype/findIndex/predicate-is-not-callable-throws.js
 built-ins/Array/prototype/findIndex/predicate-not-called-on-empty-array.js
@@ -861,6 +876,7 @@ built-ins/Array/prototype/forEach/15.4.4.18-4-6.js
 built-ins/Array/prototype/forEach/15.4.4.18-4-7.js
 built-ins/Array/prototype/forEach/15.4.4.18-4-8.js
 built-ins/Array/prototype/forEach/15.4.4.18-4-9.js
+built-ins/Array/prototype/forEach/15.4.4.18-5-1.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-10.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-11.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-12.js
@@ -871,11 +887,13 @@ built-ins/Array/prototype/forEach/15.4.4.18-5-16.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-17.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-18.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-19.js
+built-ins/Array/prototype/forEach/15.4.4.18-5-1-s.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-2.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-21.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-22.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-23.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-24.js
+built-ins/Array/prototype/forEach/15.4.4.18-5-25.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-3.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-4.js
 built-ins/Array/prototype/forEach/15.4.4.18-5-5.js
@@ -897,6 +915,7 @@ built-ins/Array/prototype/forEach/15.4.4.18-7-b-12.js
 built-ins/Array/prototype/forEach/15.4.4.18-7-b-13.js
 built-ins/Array/prototype/forEach/15.4.4.18-7-b-14.js
 built-ins/Array/prototype/forEach/15.4.4.18-7-b-15.js
+built-ins/Array/prototype/forEach/15.4.4.18-7-b-16.js
 built-ins/Array/prototype/forEach/15.4.4.18-7-b-2.js
 built-ins/Array/prototype/forEach/15.4.4.18-7-b-3.js
 built-ins/Array/prototype/forEach/15.4.4.18-7-b-4.js
@@ -1137,6 +1156,7 @@ built-ins/Array/prototype/indexOf/15.4.4.14-9-a-15.js
 built-ins/Array/prototype/indexOf/15.4.4.14-9-a-16.js
 built-ins/Array/prototype/indexOf/15.4.4.14-9-a-17.js
 built-ins/Array/prototype/indexOf/15.4.4.14-9-a-18.js
+built-ins/Array/prototype/indexOf/15.4.4.14-9-a-19.js
 built-ins/Array/prototype/indexOf/15.4.4.14-9-a-2.js
 built-ins/Array/prototype/indexOf/15.4.4.14-9-a-3.js
 built-ins/Array/prototype/indexOf/15.4.4.14-9-a-4.js
@@ -1359,6 +1379,7 @@ built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-15.js
 built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-16.js
 built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-17.js
 built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-18.js
+built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-19.js
 built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-2.js
 built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-3.js
 built-ins/Array/prototype/lastIndexOf/15.4.4.15-8-a-4.js
@@ -1494,6 +1515,7 @@ built-ins/Array/prototype/map/15.4.4.19-4-6.js
 built-ins/Array/prototype/map/15.4.4.19-4-7.js
 built-ins/Array/prototype/map/15.4.4.19-4-8.js
 built-ins/Array/prototype/map/15.4.4.19-4-9.js
+built-ins/Array/prototype/map/15.4.4.19-5-1.js
 built-ins/Array/prototype/map/15.4.4.19-5-10.js
 built-ins/Array/prototype/map/15.4.4.19-5-11.js
 built-ins/Array/prototype/map/15.4.4.19-5-12.js
@@ -1504,6 +1526,7 @@ built-ins/Array/prototype/map/15.4.4.19-5-16.js
 built-ins/Array/prototype/map/15.4.4.19-5-17.js
 built-ins/Array/prototype/map/15.4.4.19-5-18.js
 built-ins/Array/prototype/map/15.4.4.19-5-19.js
+built-ins/Array/prototype/map/15.4.4.19-5-1-s.js
 built-ins/Array/prototype/map/15.4.4.19-5-2.js
 built-ins/Array/prototype/map/15.4.4.19-5-21.js
 built-ins/Array/prototype/map/15.4.4.19-5-22.js
@@ -1533,6 +1556,7 @@ built-ins/Array/prototype/map/15.4.4.19-8-b-12.js
 built-ins/Array/prototype/map/15.4.4.19-8-b-13.js
 built-ins/Array/prototype/map/15.4.4.19-8-b-14.js
 built-ins/Array/prototype/map/15.4.4.19-8-b-15.js
+built-ins/Array/prototype/map/15.4.4.19-8-b-16.js
 built-ins/Array/prototype/map/15.4.4.19-8-b-2.js
 built-ins/Array/prototype/map/15.4.4.19-8-b-3.js
 built-ins/Array/prototype/map/15.4.4.19-8-b-4.js
@@ -1614,6 +1638,8 @@ built-ins/Array/prototype/map/create-ctor-poisoned.js
 built-ins/Array/prototype/map/create-non-array.js
 built-ins/Array/prototype/map/create-non-array-invalid-len.js
 built-ins/Array/prototype/map/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/map/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/map/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/map/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/map/create-proxy.js
 built-ins/Array/prototype/map/create-revoked-proxy.js
@@ -1837,6 +1863,7 @@ built-ins/Array/prototype/reduce/15.4.4.21-9-b-12.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-13.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-14.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-15.js
+built-ins/Array/prototype/reduce/15.4.4.21-9-b-16.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-17.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-18.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-19.js
@@ -1850,6 +1877,7 @@ built-ins/Array/prototype/reduce/15.4.4.21-9-b-25.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-26.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-27.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-28.js
+built-ins/Array/prototype/reduce/15.4.4.21-9-b-29.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-3.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-4.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-b-5.js
@@ -1919,6 +1947,7 @@ built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-34.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-35.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-37.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-4.js
+built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-4-s.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-5.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-7.js
 built-ins/Array/prototype/reduce/15.4.4.21-9-c-ii-8.js
@@ -2089,6 +2118,7 @@ built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-12.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-13.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-14.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-15.js
+built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-16.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-17.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-18.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-19.js
@@ -2102,6 +2132,7 @@ built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-25.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-26.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-27.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-28.js
+built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-29.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-3.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-4.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-b-5.js
@@ -2171,6 +2202,7 @@ built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-34.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-35.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-37.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-4.js
+built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-4-s.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-5.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-7.js
 built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-8.js
@@ -2223,6 +2255,8 @@ built-ins/Array/prototype/slice/create-ctor-poisoned.js
 built-ins/Array/prototype/slice/create-non-array.js
 built-ins/Array/prototype/slice/create-non-array-invalid-len.js
 built-ins/Array/prototype/slice/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/slice/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/slice/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/slice/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/slice/create-proxied-array-invalid-len.js
 built-ins/Array/prototype/slice/create-proxy.js
@@ -2357,6 +2391,7 @@ built-ins/Array/prototype/some/15.4.4.17-4-6.js
 built-ins/Array/prototype/some/15.4.4.17-4-7.js
 built-ins/Array/prototype/some/15.4.4.17-4-8.js
 built-ins/Array/prototype/some/15.4.4.17-4-9.js
+built-ins/Array/prototype/some/15.4.4.17-5-1.js
 built-ins/Array/prototype/some/15.4.4.17-5-10.js
 built-ins/Array/prototype/some/15.4.4.17-5-11.js
 built-ins/Array/prototype/some/15.4.4.17-5-12.js
@@ -2367,11 +2402,13 @@ built-ins/Array/prototype/some/15.4.4.17-5-16.js
 built-ins/Array/prototype/some/15.4.4.17-5-17.js
 built-ins/Array/prototype/some/15.4.4.17-5-18.js
 built-ins/Array/prototype/some/15.4.4.17-5-19.js
+built-ins/Array/prototype/some/15.4.4.17-5-1-s.js
 built-ins/Array/prototype/some/15.4.4.17-5-2.js
 built-ins/Array/prototype/some/15.4.4.17-5-21.js
 built-ins/Array/prototype/some/15.4.4.17-5-22.js
 built-ins/Array/prototype/some/15.4.4.17-5-23.js
 built-ins/Array/prototype/some/15.4.4.17-5-24.js
+built-ins/Array/prototype/some/15.4.4.17-5-25.js
 built-ins/Array/prototype/some/15.4.4.17-5-3.js
 built-ins/Array/prototype/some/15.4.4.17-5-4.js
 built-ins/Array/prototype/some/15.4.4.17-5-5.js
@@ -2393,6 +2430,7 @@ built-ins/Array/prototype/some/15.4.4.17-7-b-12.js
 built-ins/Array/prototype/some/15.4.4.17-7-b-13.js
 built-ins/Array/prototype/some/15.4.4.17-7-b-14.js
 built-ins/Array/prototype/some/15.4.4.17-7-b-15.js
+built-ins/Array/prototype/some/15.4.4.17-7-b-16.js
 built-ins/Array/prototype/some/15.4.4.17-7-b-2.js
 built-ins/Array/prototype/some/15.4.4.17-7-b-3.js
 built-ins/Array/prototype/some/15.4.4.17-7-b-4.js
@@ -2522,6 +2560,7 @@ built-ins/Array/prototype/sort/S15.4.4.11_A4_T3.js
 built-ins/Array/prototype/sort/S15.4.4.11_A5_T1.js
 built-ins/Array/prototype/sort/S15.4.4.11_A6_T2.js
 built-ins/Array/prototype/sort/S15.4.4.11_A7.7.js
+built-ins/Array/prototype/sort/S15.4.4.11_A8.js
 built-ins/Array/prototype/sort/stability-11-elements.js
 built-ins/Array/prototype/sort/stability-2048-elements.js
 built-ins/Array/prototype/sort/stability-513-elements.js
@@ -2536,6 +2575,8 @@ built-ins/Array/prototype/splice/create-ctor-poisoned.js
 built-ins/Array/prototype/splice/create-non-array.js
 built-ins/Array/prototype/splice/create-non-array-invalid-len.js
 built-ins/Array/prototype/splice/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/splice/create-proto-from-ctor-realm-array.js
+built-ins/Array/prototype/splice/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/splice/create-proto-from-ctor-realm-non-array.js
 built-ins/Array/prototype/splice/create-proxy.js
 built-ins/Array/prototype/splice/create-revoked-proxy.js
@@ -2794,6 +2835,7 @@ built-ins/DataView/custom-proto-access-throws.js
 built-ins/DataView/custom-proto-access-throws-sab.js
 built-ins/DataView/custom-proto-if-not-object-fallbacks-to-default-prototype.js
 built-ins/DataView/custom-proto-if-not-object-fallbacks-to-default-prototype-sab.js
+built-ins/DataView/custom-proto-if-object-is-used.js
 built-ins/DataView/custom-proto-if-object-is-used.js
 built-ins/DataView/custom-proto-if-object-is-used-sab.js
 built-ins/DataView/dataview.js
@@ -3390,6 +3432,39 @@ built-ins/Proxy/ownKeys/trap-is-not-callable-realm.js
 built-ins/Proxy/preventExtensions/trap-is-not-callable-realm.js
 built-ins/Proxy/set/trap-is-not-callable-realm.js
 built-ins/Proxy/setPrototypeOf/trap-is-not-callable-realm.js
+built-ins/RegExp/prototype/dotAll/cross-realm.js
+built-ins/RegExp/prototype/global/cross-realm.js
+built-ins/RegExp/prototype/ignoreCase/cross-realm.js
+built-ins/RegExp/prototype/multiline/cross-realm.js
+built-ins/RegExp/prototype/source/cross-realm.js
+built-ins/RegExp/prototype/sticky/cross-realm.js
+built-ins/RegExp/prototype/Symbol.matchAll/isregexp-called-once.js
+built-ins/RegExp/prototype/Symbol.matchAll/isregexp-this-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/length.js
+built-ins/RegExp/prototype/Symbol.matchAll/name.js
+built-ins/RegExp/prototype/Symbol.matchAll/not-a-constructor.js
+built-ins/RegExp/prototype/Symbol.matchAll/prop-desc.js
+built-ins/RegExp/prototype/Symbol.matchAll/regexpcreate-this-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-get-constructor-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-get-species-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-is-not-object-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-is-undefined.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-species-is-not-constructor.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-species-is-null-or-undefined.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-species-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-regexp-get-global-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/species-regexp-get-unicode-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/string-tostring.js
+built-ins/RegExp/prototype/Symbol.matchAll/string-tostring-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-get-flags.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-get-flags-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-lastindex-cached.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-not-object-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-tolength-lastindex-throws.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-tostring-flags.js
+built-ins/RegExp/prototype/Symbol.matchAll/this-tostring-flags-throws.js
+built-ins/RegExp/prototype/unicode/cross-realm.js
 built-ins/RegExpStringIteratorPrototype/ancestry.js
 built-ins/RegExpStringIteratorPrototype/next/custom-regexpexec.js
 built-ins/RegExpStringIteratorPrototype/next/custom-regexpexec-call-throws.js
@@ -5495,6 +5570,7 @@ built-ins/WeakSet/prototype-of-weakset.js
 built-ins/WeakSet/symbol-disallowed-as-weakset-key.js
 built-ins/WeakSet/undefined-newtarget.js
 built-ins/WeakSet/weakset.js
+language/expressions/generators/default-proto.js
 language/module-code/comment-multi-line-html-close.js
 language/module-code/comment-single-line-html-close.js
 language/module-code/comment-single-line-html-open.js
@@ -5905,3 +5981,4 @@ language/module-code/privatename-valid-no-earlyerr.js
 language/module-code/verify-dfs.js
 language/module-code/verify-dfs-a_FIXTURE.js
 language/module-code/verify-dfs-b_FIXTURE.js
+language/statements/generators/default-proto.js
