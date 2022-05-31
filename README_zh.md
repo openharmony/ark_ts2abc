@@ -34,7 +34,7 @@ ts2abc组件是方舟运行时子系统的前端工具，支持将JavaScript文�
 ts2abc组件采用命令行交互方式，支持将JavaScript代码转换为方舟字节码文件，使其能够在方舟运行时上运行。支持Windows/Linux/MacOS平台。方舟前端工具在linux平台上可通过全量编译或指定编译前端工具链获取。
 
 ```
-$ ./build.sh --product-name Hi3516DV300 --build-target ark_ts2abc_build
+$ ./build.sh --product-name hispark_taurus_standard --build-target ark_ts2abc_build
 ```
 
 ### 使用说明<a name="section33105542504"></a>
@@ -44,7 +44,7 @@ $ ./build.sh --product-name Hi3516DV300 --build-target ark_ts2abc_build
 使用ts2abc组件将JavaScript文件转换为方舟字节码文件
 
 ```
-$ cd out/hi3516dv300/clang_x64/ark/ark/build
+$ cd out/hispark_taurus/clang_x64/ark/ark/build
 $ npm install
 $ node --expose-gc src/index.js [options] file.js
 ```

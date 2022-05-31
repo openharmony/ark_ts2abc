@@ -34,7 +34,7 @@ For more information, see: [ARK Runtime Subsystem](https://gitee.com/openharmony
 ts2abc uses the command line interaction mode and converts JS code into ARK bytecode files that can be run on an ARK runtime system. ts2abc supports Windows, Linux, and macOS. Front-end tools, converting JS source code into ARK bytecode, can be built by specifying the `--build-target` with `ark_ts2abc` on Linux.
 
 ```
-$ ./build.sh --product-name Hi3516DV300 --build-target ark_ts2abc_build
+$ ./build.sh --product-name hispark_taurus_standard --build-target ark_ts2abc_build
 ```
 
 ### Usage Guidelines<a name="section33105542504"></a>
@@ -44,7 +44,7 @@ Install `node` and `npm`
 convert JS to ARK bytecode
 
 ```
-$ cd out//hi3516dv300/clang_x64/ark/ark/build
+$ cd out/hispark_taurus/clang_x64/ark/ark/build
 $ npm install
 $ node --expose-gc src/index.js [options] file.js
 ```
