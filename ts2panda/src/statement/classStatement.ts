@@ -758,8 +758,20 @@ function checkAndUpdateProperty(namedPropertyMap: Map<string, Property>, name: s
                 prop!.setSetter(valueNode);
             }
         } else {
-            if (!scalarArrayEquals(prop!.getValue(), valueNode)) {
-                return false;
+            if (prop!.getKind() == PropertyKind.Accessor) {
+                if (prop!.getGetter()) {
+                    if (!scalarArrayEquals(prop!.getGetter(), valueNode)) {
+                        return false;
+                    }
+                } else { // prop is setter
+                    if (!scalarArrayEquals(prop!.getSetter(), valueNode)) {
+                        return false;
+                    }
+                }
+            } else {
+                if (!scalarArrayEquals(prop!.getValue(), valueNode)) {
+                    return false;
+                }
             }
             prop!.setValue(valueNode);
             prop!.setKind(propKind);
