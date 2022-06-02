@@ -27,7 +27,7 @@ CUR_FILE_DIR = os.path.dirname(__file__)
 TS2PANDA_DIR = os.path.abspath(os.path.join(CUR_FILE_DIR, ".."))
 CODE_ROOT = os.path.abspath(os.path.join(TS2PANDA_DIR, "../../.."))
 DEFAULT_TARGET_DIR = os.path.join(
-    CODE_ROOT, "out/hi3516dv300/clang_x64/obj/ark/ts2abc/ts2panda")
+    CODE_ROOT, "out/hispark_taurus/clang_x64/obj/ark/ts2abc/ts2panda")
 DEFAULT_NODE_MODULE = os.path.join(
     CODE_ROOT, "prebuilts/build-tools/common/ts2abc/node_modules")
 

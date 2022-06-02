@@ -491,13 +491,8 @@ export class FunctionScope extends VariableScope {
         if (declKind == VarDeclarationKind.NONE) {
             // the variable declared without anything should be global
             // See EcmaStandard: 13.3.2 Variable Statement
-            let globalScope = this.getRootScope();
-            if (globalScope instanceof GlobalScope) {
-                v = globalScope.add(name, declKind);
-            } else {
-                v = undefined;
-                throw new Error("Error: global variable must be defined in global scope");
-            }
+            let topLevelScope = this.getRootScope();
+            v = topLevelScope.add(name, declKind);
         } else if (declKind == VarDeclarationKind.VAR || declKind == VarDeclarationKind.FUNCTION) {
             v = new LocalVariable(declKind, name);
             this.name2variable.set(name, v);
@@ -527,14 +522,8 @@ export class LocalScope extends Scope {
 
         LOGD(this.debugTag, "localscope.add (" + name + "), kind:" + declKind);
         if (declKind == VarDeclarationKind.NONE) {
-            let root = this.getRootScope();
-
-            if (root instanceof GlobalScope) {
-                return root.add(name, declKind, status);
-            } else {
-                LOGE(undefined, "Error: the root of this scope is not global scope, it is wrong");
-                return undefined;
-            }
+            let topLevelScope = this.getRootScope();
+            v = topLevelScope.add(name, declKind);
         } else if (declKind == VarDeclarationKind.VAR) {
             /**
              * the variable declared without anything should be accessible
