@@ -111,6 +111,11 @@ export class CmdOptions {
         if (!this.options) {
             return false;
         }
+
+        if (this.options["commonjs"] && this.options["modules"]) {
+            throw new Error("Can not compile with [-c] and [-m] options at the same time");
+        }
+
         return this.options["commonjs"];
     }
 
@@ -118,6 +123,11 @@ export class CmdOptions {
         if (!this.options) {
             return false;
         }
+
+        if (this.options["modules"] && this.options["commonjs"]) {
+            throw new Error("Can not compile with [-m] and [-c] options at the same time");
+        }
+
         return this.options["modules"];
     }
 
