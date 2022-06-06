@@ -794,6 +794,21 @@ static void GenerateESTypeAnnotationRecord(panda::pandasm::Program &prog)
     prog.record_table.emplace(tsTypeAnnotationRecord.name, std::move(tsTypeAnnotationRecord));
 }
 
+static void GenerateCommonJsRecord(panda::pandasm::Program &prog, bool isCommonJs)
+{
+    // when multi-abc file get merged, field should be inserted in abc's own record
+    auto commonjsRecord = panda::pandasm::Record("_CommonJsRecord", LANG_EXT);
+    commonjsRecord.metadata->SetAccessFlags(panda::ACC_PUBLIC);
+    auto isCommonJsField = panda::pandasm::Field(LANG_EXT);
+    isCommonJsField.name = "isCommonJs";
+    isCommonJsField.type = panda::pandasm::Type("u8", 0);
+    isCommonJsField.metadata->SetValue(panda::pandasm::ScalarValue::Create<panda::pandasm::Value::Type::U8>(
+        static_cast<uint8_t>(isCommonJs)));
+    commonjsRecord.field_list.emplace_back(std::move(isCommonJsField));
+
+    prog.record_table.emplace(commonjsRecord.name, std::move(commonjsRecord));
+}
+
 static void GenerateESModuleRecord(panda::pandasm::Program &prog)
 {
     auto ecmaModuleRecord = panda::pandasm::Record("_ESModuleRecord", LANG_EXT);
@@ -842,6 +857,16 @@ static void ParseModuleMode(const Json::Value &rootValue, panda::pandasm::Progra
     if (rootValue.isMember("module_mode") && rootValue["module_mode"].isBool()) {
         if (rootValue["module_mode"].asBool()) {
             GenerateESModuleRecord(prog);
+        }
+    }
+}
+
+static void ParseCommonJsModuleMode(const Json::Value &rootValue, panda::pandasm::Program &prog)
+{
+    Logd("------------parse commonjs_module_mode-------------");
+    if (rootValue.isMember("commonjs_module") && rootValue["commonjs_module"].isBool()) {
+        if (rootValue["commonjs_module"].asBool()) {
+            GenerateCommonJsRecord(prog, true);
         }
     }
 }
@@ -896,6 +921,7 @@ static void ParseOptions(const Json::Value &rootValue, panda::pandasm::Program &
     GenerateESCallTypeAnnotationRecord(prog);
     GenerateESTypeAnnotationRecord(prog);
     ParseModuleMode(rootValue, prog);
+    ParseCommonJsModuleMode(rootValue, prog);
     ParseLogEnable(rootValue);
     ParseDebugMode(rootValue);
     ParseOptLevel(rootValue);

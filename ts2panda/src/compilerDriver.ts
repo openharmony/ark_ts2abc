@@ -400,6 +400,12 @@ export class CompilerDriver {
         // the runtime passes these to global scope when calls it
         let parametersCount = 3;
         if (node.kind == ts.SyntaxKind.SourceFile) {
+            if (CmdOptions.isCommonJs()) {
+                // global scope accepts 5 additional parameters:
+                // "exports", "require", "module", "__filename","__dirname"
+                // when compiled as commonjs
+                parametersCount += 5;
+            }
             return parametersCount;
         }
         let decl = <ts.FunctionLikeDeclaration>node;
