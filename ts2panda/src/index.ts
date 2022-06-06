@@ -23,7 +23,7 @@ import * as jshelpers from "./jshelpers";
 import { LOGE } from "./log";
 import { setGlobalDeclare, setGlobalStrict } from "./strictMode";
 import { TypeChecker } from "./typeChecker";
-import { setPos, isBase64Str } from "./base/util";
+import { setPos, isBase64Str, transformCommonjsModule } from "./base/util";
 
 function checkIsGlobalDeclaration(sourceFile: ts.SourceFile) {
     for (let statement of sourceFile.statements) {
@@ -99,6 +99,9 @@ function main(fileNames: string[], options: ts.CompilerOptions) {
                             )
                             newStatements.push(...node.statements);
                             node = ts.factory.updateSourceFile(node, newStatements);
+                        }
+                        if (CmdOptions.isCommonJs()) {
+                            node = transformCommonjsModule(node);
                         }
                         let outputBinName = getOutputBinName(node);
                         let compilerDriver = new CompilerDriver(outputBinName);
@@ -286,7 +289,8 @@ function run(args: string[], options?: ts.CompilerOptions): void {
             updateWatchedFile();
             return;
         }
-        main(parsed.fileNames.concat(CmdOptions.getIncludedFiles()), parsed.options);
+
+        main(parsed.fileNames.concat(dtsFiles).concat(CmdOptions.getIncludedFiles()), parsed.options);
     } catch (err) {
         if (err instanceof diag.DiagnosticError) {
             let diagnostic = diag.getDiagnostic(err.code);
@@ -303,6 +307,5 @@ function run(args: string[], options?: ts.CompilerOptions): void {
 }
 
 let dtsFiles = getDtsFiles(path["join"](__dirname, "../node_modules/typescript/lib"));
-process.argv.push(...dtsFiles);
 run(process.argv.slice(2), Compiler.Options.Default);
 global.gc();

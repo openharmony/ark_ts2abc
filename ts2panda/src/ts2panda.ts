@@ -190,6 +190,7 @@ export class Ts2Panda {
         let options = {
             "t": JsonType.options,
             "module_mode": CmdOptions.isModules(),
+            "commonjs_module": CmdOptions.isCommonJs(),
             "debug_mode": CmdOptions.isDebugMode(),
             "log_enabled": CmdOptions.isEnableDebugLog(),
             "opt_level": CmdOptions.getOptLevel(),
