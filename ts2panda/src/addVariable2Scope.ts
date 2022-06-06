@@ -72,6 +72,14 @@ function addInnerArgs(node: ts.Node, scope: VariableScope, enableTypeRecord: boo
         scope.addParameter("this", VarDeclarationKind.CONST, 0);
     }
 
+    if (CmdOptions.isCommonJs() && node.kind === ts.SyntaxKind.SourceFile) {
+        scope.addParameter("exports", VarDeclarationKind.LET, 1);
+        scope.addParameter("require", VarDeclarationKind.LET, 2);
+        scope.addParameter("module", VarDeclarationKind.LET, 3);
+        scope.addParameter("__filename", VarDeclarationKind.LET, 4);
+        scope.addParameter("__dirname", VarDeclarationKind.LET, 5);
+    }
+
     if (node.kind != ts.SyntaxKind.SourceFile) {
         let funcNode = <ts.FunctionLikeDeclaration>node;
         addParameters(funcNode, scope, enableTypeRecord);
