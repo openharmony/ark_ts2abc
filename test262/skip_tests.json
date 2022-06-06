@@ -61,6 +61,7 @@
             "annexB/language/literals/regexp/class-escape.js",
             "annexB/language/literals/regexp/quantifiable-assertion-followed-by.js",
             "annexB/language/literals/regexp/quantifiable-assertion-not-followed-by.js",
+            "built-ins/FinalizationRegistry/proto-from-ctor-realm.js",
             "built-ins/Function/15.3.2.1-11-1.js",
             "built-ins/Function/15.3.2.1-11-2-s.js",
             "built-ins/Function/15.3.2.1-11-3.js",
@@ -222,6 +223,7 @@
             "built-ins/String/prototype/toUpperCase/S15.5.4.18_A1_T3.js",
             "built-ins/String/S15.5.1.1_A1_T6.js",
             "built-ins/String/S9.8_A1_T1.js",
+            "built-ins/WeakRef/proto-from-ctor-realm.js",
             "language/arguments-object/10.5-1-s.js",
             "language/arguments-object/10.5-7-b-1-s.js",
             "language/comments/S7.4_A5.js",
@@ -1413,8 +1415,30 @@
     {
         "reason": "Not support further ecma-2015's feature in module code",
         "files": [
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/callback-not-callable-throws.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/cleanup-prevented-with-reference.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/cleanup-prevented-with-unregister.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/custom-this.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/holdings-multiple-values.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/length.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/name.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/not-a-constructor.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/prop-desc.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/reentrancy.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/return-undefined-with-gc.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/return-undefined.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/this-does-not-have-internal-cells-throws.js",
+            "built-ins/FinalizationRegistry/prototype/cleanupSome/this-not-object-throws.js",
             "language/module-code/namespace/internals/define-own-property.js",
             "language/module-code/early-dup-export-as-star-as.js"
+        ]
+    },
+    {
+        "reason": "gc() not yet supported",
+        "files": [
+            "built-ins/FinalizationRegistry/gc-has-one-chance-to-call-cleanupCallback.js",
+            "built-ins/FinalizationRegistry/prototype/unregister/unregister-cleaned-up-cell.js",
+            "built-ins/WeakRef/prototype/deref/gc-cleanup-not-prevented-with-wr-deref.js"
         ]
     }
 ]
