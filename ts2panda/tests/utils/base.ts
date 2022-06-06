@@ -32,6 +32,7 @@ import { setGlobalStrict } from "../../src/strictMode";
 import { creatAstFromSnippet } from "./asthelper";
 import { LiteralBuffer } from "../../src/base/literal";
 import { CmdOptions } from "../../src/cmdOptions";
+import { transformCommonjsModule } from "../../src/base/util";
 
 const compileOptions = {
     outDir: "../tmp/build",
@@ -172,7 +173,7 @@ export function compileMainSnippet(snippet: string, pandaGen?: PandaGen, scope?:
     return compileUnits[0].getInsns();
 }
 
-export function compileAfterSnippet(snippet: string, name:string) {
+export function compileAfterSnippet(snippet: string, name:string, isCommonJs: boolean = false) {
     let compileUnits = null;
     ts.transpileModule(
         snippet,
@@ -185,6 +186,9 @@ export function compileAfterSnippet(snippet: string, name:string) {
             after : [
                 (ctx: ts.TransformationContext) => {
                     return (sourceFile: ts.SourceFile) => {
+                        if (isCommonJs) {
+                            sourceFile = transformCommonjsModule(sourceFile);
+                        }
                         jshelpers.bindSourceFile(sourceFile, {});
                         setGlobalStrict(jshelpers.isEffectiveStrictModeSourceFile(sourceFile, compileOptions));
                         let compilerDriver = new CompilerDriver('UnitTest');
@@ -215,6 +219,11 @@ export class SnippetCompiler {
 
     compileAfter(snippet: string, name: string, passes?: Pass[], literalBufferArray?: Array<LiteralBuffer>) {
         this.pandaGens = compileAfterSnippet(snippet, name);
+        return this.pandaGens;
+    }
+
+    compileCommonjs(snippet: string, name: string) {
+        this.pandaGens = compileAfterSnippet(snippet, name, true);
         return this.pandaGens;
     }
 
