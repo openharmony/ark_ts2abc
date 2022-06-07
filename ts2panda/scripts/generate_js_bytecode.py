@@ -40,6 +40,8 @@ def parse_args():
                         help='whether add debuginfo')
     parser.add_argument("--module", action='store_true',
                         help='whether is module')
+    parser.add_argument("--commonjs", action='store_true',
+                        help='whether is commonjs')
     arguments = parser.parse_args()
     return arguments
 
@@ -84,6 +86,8 @@ def gen_abc_info(input_arguments):
         cmd.insert(3, '--debug')
     if input_arguments.module:
         cmd.insert(4, '-m')
+    if input_arguments.commonjs:
+        cmd.insert(5, '-c')
     run_command(cmd, path)
 
 
