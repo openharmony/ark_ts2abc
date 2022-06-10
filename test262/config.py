@@ -39,6 +39,7 @@ DEFAULT_MODE = 2
 
 TEST_ES5_DIR = os.path.join(DATA_DIR, "test_es51")
 TEST_ES2015_DIR = os.path.join(DATA_DIR, "test_es2015")
+TEST_ES2021_DIR = os.path.join(DATA_DIR, "test_es2021")
 TEST_INTL_DIR = os.path.join(DATA_DIR, "test_intl")
 TEST_CI_DIR = os.path.join(DATA_DIR, "test_CI")
 
@@ -57,6 +58,7 @@ DEFAULT_TIMEOUT = 60000
 ES5_LIST_FILE = os.path.join("test262", "es5_tests.txt")
 ES2015_LIST_FILE = os.path.join("test262", "es2015_tests.txt")
 INTL_LIST_FILE = os.path.join("test262", "intl_tests.txt")
+ES2021_LIST_FILE = os.path.join("test262", "es2021_tests.txt")
 CI_LIST_FILE = os.path.join("test262", "CI_tests.txt")
 MODULE_FILES_LIST = os.path.join("test262", "module_tests.txt")
 

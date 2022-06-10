@@ -44,15 +44,19 @@ def parse_args():
                         '3: both default and strict mode\n')
     parser.add_argument('--es51', action='store_true',
                         help='Run test262 ES5.1 version')
-    parser.add_argument('--es2015', default=False, const='all',
+    parser.add_argument('--es2021', default=False, const='all',
                         nargs='?', choices=['all', 'only'],
-                        help='Run test262 - ES2015. ' +
-                        'all: Contains all use cases for ES5 and ES2015' +
-                        'only: Only include use cases for ES2015')
+                        help='Run test262 - ES2021. ' +
+                        'all: Contains all use cases for es5_tests and es2015_tests and es2021_tests and intl_tests' +
+                        'only: Only include use cases for ES2021')
     parser.add_argument('--intl', default=False, const='intl',
                         nargs='?', choices=['intl'],
                         help='Run test262 - Intltest. ' +
                         'intl: Only include use cases for intlcsae')
+    parser.add_argument('--es2015', default=False, const='es2015',
+                        nargs='?', choices=['es2015'],
+                        help='Run test262 - es2015. ' +
+                        'es2015: Only include use cases for es2015')
     parser.add_argument('--ci-build', action='store_true',
                         help='Run test262 ES2015 filter cases for build version')
     parser.add_argument('--esnext', action='store_true',
@@ -125,6 +129,7 @@ def init(args):
     remove_dir(TEST_ES5_DIR)
     remove_dir(TEST_ES2015_DIR)
     remove_dir(TEST_INTL_DIR)
+    remove_dir(TEST_ES2021_DIR)
     remove_dir(TEST_CI_DIR)
     get_all_skip_tests(SKIP_LIST_FILE)
     get_intl_skip_tests(INTL_SKIP_LIST_FILE)
@@ -209,22 +214,26 @@ class TestPrepare():
         git_clean(HARNESS_DIR)
         git_apply("../harness.patch", HARNESS_DIR)
 
-    def prepare_args_es51_es2015(self):
+    def prepare_args_es51_es2021(self):
         if self.args.dir:
             if TEST_ES5_DIR in self.args.dir:
                 self.args.es51 = True
             elif TEST_ES2015_DIR in self.args.dir:
-                self.args.es2015 = "all"
+                self.args.es2015 = "es2015"
             elif TEST_INTL_DIR in self.args.dir:
                 self.args.intl = "intl"
+            elif TEST_ES2021_DIR in self.args.dir:
+                self.args.es2021 = "all"
 
         if self.args.file:
             if TEST_ES5_DIR in self.args.file:
                 self.args.es51 = True
             elif TEST_ES2015_DIR in self.args.file:
-                self.args.es2015 = "all"
+                self.args.es2015 = "es2015"
             elif TEST_INTL_DIR in self.args.file:
                 self.args.intl = "intl"
+            elif TEST_ES2021_DIR in self.args.file:
+                self.args.es2021 = "all"
 
     def prepare_out_dir(self):
         if self.args.es51:
@@ -233,6 +242,8 @@ class TestPrepare():
             self.out_dir = os.path.join(BASE_OUT_DIR, "test_es2015")
         elif self.args.intl:
             self.out_dir = os.path.join(BASE_OUT_DIR, "test_intl")
+        elif self.args.es2021:
+            self.out_dir = os.path.join(BASE_OUT_DIR, "test_es2021")
         elif self.args.ci_build:
             self.out_dir = os.path.join(BASE_OUT_DIR, "test_CI")
         else:
@@ -248,6 +259,8 @@ class TestPrepare():
             self.args.dir = TEST_ES2015_DIR
         elif self.args.intl:
             self.args.dir = TEST_INTL_DIR
+        elif self.args.es2021:
+            self.args.dir = TEST_ES2021_DIR
         elif self.args.ci_build:
             self.args.dir = TEST_CI_DIR
         else:
@@ -268,6 +281,8 @@ class TestPrepare():
             dstdir = os.path.join(TEST_ES2015_DIR, file)
         elif self.args.intl:
             dstdir = os.path.join(TEST_INTL_DIR, file)
+        elif self.args.es2021:
+            dstdir = os.path.join(TEST_ES2021_DIR, file)
         elif self.args.ci_build:
             dstdir = os.path.join(TEST_CI_DIR, file)
         subprocess.getstatusoutput("cp %s %s" % (srcdir, dstdir))
@@ -279,7 +294,7 @@ class TestPrepare():
         esid = ""
         if self.args.es51:
             esid = "es5id"
-        elif self.args.es2015:
+        elif self.args.es2021:
             esid = "es6id"
 
         for file_name in file_names:
@@ -294,13 +309,14 @@ class TestPrepare():
             files = fopen.readlines()
         return files
 
-    def prepare_es2015_tests(self):
+    def prepare_es2021_tests(self):
         files = []
         files = self.collect_tests()
-        files.extend(self.get_tests_from_file(ES2015_LIST_FILE))
-        if self.args.es2015 == "all":
+        files.extend(self.get_tests_from_file(ES2021_LIST_FILE))
+        if self.args.es2021 == "all":
             files.extend(self.get_tests_from_file(ES5_LIST_FILE))
             files.extend(self.get_tests_from_file(INTL_LIST_FILE))
+            files.extend(self.get_tests_from_file(ES2015_LIST_FILE))
         return files
 
     def prepare_intl_tests(self):
@@ -308,6 +324,13 @@ class TestPrepare():
         files = self.collect_tests()
         if self.args.intl:
             files = self.get_tests_from_file(INTL_LIST_FILE)
+        return files
+        
+    def prepare_es2015_tests(self):
+        files = []
+        files = self.collect_tests()
+        if self.args.es2015:
+            files = self.get_tests_from_file(ES2015_LIST_FILE)
         return files
 
     def prepare_test_suit(self):
@@ -322,6 +345,9 @@ class TestPrepare():
         elif self.args.intl:
             test_dir = TEST_INTL_DIR
             files = self.prepare_intl_tests()
+        elif self.args.es2021:
+            test_dir = TEST_ES2021_DIR
+            files = self.prepare_es2021_tests()
         elif self.args.ci_build:
             test_dir = TEST_CI_DIR
             files = self.get_tests_from_file(CI_LIST_FILE)
@@ -347,6 +373,9 @@ class TestPrepare():
         elif self.args.intl:
             self.prepare_test_suit()
             src_dir = TEST_INTL_DIR
+        elif self.args.es2021:
+            self.prepare_test_suit()
+            src_dir = TEST_ES2021_DIR
         elif self.args.ci_build:
             self.prepare_test_suit()
             src_dir = TEST_CI_DIR
@@ -367,7 +396,7 @@ class TestPrepare():
         self.prepare_test262_code()
         self.prepare_clean_data()
         self.patching_the_plugin()
-        self.prepare_args_es51_es2015()
+        self.prepare_args_es51_es2021()
         self.prepare_out_dir()
         self.prepare_args_testdir()
         self.prepare_test262_test()
