@@ -65,7 +65,11 @@ export function getHiddenParameters(expr: ts.Expression, compiler: Compiler) {
         if ((<ts.PropertyAccessExpression | ts.ElementAccessExpression>expr).expression.kind == ts.SyntaxKind.SuperKeyword) {
             compileSuperProperty(compiler, expr, thisReg, prop);
         } else {
-            pandaGen.loadObjProperty(expr, thisReg, prop);
+            pandaGen.loadObjProperty(
+                ts.isPropertyAccessExpression(expr) ? expr.name : (<ts.ElementAccessExpression>expr).argumentExpression,
+                thisReg,
+                prop
+            );
         }
         pandaGen.storeAccumulator(expr, funcReg);
         args.push(...[funcReg, thisReg]);

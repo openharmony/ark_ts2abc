@@ -34,7 +34,11 @@ export function compileMemberAccessExpression(node: ts.ElementAccessExpression |
         compileSuperProperty(compiler, node, thisReg, property);
         pandaGen.freeTemps(thisReg);
     } else {
-        pandaGen.loadObjProperty(node, obj, property);
+        pandaGen.loadObjProperty(
+            ts.isPropertyAccessExpression(node) ? node.name : node.argumentExpression,
+            obj,
+            property
+        );
     }
 
     pandaGen.freeTemps(objReg, propReg);
