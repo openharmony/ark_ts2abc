@@ -21,6 +21,8 @@ usage: run_test262.py [-h] [--dir DIR] [--file FILE] [--mode [{1,2,3}]]
                       [--es51] [--es2015 [{all,only}]] [--esnext]
                       [--engine FILE] [--babel] [--timeout TIMEOUT]
                       [--threads THREADS] [--hostArgs HOSTARGS]
+                      [--ark-aot]
+                      [--ark-aot-tool ARK_AOT_TOOL]
                       [--ark-tool ARK_TOOL]
                       [--ark-frontend-tool ARK_FRONTEND_TOOL]
                       [--libs-dir LIBS_DIR]
@@ -45,6 +47,9 @@ optional arguments:
   --threads THREADS     Run this many tests in parallel. Note that the browser
                         runners don't work great with t > 1.
   --hostArgs HOSTARGS   command-line arguments to pass to eshost host
+  --ark-aot             Run test262 with aot
+  --ark-aot-tool ARK_AOT_TOOL
+                        ark's aot tool
   --ark-tool ARK_TOOL   ark's binary tool
   --ark-frontend-tool ARK_FRONTEND_TOOL
                         ark frontend conversion tool
