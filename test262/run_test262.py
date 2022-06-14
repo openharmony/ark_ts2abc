@@ -26,7 +26,8 @@ import os
 import sys
 import subprocess
 from multiprocessing import Pool
-from utils import *
+import platform
+from utils import * 
 from config import *
 
 
@@ -270,7 +271,12 @@ class TestPrepare():
             dstdir = os.path.join(TEST_INTL_DIR, file)
         elif self.args.ci_build:
             dstdir = os.path.join(TEST_CI_DIR, file)
-        subprocess.getstatusoutput("cp %s %s" % (srcdir, dstdir))
+        if platform.system() == "Windows" :
+            proc = subprocess.Popen("cp %s %s" % (srcdir, dstdir))
+            proc.wait()
+        else :
+            subprocess.getstatusoutput("cp %s %s" % (srcdir, dstdir))
+
 
     def collect_tests(self):
         files = []
@@ -283,7 +289,7 @@ class TestPrepare():
             esid = "es6id"
 
         for file_name in file_names:
-            with open(file_name, 'r') as file:
+            with open(file_name, 'r', encoding='utf-8') as file:
                 content = file.read()
                 if esid in content:
                     files.append(file_name.split(origin_dir)[1])
@@ -483,13 +489,18 @@ def run_test262_test(args):
     test_cmd.append(f"--threads={threads}")
     test_cmd.append(f"--mode={run_test262_mode(args)}")
     test_cmd.append(f"--timeout={timeout}")
+    if platform.system() == "Windows" :
+        global BASE_OUT_DIR
+        global DATA_DIR
+        BASE_OUT_DIR = BASE_OUT_DIR.replace("/","\\")
+        DATA_DIR = DATA_DIR.replace("/","\\")
+        execute_args = execute_args.replace("/","\\")
     test_cmd.append(f"--tempDir={BASE_OUT_DIR}")
     test_cmd.append(f"--test262Dir={DATA_DIR}")
 
     if args.babel:
         test_cmd.append("--preprocessor='test262/babel-preprocessor.js'")
     test_cmd.append(DEFAULT_OTHER_ARGS)
-
     test_cmd.append(execute_args)
 
     run_check(test_cmd)

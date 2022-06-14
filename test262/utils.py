@@ -24,6 +24,7 @@ import subprocess
 import datetime
 import time
 import shutil
+import platform
 
 TERM_NORMAL = '\033[0m'
 TERM_YELLOW = '\033[1;33m'
@@ -80,7 +81,10 @@ class CommandCwd():
     def run(self):
         cmd = " ".join(self.cmds)
         LOGGING.debug("command: " + cmd + " | " + "dir: " + self.cwd)
-        proc = subprocess.Popen(self.cmds, cwd=self.cwd)
+        if platform.system() == "Windows" :
+            proc = subprocess.Popen(self.cmds, cwd=self.cwd ,shell=True)
+        else :
+            proc = subprocess.Popen(self.cmds, cwd=self.cwd)
         return proc.wait()
 
 
