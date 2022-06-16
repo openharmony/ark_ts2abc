@@ -1277,8 +1277,8 @@ static bool ReadFromPipe(panda::pandasm::Program &prog)
     return true;
 }
 
-bool GenerateProgram([[maybe_unused]] const std::string &data, std::string output, bool isParsingFromPipe,
-                     int optLevel, std::string optLogLevel)
+bool GenerateProgram([[maybe_unused]] const std::string &data, const std::string &output, bool isParsingFromPipe,
+                     int optLevel, std::string &optLogLevel)
 {
     panda::pandasm::Program prog = panda::pandasm::Program();
     prog.lang = panda::pandasm::extensions::Language::ECMASCRIPT;
