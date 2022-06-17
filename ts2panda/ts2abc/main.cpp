@@ -86,13 +86,14 @@ int main(int argc, const char *argv[])
 
     std::string output;
     std::string data = "";
+    std::string optLogLevel(options.GetOptLogLevelArg());
 
     if (Preprocess(options, argParser, output, data, usage) == RETURN_FAILED) {
         return RETURN_FAILED;
     }
 
     if (!GenerateProgram(data, output, options.GetCompileByPipeArg(),
-                         options.GetOptLevelArg(), options.GetOptLogLevelArg())) {
+                         options.GetOptLevelArg(), optLogLevel)) {
         std::cerr << "call GenerateProgram fail" << std::endl;
         return RETURN_FAILED;
     }
