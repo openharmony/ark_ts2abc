@@ -8,6 +8,24 @@
         ]
     },
     {
+        "reason": "There is a type error when testing the array, and the prototype name is incorrect",
+        "files": [
+            "built-ins/Promise/allSettled/invoke-resolve-on-promises-every-iteration-of-custom.js",
+            "built-ins/Promise/allSettled/invoke-resolve-on-promises-every-iteration-of-promise.js",
+            "built-ins/Promise/allSettled/invoke-resolve-on-values-every-iteration-of-promise.js",
+            "built-ins/Promise/allSettled/reject-element-function-name.js",
+            "built-ins/Promise/allSettled/resolve-element-function-name.js",
+            "built-ins/Promise/any/invoke-resolve.js",
+            "built-ins/Promise/any/invoke-resolve-get-once-multiple-calls.js",
+            "built-ins/Promise/any/invoke-resolve-on-promises-every-iteration-of-custom.js",
+            "built-ins/Promise/any/invoke-resolve-on-promises-every-iteration-of-promise.js",
+            "built-ins/Promise/any/invoke-resolve-on-values-every-iteration-of-custom.js",
+            "built-ins/Promise/any/invoke-resolve-on-values-every-iteration-of-promise.js",
+            "built-ins/Promise/any/invoke-then-on-promises-every-iteration.js",
+            "built-ins/Promise/any/reject-element-function-name.js"
+        ]
+    },
+    {
         "reason": "A bug in tsc caused the use case to fail",
         "files": [
             "language/statements/for/S12.6.3_A2.1.js",
@@ -204,6 +222,8 @@
             "built-ins/global/S10.2.3_A2.3_T2.js",
             "built-ins/global/S10.2.3_A2.3_T3.js",
             "built-ins/global/S10.2.3_A2.3_T4.js",
+	    "built-ins/NativeErrors/AggregateError/newtarget-proto-fallback.js",
+            "built-ins/NativeErrors/AggregateError/proto-from-ctor-realm.js",
             "built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-187.js",
             "built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-188.js",
             "built-ins/Promise/all/ctx-non-ctor.js",
