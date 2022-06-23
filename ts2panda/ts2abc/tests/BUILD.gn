@@ -30,6 +30,10 @@ import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 #  sources = [ "functions_test.cpp" ]
 # }
 
+ts2abc_unittest_action("TypeAdapterTest") {
+  sources = [ "type_adapter_test.cpp" ]
+}
+
 # group("unittest") {
 #   testonly = true
 #  deps = [
@@ -39,3 +43,11 @@ import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 #    ":StringArrTestAction",
 #   ]
 # }
+
+group("type_adapter_unit_tests") {
+  testonly = true
+  deps = [
+    ":TypeAdapterTest",
+    "$ark_root/assembler:libarkassembler_frontend_static",
+  ]
+}
