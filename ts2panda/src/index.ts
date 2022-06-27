@@ -290,7 +290,7 @@ function run(args: string[], options?: ts.CompilerOptions): void {
             return;
         }
 
-        main(parsed.fileNames.concat(dtsFiles).concat(CmdOptions.getIncludedFiles()), parsed.options);
+        main(parsed.fileNames.concat(CmdOptions.getIncludedFiles()), parsed.options);
     } catch (err) {
         if (err instanceof diag.DiagnosticError) {
             let diagnostic = diag.getDiagnostic(err.code);
@@ -307,5 +307,7 @@ function run(args: string[], options?: ts.CompilerOptions): void {
 }
 
 let dtsFiles = getDtsFiles(path["join"](__dirname, "../node_modules/typescript/lib"));
+// keep these dtsFiles been pushed here
+process.argv.push(...dtsFiles);
 run(process.argv.slice(2), Compiler.Options.Default);
 global.gc();
