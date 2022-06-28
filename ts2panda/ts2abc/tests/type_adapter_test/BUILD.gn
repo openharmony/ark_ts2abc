@@ -1,0 +1,60 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//ark/runtime_core/ark_config.gni")
+import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
+
+ohos_executable("ts2abc_type_adapter_unit_tests") {
+  sources = [
+    "//ark/ts2abc/ts2panda/ts2abc/type_adapter.cpp",
+    "type_adapter_test.cpp",
+  ]
+
+  configs = [ "//ark/ts2abc/ts2panda/ts2abc:ts2abc_config" ]
+
+  cflags = [
+    "-Wno-c++20-designator",
+    "-Wno-c99-extensions",
+    "-Wno-unknown-warning-option",
+  ]
+
+  deps = [ sdk_libc_secshared_dep ]
+
+  if (is_linux || is_mingw || is_mac) {
+    deps += [
+      "$ark_root/assembler:libarkassembler_frontend_static",
+      "$ark_root/libpandabase:libarkbase_frontend_static",
+      "$ark_root/libpandafile:libarkfile_frontend_static",
+      "$ark_root/libziparchive:libarkziparchive_frontend_static",
+    ]
+  } else {
+    deps += [
+      "$ark_root/assembler:libarkassembler",
+      "$ark_root/libpandabase:libarkbase",
+      "$ark_root/libpandafile:libarkfile",
+      "$ark_root/libziparchive:libarkziparchive",
+    ]
+  }
+
+  if (is_linux) {
+    if (build_public_version) {
+      ldflags = [ "-static-libstdc++" ]
+    } else {
+      libs = [ libcpp_static_lib ]
+    }
+  }
+
+  output_name = "ts2abc_type_adapter_unit_tests"
+  install_enable = true
+  subsystem_name = "ark"
+}

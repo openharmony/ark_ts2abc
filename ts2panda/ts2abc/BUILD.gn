@@ -80,6 +80,7 @@ if (!defined(ark_independent_build)) {
     sources = [
       "main.cpp",
       "ts2abc.cpp",
+      "type_adapter.cpp",
     ]
 
     configs = [ ":ts2abc_config" ]
