@@ -126,18 +126,15 @@ describe("ScopeTest", function () {
     });
 
     it("test add 'none' variable to LocalScope", function () {
-        let parent = new FunctionScope();
+        let parent = new GlobalScope();
         let scope = new LocalScope(parent);
         let variable = scope.add("x", VarDeclarationKind.NONE);
-        expect(variable).to.be.equal(undefined);
+        expect(variable instanceof GlobalVariable).to.be.true;
         let { scope: sp, level: lv, v: outVariable } = scope.find("x");
-        expect(outVariable).to.be.equal(undefined);
-        expect(lv).to.be.equal(0);
-        expect(sp).to.be.equal(undefined);
+        expect(outVariable === variable).to.be.true;
         let { scope: spParent, level: lvParent, v: outVariableParent } = parent.find("x");
-        expect(outVariableParent).to.be.equal(undefined);
-        expect(lvParent).to.be.equal(0);
-        expect(spParent).to.be.equal(undefined);
+        expect(outVariableParent === variable).to.be.true;
+        expect(spParent instanceof GlobalScope).to.be.true;
     });
 
     it("test add 'var' variable to LocalScope", function () {
