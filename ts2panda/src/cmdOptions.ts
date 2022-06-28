@@ -44,7 +44,9 @@ const ts2pandaOptions = [
     { name: 'record-type', alias: 'p', type: Boolean, defaultValue: false, description: "Record type info. Default: true" },
     { name: 'dts-type-record', alias: 'q', type: Boolean, defaultValue: false, description: "Record type info for .d.ts files. Default: false" },
     { name: 'debug-type', alias: 'g', type: Boolean, defaultValue: false, description: "Print type-related log. Default: false" },
-    { name: 'output-type', type: Boolean, defaultValue: false, description: "set output type."}
+    { name: 'output-type', type: Boolean, defaultValue: false, description: "set output type."},
+    { name: 'enable-typeinfo', type: Boolean, defaultValue: false, description: "Enable typeinfo of pairs of instruction orders and types" },
+    { name: 'display-typeinfo', type: Boolean, defaultValue: false, description: "Display typeinfo of pairs of instruction orders and types when enable-typeinfo is true" }
 ]
 
 
@@ -52,6 +54,20 @@ const ts2pandaOptions = [
 export class CmdOptions {
     private static parsedResult: ts.ParsedCommandLine;
     private static options: commandLineArgs.CommandLineOptions;
+
+    static getEnableTypeinfo(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["enable-typeinfo"];
+    }
+
+    static getDisplayTypeinfo(): boolean {
+        if (!this.options) {
+            return false;
+        }
+        return this.options["display-typeinfo"];
+    }
 
     static isEnableDebugLog(): boolean {
         if (!this.options) {

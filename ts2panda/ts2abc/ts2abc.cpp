@@ -24,8 +24,9 @@
 #include "assembly-program.h"
 #include "assembly-emitter.h"
 #include "json/json.h"
-#include "ts2abc_options.h"
 #include "securec.h"
+#include "ts2abc_options.h"
+#include "type_adapter.h"
 #include "ts2abc.h"
 
 #ifdef ENABLE_BYTECODE_OPT
@@ -39,6 +40,8 @@ namespace {
     bool g_debugModeEnabled = false;
     bool g_debugLogEnabled = false;
     int g_optLevel = 0;
+    bool g_enableTypeinfo = false;
+    bool g_displayTypeinfo = false;
     std::string g_optLogLevel = "error";
     uint32_t g_literalArrayCount = 0;
 
@@ -626,7 +629,7 @@ static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::F
 {
     if (function.isMember("ti") && function["ti"].isArray()) {
         auto typeInfo = function["ti"];
-        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        panda::pandasm::AnnotationData funcAnnotation(TypeAdapter::TSTYPE_ANNO_RECORD_NAME);
         std::vector<panda::pandasm::ScalarValue> elements;
 
         for (Json::ArrayIndex i = 0; i < typeInfo.size(); i++) {
@@ -640,7 +643,7 @@ static void ParseFunctionTypeInfo(const Json::Value &function, panda::pandasm::F
             elements.emplace_back(std::move(tIndex));
         }
 
-        std::string annotationName = "typeOfVreg";
+        std::string annotationName = TypeAdapter::TSTYPE_ANNO_ELEMENT_NAME;
         panda::pandasm::AnnotationElement typeOfVregElement(
             annotationName, std::make_unique<panda::pandasm::ArrayValue>(panda::pandasm::ArrayValue(
             panda::pandasm::Value::Type::U32, elements)));
@@ -662,7 +665,7 @@ static void ParseFunctionExportedType(const Json::Value &function, panda::pandas
 
     if (function.isMember("es2t") && function["es2t"].isArray()) {
         auto exportedTypes = function["es2t"];
-        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        panda::pandasm::AnnotationData funcAnnotation(TypeAdapter::TSTYPE_ANNO_RECORD_NAME);
         std::vector<panda::pandasm::ScalarValue> symbolElements;
         std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
         for (Json::ArrayIndex i = 0; i < exportedTypes.size(); i++) {
@@ -718,7 +721,7 @@ static void ParseFunctionDeclaredType(const Json::Value &function, panda::pandas
 
     if (function.isMember("ds2t") && function["ds2t"].isArray()) {
         auto declaredTypes = function["ds2t"];
-        panda::pandasm::AnnotationData funcAnnotation("_ESTypeAnnotation");
+        panda::pandasm::AnnotationData funcAnnotation(TypeAdapter::TSTYPE_ANNO_RECORD_NAME);
         std::vector<panda::pandasm::ScalarValue> symbolElements;
         std::vector<panda::pandasm::ScalarValue> symbolTypeElements;
         for (Json::ArrayIndex i = 0; i < declaredTypes.size(); i++) {
@@ -788,7 +791,7 @@ static void GenerateESCallTypeAnnotationRecord(panda::pandasm::Program &prog)
 }
 static void GenerateESTypeAnnotationRecord(panda::pandasm::Program &prog)
 {
-    auto tsTypeAnnotationRecord = panda::pandasm::Record("_ESTypeAnnotation", LANG_EXT);
+    auto tsTypeAnnotationRecord = panda::pandasm::Record(TypeAdapter::TSTYPE_ANNO_RECORD_NAME, LANG_EXT);
     tsTypeAnnotationRecord.metadata->SetAttribute("external");
     tsTypeAnnotationRecord.metadata->SetAccessFlags(panda::ACC_ANNOTATION);
     prog.record_table.emplace(tsTypeAnnotationRecord.name, std::move(tsTypeAnnotationRecord));
@@ -897,6 +900,22 @@ static void ParseOptLevel(const Json::Value &rootValue)
     }
 }
 
+static void ParseEnableTypeinfo(const Json::Value &rootValue)
+{
+    Logd("-----------------parse enable_typeinfo-----------------");
+    if (rootValue.isMember("enable_typeinfo") && rootValue["enable_typeinfo"].isBool()) {
+        g_enableTypeinfo = rootValue["enable_typeinfo"].asBool();
+    }
+}
+
+static void ParseDisplayTypeinfo(const Json::Value &rootValue)
+{
+    Logd("-----------------parse enable_typeinfo-----------------");
+    if (rootValue.isMember("display_typeinfo") && rootValue["display_typeinfo"].isBool()) {
+        g_displayTypeinfo = rootValue["display_typeinfo"].asBool();
+    }
+}
+
 static void ParseOptLogLevel(const Json::Value &rootValue)
 {
     Logd("-----------------parse opt log level-----------------");
@@ -925,6 +944,8 @@ static void ParseOptions(const Json::Value &rootValue, panda::pandasm::Program &
     ParseLogEnable(rootValue);
     ParseDebugMode(rootValue);
     ParseOptLevel(rootValue);
+    ParseEnableTypeinfo(rootValue);
+    ParseDisplayTypeinfo(rootValue);
     ParseOptLogLevel(rootValue);
 }
 
@@ -1296,6 +1317,11 @@ bool GenerateProgram([[maybe_unused]] const std::string &data, const std::string
     }
 
     Logd("parsing done, calling pandasm\n");
+
+    if (g_enableTypeinfo) {
+        TypeAdapter ada(g_displayTypeinfo);
+        ada.AdaptTypeForProgram(&prog);
+    }
 
 #ifdef ENABLE_BYTECODE_OPT
     if (g_optLevel != static_cast<int>(OptLevel::O_LEVEL0) || optLevel != static_cast<int>(OptLevel::O_LEVEL0)) {
