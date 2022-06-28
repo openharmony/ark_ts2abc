@@ -1,0 +1,1 @@
+SyntaxError: Function implementation name must be 'bar'. [test-class-method-overload11.ts:3:5]

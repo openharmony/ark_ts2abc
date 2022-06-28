@@ -1,0 +1,1 @@
+SyntaxError: Overload signatures must all be abstract or non-abstract. [test-class-definiton18.ts:3:5]

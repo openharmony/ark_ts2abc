@@ -1,0 +1,1 @@
+SyntaxError: Function implementation is missing or not immediately following the declaration. [test-class-method-overload4.ts:2:5]

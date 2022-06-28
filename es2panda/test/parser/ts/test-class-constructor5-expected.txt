@@ -1,0 +1,1 @@
+SyntaxError: Multiple constructor implementations are not allowed. [test-class-constructor5.ts:3:5]

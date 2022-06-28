@@ -1,0 +1,295 @@
+{
+  "type": "Program",
+  "statements": [
+    {
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "id": {
+            "type": "ArrayPattern",
+            "elements": [
+              {
+                "type": "AssignmentPattern",
+                "left": {
+                  "type": "Identifier",
+                  "name": "a",
+                  "decorators": [],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 6
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 7
+                    }
+                  }
+                },
+                "right": {
+                  "type": "NumberLiteral",
+                  "value": 5,
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 10
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 11
+                    }
+                  }
+                },
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 6
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 11
+                  }
+                }
+              },
+              {
+                "type": "RestElement",
+                "argument": {
+                  "type": "Identifier",
+                  "name": "b",
+                  "decorators": [],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 16
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 17
+                    }
+                  }
+                },
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 13
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 17
+                  }
+                }
+              }
+            ],
+            "typeAnnotation": {
+              "type": "TSUnionType",
+              "types": [
+                {
+                  "type": "TSTupleType",
+                  "elementTypes": [
+                    {
+                      "type": "TSNumberKeyword",
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 21
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 28
+                        }
+                      }
+                    },
+                    {
+                      "type": "TSStringKeyword",
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 29
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 36
+                        }
+                      }
+                    },
+                    {
+                      "type": "TSBooleanKeyword",
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 37
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 45
+                        }
+                      }
+                    }
+                  ],
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 20
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 45
+                    }
+                  }
+                },
+                {
+                  "type": "TSArrayType",
+                  "elementType": {
+                    "type": "TSStringKeyword",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 48
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 54
+                      }
+                    }
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 48
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 56
+                    }
+                  }
+                },
+                {
+                  "type": "TSLiteralType",
+                  "literal": {
+                    "type": "NumberLiteral",
+                    "value": 5,
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 59
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 60
+                      }
+                    }
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 59
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 60
+                    }
+                  }
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 20
+                },
+                "end": {
+                  "line": 1,
+                  "column": 60
+                }
+              }
+            },
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 5
+              },
+              "end": {
+                "line": 1,
+                "column": 18
+              }
+            }
+          },
+          "init": {
+            "type": "ArrayExpression",
+            "elements": [
+              {
+                "type": "StringLiteral",
+                "value": "",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 64
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 69
+                  }
+                }
+              },
+              {
+                "type": "StringLiteral",
+                "value": "",
+                "loc": {
+                  "start": {
+                    "line": 1,
+                    "column": 71
+                  },
+                  "end": {
+                    "line": 1,
+                    "column": 76
+                  }
+                }
+              }
+            ],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 63
+              },
+              "end": {
+                "line": 1,
+                "column": 77
+              }
+            }
+          },
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 5
+            },
+            "end": {
+              "line": 1,
+              "column": 77
+            }
+          }
+        }
+      ],
+      "kind": "var",
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 78
+        }
+      }
+    }
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "line": 1,
+      "column": 78
+    }
+  }
+}
+TypeError: Type '[number, string, boolean] | string[] | 5' must have a '[Symbol.iterator]()' method that returns an interator [arrayDestructuring12.ts:1:6]

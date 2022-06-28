@@ -1,0 +1,425 @@
+{
+  "type": "Program",
+  "statements": [
+    {
+      "type": "VariableDeclaration",
+      "declarations": [
+        {
+          "type": "VariableDeclarator",
+          "id": {
+            "type": "Identifier",
+            "name": "func",
+            "typeAnnotation": {
+              "type": "TSTypeLiteral",
+              "members": [
+                {
+                  "type": "TSCallSignatureDeclaration",
+                  "params": [
+                    {
+                      "type": "Identifier",
+                      "name": "a",
+                      "typeAnnotation": {
+                        "type": "TSNumberKeyword",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 17
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 23
+                          }
+                        }
+                      },
+                      "decorators": [],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 14
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 15
+                        }
+                      }
+                    },
+                    {
+                      "type": "RestElement",
+                      "argument": {
+                        "type": "Identifier",
+                        "name": "c",
+                        "decorators": [],
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 28
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 29
+                          }
+                        }
+                      },
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 25
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 29
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "type": "TSBooleanKeyword",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 32
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 39
+                      }
+                    }
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 13
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 40
+                    }
+                  }
+                },
+                {
+                  "type": "TSCallSignatureDeclaration",
+                  "params": [
+                    {
+                      "type": "Identifier",
+                      "name": "a",
+                      "decorators": [],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 42
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 43
+                        }
+                      }
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "b",
+                      "typeAnnotation": {
+                        "type": "TSArrayType",
+                        "elementType": {
+                          "type": "TSStringKeyword",
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 48
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 54
+                            }
+                          }
+                        },
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 48
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 56
+                          }
+                        }
+                      },
+                      "decorators": [],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 45
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 46
+                        }
+                      }
+                    },
+                    {
+                      "type": "RestElement",
+                      "argument": {
+                        "type": "Identifier",
+                        "name": "c",
+                        "decorators": [],
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 61
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 62
+                          }
+                        }
+                      },
+                      "typeAnnotation": {
+                        "type": "TSArrayType",
+                        "elementType": {
+                          "type": "TSNumberKeyword",
+                          "loc": {
+                            "start": {
+                              "line": 1,
+                              "column": 64
+                            },
+                            "end": {
+                              "line": 1,
+                              "column": 70
+                            }
+                          }
+                        },
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 64
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 72
+                          }
+                        }
+                      },
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 58
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 72
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "type": "TSStringKeyword",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 75
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 81
+                      }
+                    }
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 41
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 82
+                    }
+                  }
+                },
+                {
+                  "type": "TSCallSignatureDeclaration",
+                  "params": [
+                    {
+                      "type": "Identifier",
+                      "name": "a",
+                      "typeAnnotation": {
+                        "type": "TSNumberKeyword",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 87
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 93
+                          }
+                        }
+                      },
+                      "decorators": [],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 84
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 85
+                        }
+                      }
+                    },
+                    {
+                      "type": "Identifier",
+                      "name": "b",
+                      "typeAnnotation": {
+                        "type": "TSBooleanKeyword",
+                        "loc": {
+                          "start": {
+                            "line": 1,
+                            "column": 98
+                          },
+                          "end": {
+                            "line": 1,
+                            "column": 105
+                          }
+                        }
+                      },
+                      "decorators": [],
+                      "loc": {
+                        "start": {
+                          "line": 1,
+                          "column": 95
+                        },
+                        "end": {
+                          "line": 1,
+                          "column": 96
+                        }
+                      }
+                    }
+                  ],
+                  "returnType": {
+                    "type": "TSNumberKeyword",
+                    "loc": {
+                      "start": {
+                        "line": 1,
+                        "column": 108
+                      },
+                      "end": {
+                        "line": 1,
+                        "column": 114
+                      }
+                    }
+                  },
+                  "loc": {
+                    "start": {
+                      "line": 1,
+                      "column": 83
+                    },
+                    "end": {
+                      "line": 1,
+                      "column": 116
+                    }
+                  }
+                }
+              ],
+              "loc": {
+                "start": {
+                  "line": 1,
+                  "column": 11
+                },
+                "end": {
+                  "line": 1,
+                  "column": 116
+                }
+              }
+            },
+            "decorators": [],
+            "loc": {
+              "start": {
+                "line": 1,
+                "column": 5
+              },
+              "end": {
+                "line": 1,
+                "column": 9
+              }
+            }
+          },
+          "init": null,
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 5
+            },
+            "end": {
+              "line": 1,
+              "column": 9
+            }
+          }
+        }
+      ],
+      "kind": "var",
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 1
+        },
+        "end": {
+          "line": 1,
+          "column": 117
+        }
+      }
+    },
+    {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "CallExpression",
+        "callee": {
+          "type": "Identifier",
+          "name": "func",
+          "decorators": [],
+          "loc": {
+            "start": {
+              "line": 2,
+              "column": 1
+            },
+            "end": {
+              "line": 2,
+              "column": 5
+            }
+          }
+        },
+        "arguments": [],
+        "optional": false,
+        "loc": {
+          "start": {
+            "line": 2,
+            "column": 1
+          },
+          "end": {
+            "line": 2,
+            "column": 7
+          }
+        }
+      },
+      "loc": {
+        "start": {
+          "line": 2,
+          "column": 1
+        },
+        "end": {
+          "line": 2,
+          "column": 8
+        }
+      }
+    }
+  ],
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 1
+    },
+    "end": {
+      "line": 2,
+      "column": 8
+    }
+  }
+}
+TypeError: Expected at least 1 arguments, but got 0. [functionCall_15.ts:2:1]
