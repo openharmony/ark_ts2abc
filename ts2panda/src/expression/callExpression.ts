@@ -109,17 +109,32 @@ function emitCallArguments(compiler: Compiler, expr: ts.CallExpression, args: VR
 export function emitCall(expr: ts.CallExpression, args: VReg[], passThis: boolean, compiler: Compiler) {
     let pandaGen = compiler.getPandaGen();
     let hasSpread = emitCallArguments(compiler, expr, args);
+    let callee = expr.expression;
+    let debugNode = undefined;
+    switch (callee.kind) {
+        case ts.SyntaxKind.ElementAccessExpression: {
+            debugNode = (<ts.ElementAccessExpression>callee).argumentExpression;
+            break;
+        }
+        case ts.SyntaxKind.PropertyAccessExpression: {
+            debugNode = (<ts.PropertyAccessExpression>callee).name;
+            break;
+        }
+        default: {
+            debugNode = expr;
+        }
+    }
 
     if (!hasSpread) {
-        pandaGen.call(expr, [...args], passThis);
+        pandaGen.call(debugNode, [...args], passThis);
         return;
     }
 
     // spread argument exist
-    let callee = args[0];
+    let calleeReg = args[0];
     let thisReg = passThis ? args[1] : getVregisterCache(pandaGen, CacheList.undefined);
     let argArray = pandaGen.getTemp();
     createArrayFromElements(expr, compiler, <ts.NodeArray<ts.Expression>>expr.arguments, argArray);
-    pandaGen.callSpread(expr, callee, thisReg, argArray);
+    pandaGen.callSpread(debugNode, calleeReg, thisReg, argArray);
     pandaGen.freeTemps(argArray);
 }
