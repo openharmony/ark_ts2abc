@@ -222,7 +222,7 @@
             "built-ins/global/S10.2.3_A2.3_T2.js",
             "built-ins/global/S10.2.3_A2.3_T3.js",
             "built-ins/global/S10.2.3_A2.3_T4.js",
-	    "built-ins/NativeErrors/AggregateError/newtarget-proto-fallback.js",
+            "built-ins/NativeErrors/AggregateError/newtarget-proto-fallback.js",
             "built-ins/NativeErrors/AggregateError/proto-from-ctor-realm.js",
             "built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-187.js",
             "built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-188.js",
@@ -1402,7 +1402,7 @@
     },
     {
         "reason": "Special unicode character that tsc can not recognize",
-        "files" : [
+        "files": [
             "language/module-code/export-expname-binding-string.js",
             "language/module-code/export-expname-from-binding-string.js",
             "language/module-code/export-expname-from-star-string.js",
