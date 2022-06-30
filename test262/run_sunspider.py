@@ -189,7 +189,10 @@ class ArkProgram():
 
     def execute(self):
         if platform.system() == "Windows" :
-            os.environ["PATH"] = self.libs_dir + ";" + os.environ["PATH"]
+            #add env path for cmd/powershell execute
+            libs_dir = self.libs_dir.replace(":", ";")
+            libs_dir = libs_dir.replace("/", "\\")
+            os.environ["PATH"] = libs_dir + ";" + os.environ["PATH"]
         elif platform.system() == "Linux" :
             os.environ["LD_LIBRARY_PATH"] = self.libs_dir
         else :
