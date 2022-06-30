@@ -19,6 +19,7 @@
 #include "assembler/assembly-program.h"
 #include "assembler/assembly-function.h"
 
+namespace ts2abc_type_adapter {
 class TypeAdapter {
 public:
     TypeAdapter() {};
@@ -43,5 +44,6 @@ private:
                               const std::unordered_map<int32_t, int32_t> &order_type_map) const;
     bool display_typeinfo_ = false;
 };
+}  // namespace ts2abc_type_adapter
 
 #endif  // TS2PANDA_TS2ABC_TYPE_ADAPTER_H

@@ -17,6 +17,7 @@
 #include "assembler/meta.h"
 #include "assembler/assembly-parser.h"
 
+namespace ts2abc_type_adapter::type_adapter_test {
 using ArrayValue = panda::pandasm::ArrayValue;
 using ScalarValue = panda::pandasm::ScalarValue;
 using AnnotationData = panda::pandasm::AnnotationData;
@@ -132,12 +133,14 @@ void TypeAdapterTest::TestVariablesArgsType() const
     const int32_t instruction_location = 8;
     CheckTypeExist(typeinfo, instruction_location, 1);
 }
+}  // namespace ts2abc_type_adapter::type_adapter_test
 
-int main(int argc, const char *argv[])
+int main()
 {
-    TypeAdapterTest test;
+    ts2abc_type_adapter::type_adapter_test::TypeAdapterTest test;
     std::cout << "TypeAdapterTest TestVariablesArgsType: " << std::endl;
     test.TestVariablesArgsType();
     std::cout << "PASS!" << std::endl;
+    return 0;
     // should enable TestBuiltinsType when builtins adaption is ready
 }

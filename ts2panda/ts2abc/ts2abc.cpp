@@ -44,6 +44,7 @@ namespace {
     bool g_displayTypeinfo = false;
     std::string g_optLogLevel = "error";
     uint32_t g_literalArrayCount = 0;
+    using ts2abc_type_adapter::TypeAdapter;
 
     constexpr std::size_t BOUND_LEFT = 0;
     constexpr std::size_t BOUND_RIGHT = 0;
