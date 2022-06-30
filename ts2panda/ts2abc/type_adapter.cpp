@@ -16,6 +16,7 @@
 #include "type_adapter.h"
 #include "assembler/meta.h"
 
+namespace ts2abc_type_adapter {
 void TypeAdapter::AdaptTypeForProgram(panda::pandasm::Program *prog) const
 {
     for (auto &[name, func] : prog->function_table) {
@@ -151,3 +152,4 @@ void TypeAdapter::UpdateTypeAnnotation(panda::pandasm::Function *func, size_t an
         std::cout << "\n";
     }
 }
+}  // namespace ts2abc_type_adapter
