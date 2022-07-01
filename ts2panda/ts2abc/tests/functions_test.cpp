@@ -43,7 +43,7 @@ namespace ARK::Ts2Abc::Ts2Abc {
         EXPECT_EQ(ret, 1);
         Json::Value rootValue;
         ret = ParseJson(data, rootValue);
-        EXPECT_EQ(ret, RETURN_SUCCESS);
+        EXPECT_EQ(ret, panda::ts2abc::RETURN_SUCCESS);
         function = rootValue["func_body"];
     }
     const void FunctionTest::TearDown() {}

@@ -33,31 +33,30 @@
 #include "optimize_bytecode.h"
 #endif
 
-namespace {
-    // pandasm definitions
-    constexpr const auto LANG_EXT = panda::pandasm::extensions::Language::ECMASCRIPT;
-    const std::string WHOLE_LINE;
-    bool g_debugModeEnabled = false;
-    bool g_debugLogEnabled = false;
-    int g_optLevel = 0;
-    bool g_enableTypeinfo = false;
-    bool g_displayTypeinfo = false;
-    std::string g_optLogLevel = "error";
-    uint32_t g_literalArrayCount = 0;
-    using ts2abc_type_adapter::TypeAdapter;
+namespace panda::ts2abc {
+// pandasm definitions
+constexpr const auto LANG_EXT = panda::pandasm::extensions::Language::ECMASCRIPT;
+const std::string WHOLE_LINE;
+bool g_debugModeEnabled = false;
+bool g_debugLogEnabled = false;
+int g_optLevel = 0;
+bool g_enableTypeinfo = false;
+bool g_displayTypeinfo = false;
+std::string g_optLogLevel = "error";
+uint32_t g_literalArrayCount = 0;
+using ts2abc_type_adapter::TypeAdapter;
 
-    constexpr std::size_t BOUND_LEFT = 0;
-    constexpr std::size_t BOUND_RIGHT = 0;
-    constexpr std::size_t LINE_NUMBER = 0;
-    constexpr bool IS_DEFINED = true;
-    int g_opCodeIndex = 0;
-    std::unordered_map<int, panda::pandasm::Opcode> g_opcodeMap = {
+constexpr std::size_t BOUND_LEFT = 0;
+constexpr std::size_t BOUND_RIGHT = 0;
+constexpr std::size_t LINE_NUMBER = 0;
+constexpr bool IS_DEFINED = true;
+int g_opCodeIndex = 0;
+std::unordered_map<int, panda::pandasm::Opcode> g_opcodeMap = {
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs) {g_opCodeIndex++, panda::pandasm::Opcode::opcode},
-        PANDA_INSTRUCTION_LIST(OPLIST)
+    PANDA_INSTRUCTION_LIST(OPLIST)
 #undef OPLIST
-            {-1, panda::pandasm::Opcode::INVALID},
-    };
-}
+    {-1, panda::pandasm::Opcode::INVALID},
+};
 
 // pandasm helpers
 static panda::pandasm::Record MakeRecordDefinition(const std::string &name, const std::string &wholeLine,
@@ -1395,3 +1394,5 @@ bool HandleJsonFile(const std::string &input, std::string &data)
 
     return true;
 }
+
+} // namespace panda::ts2abc
