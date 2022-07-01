@@ -1,0 +1,1 @@
+SyntaxError: Unexpected token. [test-keyword-declare3.ts:1:9]

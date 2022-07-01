@@ -1,0 +1,1 @@
+SyntaxError: Function implementation name must be '1'. [test-class-method-overload12.ts:3:5]

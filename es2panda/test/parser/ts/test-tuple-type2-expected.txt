@@ -1,0 +1,1 @@
+SyntaxError: Tuple members must all have names or all not have names [test-tuple-type2.ts:1:17]

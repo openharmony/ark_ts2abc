@@ -1,0 +1,1 @@
+SyntaxError: Enum declarations can only merge with namespace or other enum declarations. [test-enum-declaration4.ts:4:10]

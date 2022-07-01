@@ -1,0 +1,1 @@
+SyntaxError: Overload signatures must all be optional or required. [test-class-method-overload3.ts:2:5]

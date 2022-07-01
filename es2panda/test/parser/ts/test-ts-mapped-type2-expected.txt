@@ -1,0 +1,1 @@
+SyntaxError: Unexpected token [test-ts-mapped-type2.ts:1:26]
