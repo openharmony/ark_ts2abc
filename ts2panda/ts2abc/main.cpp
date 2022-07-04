@@ -32,21 +32,21 @@ int Preprocess(const panda::ts2abc::Options &options, const panda::PandArgParser
             std::cerr << "Usage example: ts2abc test.json test.abc"<< std::endl;
             std::cerr << usage << std::endl;
             std::cerr << argParser.GetHelpString();
-            return RETURN_FAILED;
+            return panda::ts2abc::RETURN_FAILED;
         }
 
-        if (!HandleJsonFile(input, data)) {
-            return RETURN_FAILED;
+        if (!panda::ts2abc::HandleJsonFile(input, data)) {
+            return panda::ts2abc::RETURN_FAILED;
         }
     } else {
         output = options.GetTailArg1();
         if (output.empty()) {
             std::cerr << usage << std::endl;
             std::cerr << argParser.GetHelpString();
-            return RETURN_FAILED;
+            return panda::ts2abc::RETURN_FAILED;
         }
     }
-    return RETURN_SUCCESS;
+    return panda::ts2abc::RETURN_SUCCESS;
 }
 
 int main(int argc, const char *argv[])
@@ -59,44 +59,44 @@ int main(int argc, const char *argv[])
     if (!argParser.Parse(argc, argv)) {
         std::cerr << argParser.GetErrorString();
         std::cerr << argParser.GetHelpString();
-        return RETURN_FAILED;
+        return panda::ts2abc::RETURN_FAILED;
     }
 
     std::string usage = "Usage: ts2abc [OPTIONS]... [ARGS]...";
     if (options.GetHelpArg()) {
         std::cout << usage << std::endl;
         std::cout << argParser.GetHelpString();
-        return RETURN_SUCCESS;
+        return panda::ts2abc::RETURN_SUCCESS;
     }
 
     if (options.GetBcVersionArg() || options.GetBcMinVersionArg()) {
         std::string version = options.GetBcVersionArg() ? panda::panda_file::GetVersion(panda::panda_file::version) :
                               panda::panda_file::GetVersion(panda::panda_file::minVersion);
         std::cout << version << std::endl;
-        return RETURN_SUCCESS;
+        return panda::ts2abc::RETURN_SUCCESS;
     }
 
-    if ((options.GetOptLevelArg() < static_cast<int>(OptLevel::O_LEVEL0)) ||
-        (options.GetOptLevelArg() > static_cast<int>(OptLevel::O_LEVEL2))) {
+    if ((options.GetOptLevelArg() < static_cast<int>(panda::ts2abc::OptLevel::O_LEVEL0)) ||
+        (options.GetOptLevelArg() > static_cast<int>(panda::ts2abc::OptLevel::O_LEVEL2))) {
         std::cerr << "Incorrect optimization level value" << std::endl;
         std::cerr << usage << std::endl;
         std::cerr << argParser.GetHelpString();
-        return RETURN_FAILED;
+        return panda::ts2abc::RETURN_FAILED;
     }
 
     std::string output;
     std::string data = "";
     std::string optLogLevel(options.GetOptLogLevelArg());
 
-    if (Preprocess(options, argParser, output, data, usage) == RETURN_FAILED) {
-        return RETURN_FAILED;
+    if (Preprocess(options, argParser, output, data, usage) == panda::ts2abc::RETURN_FAILED) {
+        return panda::ts2abc::RETURN_FAILED;
     }
 
-    if (!GenerateProgram(data, output, options.GetCompileByPipeArg(),
-                         options.GetOptLevelArg(), optLogLevel)) {
+    if (!panda::ts2abc::GenerateProgram(data, output, options.GetCompileByPipeArg(),
+                                        options.GetOptLevelArg(), optLogLevel)) {
         std::cerr << "call GenerateProgram fail" << std::endl;
-        return RETURN_FAILED;
+        return panda::ts2abc::RETURN_FAILED;
     }
 
-    return RETURN_SUCCESS;
+    return panda::ts2abc::RETURN_SUCCESS;
 }

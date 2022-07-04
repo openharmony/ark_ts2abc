@@ -28,6 +28,7 @@
 #include "assembly-emitter.h"
 #include "json/json.h"
 
+namespace panda::ts2abc {
 enum class JsonType {
     FUNCTION = 0,
     RECORD,
@@ -57,5 +58,6 @@ void ParseDebugMode(const Json::Value &rootValue);
 std::string ParseString(const std::string &data);
 int ParseJson(const std::string &data, Json::Value &rootValue);
 panda::pandasm::Function GetFunctionDefintion(const Json::Value &function);
+} // namespace panda::ts2abc
 
 #endif // TS2PANDA_TS2ABC_TS2ABC_H_
