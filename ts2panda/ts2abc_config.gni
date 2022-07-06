@@ -23,7 +23,11 @@ if (!defined(ark_independent_build)) {
 
 declare_args() {
   buildtool_linux = "$build_root/toolchain/linux:clang_x64"
-  buildtool_mac = "$build_root/toolchain/mac:clang_x64"
+  if (host_cpu == "arm64") {
+    buildtool_mac = "$build_root/toolchain/mac:clang_arm64"
+  } else {
+    buildtool_mac = "$build_root/toolchain/mac:clang_x64"
+  }
   buildtool_win = "$build_root/toolchain/mingw:mingw_x86_64"
 
   nodejs_dir = ""
