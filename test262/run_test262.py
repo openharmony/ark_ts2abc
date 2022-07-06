@@ -267,12 +267,14 @@ class TestPrepare():
         else:
             self.args.dir = os.path.join(DATA_DIR, "test")
 
-    def copyfile(self, file):
+    def copyfile(self, file, all_skips, intl_skips):
         dstdir = os.path.join(DATA_DIR, "test")
         file = file.strip()
-        if file in ALL_SKIP_TESTS:
+        file = file.strip('\n')
+        file = file.replace("\\", "/")
+        if file in all_skips:
             return
-        if file in INTL_SKIP_TESTS:
+        if file in intl_skips:
             return
 
         srcdir = os.path.join(DATA_DIR, "test", file)
@@ -364,7 +366,8 @@ class TestPrepare():
             mkdir(path)
 
         pool = Pool(DEFAULT_THREADS)
-        pool.map(self.copyfile, files)
+        for it in files:
+            pool.apply(self.copyfile, (it, ALL_SKIP_TESTS, INTL_SKIP_TESTS))
         pool.close()
         pool.join()
 
