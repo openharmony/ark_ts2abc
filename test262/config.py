@@ -45,6 +45,7 @@ TEST_CI_DIR = os.path.join(DATA_DIR, "test_CI")
 
 DEFAULT_ARK_FRONTEND_TOOL = os.path.join(ARK_DIR, "build", "src", "index.js")
 DEFAULT_ARK_TOOL = os.path.join(ARK_JS_RUNTIME_DIR, "ark_js_vm")
+DEFAULT_ARK_AOT_TOOL = os.path.join(ARK_JS_RUNTIME_DIR, "ark_aot_compiler")
 DEFAULT_LIBS_DIR = f"{ARK_DIR}:{ICUI_DIR}:{LLVM_DIR}:{ARK_JS_RUNTIME_DIR}"
 
 DEFAULT_HOST_TYPE = "panda"
