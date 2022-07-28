@@ -163,6 +163,7 @@ import {
     EcmaSub2dyn,
     EcmaSuspendgenerator,
     EcmaTonumber,
+    EcmaTonumeric,
     EcmaTypeofdyn,
     EcmaXor2dyn,
     Imm,
@@ -1000,6 +1001,10 @@ export class PandaGen {
 
     toNumber(node: ts.Node, arg: VReg) {
         this.add(node, new EcmaTonumber(arg));
+    }
+
+    toNumeric(node: ts.Node, arg: VReg) {
+        this.add(node, new EcmaTonumeric(arg));
     }
 
     createGeneratorObj(node: ts.Node, funcObj: VReg) {

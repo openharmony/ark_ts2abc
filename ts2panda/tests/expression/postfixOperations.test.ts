@@ -22,7 +22,7 @@ import {
     EcmaIncdyn,
     EcmaReturnundefined,
     EcmaStlettoglobalrecord,
-    EcmaTonumber,
+    EcmaTonumeric,
     EcmaTryldglobalbyname,
     EcmaTrystglobalbyname,
     Imm,
@@ -45,7 +45,7 @@ describe("PostfixOperationsTest", function () {
             new StaDyn(temp),
             new EcmaIncdyn(temp),
             new EcmaTrystglobalbyname('i'),
-            new EcmaTonumber(i),
+            new EcmaTonumeric(i),
             new EcmaReturnundefined()
         ];
         expect(checkInstructions(insns, expected)).to.be.true;
@@ -62,7 +62,7 @@ describe("PostfixOperationsTest", function () {
             new StaDyn(temp),
             new EcmaDecdyn(temp),
             new EcmaTrystglobalbyname('i'),
-            new EcmaTonumber(i),
+            new EcmaTonumeric(i),
             new EcmaReturnundefined()
         ];
         expect(checkInstructions(insns, expected)).to.be.true;

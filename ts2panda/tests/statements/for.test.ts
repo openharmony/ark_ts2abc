@@ -21,7 +21,7 @@ import {
     EcmaIncdyn,
     EcmaLessdyn,
     EcmaReturnundefined,
-    EcmaTonumber,
+    EcmaTonumeric,
     Imm,
     Jeqz,
     Jmp,
@@ -228,7 +228,7 @@ describe("LoopWithLabelTests", function () {
             new StaDyn(j),
             new EcmaIncdyn(j),
             new StaDyn(j),
-            new EcmaTonumber(j),
+            new EcmaTonumeric(j),
             // jump to the loop header
             new Jmp(labelPre1),
             labelPost1,
@@ -299,7 +299,7 @@ describe("LoopWithLabelTests", function () {
             new StaDyn(j),
             new EcmaIncdyn(j),
             new StaDyn(j),
-            new EcmaTonumber(j),
+            new EcmaTonumeric(j),
             // jump to the loop header
             new Jmp(labelPre1),
             labelPost1,

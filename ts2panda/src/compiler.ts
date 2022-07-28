@@ -1210,7 +1210,7 @@ export class Compiler {
         // lvalue var = acc +/- 1
         lref.setValue();
         // acc = operand_old
-        pandaGen.toNumber(expr, operandReg);
+        pandaGen.toNumeric(expr, operandReg);
         pandaGen.freeTemps(operandReg);
     }
 

@@ -32,7 +32,7 @@ import {
     EcmaStlexvardyn,
     EcmaThrowconstassignment,
     EcmaThrowundefinedifhole,
-    EcmaTonumber,
+    EcmaTonumeric,
     EcmaTrystglobalbyname,
     Imm,
     IRNode,
@@ -520,7 +520,7 @@ describe("lexenv-compile-testcase in lexenv.test.ts", function () {
             new EcmaIncdyn(new VReg()),
             new StaDyn(new VReg()),
             ...MicroStoreLexVar(1, 0),
-            new EcmaTonumber(new VReg()), // this is redundant load varialbe
+            new EcmaTonumeric(new VReg()), // this is redundant load varialbe
             ...MicroLoadLexVar(1, 0),
             new StaDyn(new VReg),
             ...MicroLoadLexVar(1, 1),
