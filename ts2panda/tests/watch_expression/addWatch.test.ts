@@ -48,7 +48,7 @@ import {
     EcmaStricteqdyn,
     EcmaSuspendgenerator,
     EcmaThrowdyn,
-    EcmaTonumber,
+    EcmaTonumeric,
     EcmaTypeofdyn,
     FldaiDyn,
     Imm,
@@ -661,7 +661,7 @@ describe("WatchExpressions", function () {
             new LdaStr('a'),
             new StaDyn(new VReg()),
             new EcmaCallargs2dyn(new VReg(), new VReg(), new VReg()),
-            new EcmaTonumber(new VReg()),
+            new EcmaTonumeric(new VReg()),
 
             new ReturnDyn()
         ];
