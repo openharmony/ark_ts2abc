@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "ts2abc_options.h"
 #include "type_adapter.h"
 #include "ts2abc.h"
+#include "parse_unicode_hex_u16.h"
 
 #ifdef ENABLE_BYTECODE_OPT
 #include "optimize_bytecode.h"
@@ -177,7 +178,6 @@ static std::string ParseUnicodeEscapeString(const std::string &data)
 {
     const int unicodeEscapeSymbolLen = 2;
     const int unicodeCharacterLen = 4;
-    const int base = 16;
     std::string::size_type startIdx = 0;
     std::string newData = "";
     std::string::size_type len = data.length();
@@ -196,9 +196,15 @@ static std::string ParseUnicodeEscapeString(const std::string &data)
             std::string tmpStr = data.substr(startIdx, index - startIdx);
             newData += ConvertUtf8ToMUtf8(tmpStr);
             std::string uStr = data.substr(index + unicodeEscapeSymbolLen, unicodeCharacterLen);
-            uint16_t u16Data = static_cast<uint16_t>(std::stoi(uStr.c_str(), NULL, base));
-            newData += ConvertUtf16ToMUtf8(&u16Data, 1);
-            startIdx = index + unicodeEscapeSymbolLen + unicodeCharacterLen;
+            uint16_t u16Data = 0;
+            if (uStr.size() == static_cast<size_t>(unicodeCharacterLen) && ParseUnicodeHexU16(uStr, u16Data)) {
+                newData += ConvertUtf16ToMUtf8(&u16Data, 1);
+                startIdx = index + unicodeEscapeSymbolLen + unicodeCharacterLen;
+            } else {
+                // leftover/invalid \uXXXX: do not decode a truncated hex prefix
+                newData += ConvertUtf8ToMUtf8(unicodeStr);
+                startIdx = index + unicodeEscapeSymbolLen;
+            }
         }
     }
     if (startIdx != len) {
